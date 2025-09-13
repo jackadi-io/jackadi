@@ -1,0 +1,281 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: manager
+    binary: jackadi-manager
+    main: ./cmd/manager
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+  - id: agent
+    binary: jackadi-agent
+    main: ./cmd/agent
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+  - id: cli
+    binary: jackadi
+    main: ./cmd/jack
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - LICENSE*
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  use: git
+  sort: asc
+  abbrev: -1
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+      - '^style:'
+  groups:
+    - title: 'Breaking changes'
+      regexp: '^.*?(\([[:word:]]+\))??!:.+$'
+      order: 0
+    - title: 'New features'
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: 'Bug fixes'
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: 'Other changes'
+      regexp: '^.+$'
+      order: 999
+
+nfpms:
+  ###
+  # Linux packages for manager+cli.
+  ##
+  - id: jackadi-server
+    package_name: jackadi-server
+    file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Arch }}"
+
+    ids:
+      - manager
+      - cli
+
+    vendor: Jackadi
+    homepage: https://jackadi.io/
+    maintainer: Kevin Petremann <k@kpmail.fr>
+
+    section: utils
+    priority: optional
+
+    description: |-
+      Jackadi server components (manager and CLI).
+      Developer-first automation and configuration management.
+
+    formats:
+      - deb
+      - rpm
+
+    contents:
+      - src: /dev/null
+        dst: /etc/jackadi
+        type: dir
+        file_info:
+          mode: 0755
+          owner: root
+          group: root
+
+      - src: /dev/null
+        dst: /etc/jackadi/plugins.yaml
+        type: config
+        file_info:
+          mode: 0644
+          owner: root
+          group: root
+
+      - src: /dev/null
+        dst: /run/jackadi
+        type: dir
+        file_info:
+          mode: 0755
+          owner: jackadi
+          group: jackadi
+
+      - src: /dev/null
+        dst: /var/lib/jackadi
+        type: dir
+        file_info:
+          mode: 0755
+          owner: jackadi
+          group: jackadi
+
+      - src: /dev/null
+        dst: /opt/jackadi/plugins
+        type: dir
+        file_info:
+          mode: 0755
+          owner: jackadi
+          group: jackadi
+
+      - src: ./scripts/jackadi-manager.service
+        dst: /etc/systemd/system/jackadi-manager.service
+        type: config
+        file_info:
+          mode: 0644
+
+    scripts:
+      preinstall: ./scripts/preinstall-server.sh
+      postinstall: ./scripts/postinstall-server.sh
+      preremove: ./scripts/preremove-server.sh
+      postremove: ./scripts/postremove-server.sh
+
+  ###
+  # Linux packages for agent.
+  ##
+  - id: jackadi-agent
+    package_name: jackadi-agent
+    file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Arch }}"
+    ids:
+      - agent
+    vendor: Jackadi
+    homepage: https://jackadi.io/
+    maintainer: Kevin Petremann <k@kpmail.fr>
+
+    section: utils
+    priority: optional
+
+    description: |-
+      Jackadi's agent.
+      Developer-first automation and configuration management.
+
+    formats:
+      - deb
+      - rpm
+
+    contents:
+      - src: /dev/null
+        dst: /etc/jackadi
+        type: dir
+        file_info:
+          mode: 0755
+          owner: root
+          group: root
+
+      - src: /dev/null
+        dst: /var/lib/jackadi
+        type: dir
+        file_info:
+          mode: 0755
+          owner: jackadi
+          group: jackadi
+
+      - src: ./scripts/jackadi-agent.service
+        dst: /etc/systemd/system/jackadi-agent.service
+        type: config
+        file_info:
+          mode: 0644
+
+    scripts:
+      preinstall: ./scripts/preinstall-agent.sh
+      postinstall: ./scripts/postinstall-agent.sh
+      preremove: ./scripts/preremove-agent.sh
+      postremove: ./scripts/postremove-agent.sh
+
+  ###
+  # .deb for agent for SONiC
+  ##
+  - id: jackadi-agent-sonic
+    package_name: jackadi-agent-sonic
+    file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Arch }}"
+    ids:
+      - agent
+    vendor: Jackadi
+    homepage: https://jackadi.io/
+    maintainer: Kevin Petremann <k@kpmail.fr>
+
+    section: utils
+    priority: optional
+
+    description: |-
+      Jackadi's agent.
+      Developer-first automation and configuration management.
+
+    formats:
+      - deb
+
+    contents:
+      - src: /dev/null
+        dst: /etc/jackadi
+        type: dir
+        file_info:
+          mode: 0755
+          owner: root
+          group: root
+
+      - src: /dev/null
+        dst: /var/lib/jackadi
+        type: dir
+        file_info:
+          mode: 0755
+          owner: jackadi
+          group: jackadi
+
+      - src: ./scripts/jackadi-agent-sonic.service
+        dst: /etc/systemd/system/jackadi-agent.service
+        type: config
+        file_info:
+          mode: 0644
+
+    scripts:
+      preinstall: ./scripts/preinstall-agent-sonic.sh
+      postinstall: ./scripts/postinstall-agent.sh
+      preremove: ./scripts/preremove-agent.sh
+      postremove: ./scripts/postremove-agent.sh
+
+
+release:
+  draft: false
+  prerelease: auto
+  mode: replace

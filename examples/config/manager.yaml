@@ -1,0 +1,29 @@
+# Jackadi Manager Configuration
+# This file shows all available configuration options for the manager
+
+# Manager identification
+manager-id: "my-manager-01"
+
+# Network settings
+address: "0.0.0.0"
+port: "40080"
+plugin-server-port: "40081"
+
+# Directory settings
+config-dir: "/etc/jackadi"
+plugin-dir: "/opt/jackadi/plugins"
+
+# Agent management
+auto-accept-agent: false  # Set to true to automatically accept new agents
+
+# Security settings (mTLS)
+mtls: true
+mtls-key: "/etc/jackadi/certs/manager.key"
+mtls-cert: "/etc/jackadi/certs/manager.crt"
+mtls-agent-ca-cert: "/etc/jackadi/certs/ca.crt"
+
+# Alternative minimal configuration example:
+# manager-id: "simple-manager"
+# address: "127.0.0.1"
+# auto-accept-agent: true
+# mtls: false

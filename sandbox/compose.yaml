@@ -1,0 +1,57 @@
+services:
+  manager:
+    build: .
+    hostname: manager
+    working_dir: /etc/jackadi
+    environment:
+      - JACKADI_MANAGER_ADDRESS=0.0.0.0
+      - JACKADI_MANAGER_AUTO_ACCEPT_AGENT=true
+      - JACKADI_MANAGER_MTLS_CERT=/etc/jackadi/tls/manager_cert.pem
+      - JACKADI_MANAGER_MTLS_KEY=/etc/jackadi/tls/manager_key.pem
+      - JACKADI_MANAGER_MTLS_AGENT_CA_CERT=/etc/jackadi/tls/agent_ca_cert.pem
+    command: sh -c "\
+      jack completion bash > /etc/bash_completion.d/_jack && \
+      exec jackadi-manager"
+    volumes:
+      - ./demo.sh:/etc/jackadi/demo.sh
+      - ./manager:/usr/bin/jackadi-manager
+      - ./plugins/:/opt/jackadi/plugins/
+      - ./plugins.yaml:/etc/jackadi/plugins.yaml
+      - ./jack:/usr/bin/jack
+      - ./tls/manager_cert.pem:/etc/jackadi/tls/manager_cert.pem
+      - ./tls/manager_key.pem:/etc/jackadi/tls/manager_key.pem
+      - ./tls/agent_ca_cert.pem:/etc/jackadi/tls/agent_ca_cert.pem
+
+  agent1:
+    image: ubuntu
+    hostname: agent1
+    working_dir: /etc/jackadi
+    environment:
+      - JACKADI_AGENT_AGENT_ID=agent1
+      - JACKADI_AGENT_MANAGER_ADDRESS=manager
+      - JACKADI_AGENT_MTLS_CERT=/etc/jackadi/tls/agent1_cert.pem
+      - JACKADI_AGENT_MTLS_KEY=/etc/jackadi/tls/agent1_key.pem
+      - JACKADI_AGENT_MTLS_MANAGER_CA_CERT=/etc/jackadi/tls/manager_ca_cert.pem
+    command: jackadi-agent
+    volumes:
+      - ./agent/:/usr/bin/jackadi-agent
+      - ./tls/agent1_cert.pem:/etc/jackadi/tls/agent1_cert.pem
+      - ./tls/agent1_key.pem:/etc/jackadi/tls/agent1_key.pem
+      - ./tls/manager_ca_cert.pem:/etc/jackadi/tls/manager_ca_cert.pem
+
+  agent2:
+    image: ubuntu
+    hostname: agent2
+    working_dir: /etc/jackadi
+    environment:
+      - JACKADI_AGENT_AGENT_ID=agent2
+      - JACKADI_AGENT_MANAGER_ADDRESS=manager
+      - JACKADI_AGENT_MTLS_CERT=/etc/jackadi/tls/agent2_cert.pem
+      - JACKADI_AGENT_MTLS_KEY=/etc/jackadi/tls/agent2_key.pem
+      - JACKADI_AGENT_MTLS_MANAGER_CA_CERT=/etc/jackadi/tls/manager_ca_cert.pem
+    command: jackadi-agent
+    volumes:
+      - ./agent/:/usr/bin/jackadi-agent
+      - ./tls/agent2_cert.pem:/etc/jackadi/tls/agent2_cert.pem
+      - ./tls/agent2_key.pem:/etc/jackadi/tls/agent2_key.pem
+      - ./tls/manager_ca_cert.pem:/etc/jackadi/tls/manager_ca_cert.pem

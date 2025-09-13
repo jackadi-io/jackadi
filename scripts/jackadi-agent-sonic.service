@@ -1,0 +1,18 @@
+[Unit]
+Description=Jackadi Agent
+Documentation=https://jackadi.io/
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=jackadi
+Group=jackadi
+WorkingDirectory=/var/lib/jackadi
+ExecStart=/usr/bin/jackadi-agent
+Restart=on-failure
+RestartSec=5
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

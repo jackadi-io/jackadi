@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package proto;
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+
+option go_package="github.com/jackadi-io/jackadi/internal/proto";
+
+service Comm {
+    rpc Handshake (HandshakeRequest) returns (HandshakeResponse);
+    rpc ExecTask (stream TaskResponse) returns (stream TaskRequest);
+    rpc ListAgentPlugins (google.protobuf.Empty) returns (ListAgentPluginsResponse);
+}
+
+service Forwarder {
+    rpc ExecTask (TaskRequest) returns (FwdResponse);
+}
+
+message HandshakeRequest {
+    int64 id = 1;
+}
+
+message HandshakeResponse {
+    int64 id = 1;
+}
+
+message TaskRequest {
+    int64 id = 1;
+    optional int64 groupID = 2;
+    string target = 3;
+    TargetMode target_mode = 4;
+    LockMode lock_mode = 5;
+    uint32 timeout = 6;
+    string task = 7;
+    Input input = 8;
+}
+
+message Input {
+    google.protobuf.ListValue args = 1;
+    google.protobuf.Struct options = 2;
+}
+
+message TaskResponse {
+    int64 id = 1;
+    optional int64 groupID = 2;
+    bytes output = 3;
+    string error = 4;
+    int32 retcode = 5;
+    InternalError internalError = 6;
+    string moduleError = 7;
+}
+
+message FwdResponse {
+    map<string, TaskResponse> responses = 1;
+}
+
+message ListAgentPluginsResponse {
+    repeated string plugin = 1;
+}
+
+enum InternalError {
+    OK = 0;
+    TIMEOUT = 1;
+    STARTED_TIMEOUT = 2;
+    BUSY_QUEUE = 3;
+    FULL_QUEUE = 4;
+    UNKNOWN_TASK = 5;
+    MODULE_ERROR = 6;
+    DISCONNECTING = 7;
+    DISCONNECTED = 8;
+    UNKNOWN_ERROR = 9;
+}
+
+enum TargetMode {
+    UNKNOWN = 0;
+    EXACT = 1;
+    LIST = 2;
+    GLOB = 3;
+    REGEX = 4;
+    QUERY = 5;
+}
+
+enum LockMode {
+    UNSPECIFIED = 0;
+    NO_LOCK = 1;
+    WRITE = 2;
+    EXCLUSIVE = 3;
+}

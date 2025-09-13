@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package protoplugin;
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "internal/proto/msg.proto";
+option go_package="github.com/jackadi-io/jackadi/pkg/plugin/protoplugin";
+
+service PluginCollection {
+    rpc Name (google.protobuf.Empty) returns (NameResponse);
+    rpc Tasks (google.protobuf.Empty) returns (TasksResponse);
+    rpc Help (HelpRequest) returns (HelpResponse);
+    rpc Version (google.protobuf.Empty) returns (VersionResponse);
+    rpc Do (DoRequest) returns (DoResponse);
+    rpc CollectSpecs (google.protobuf.Empty) returns (CollectSpecsResponse);
+    rpc GetTaskLockMode (TaskLockModeRequest) returns (TaskLockModeResponse);
+}
+
+message NameResponse {
+    string name = 1;
+}
+
+message TasksResponse {
+    repeated string names = 1;
+}
+
+message HelpRequest {
+    string task = 1;
+}
+
+message HelpResponse {
+    map<string, string> output = 1;
+}
+
+message VersionResponse {
+   	string PluginVersion = 1;
+	string Commit = 2;
+	string BuildTime = 3;
+	string GoVersion = 4;
+}
+
+message DoRequest {
+    string task = 1;
+    proto.Input input = 2;
+}
+
+message DoResponse {
+    bytes output = 1;
+    string error = 2;
+    int32 retcode = 3;
+}
+
+message CollectSpecsResponse {
+    bytes output = 1;
+    string error = 2;
+}
+
+message TaskLockModeRequest {
+    string task = 1;
+}
+
+message TaskLockModeResponse {
+    proto.LockMode lock_mode = 1;
+}

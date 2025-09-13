@@ -1,0 +1,23 @@
+[Unit]
+Description=Jackadi Manager
+Documentation=https://jackadi.io/
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=jackadi
+Group=jackadi
+WorkingDirectory=/var/lib/jackadi
+ExecStart=/usr/bin/jackadi-manager
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/jackadi /etc/jackadi /run/jackadi /opt/jackadi
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
