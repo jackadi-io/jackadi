@@ -33,7 +33,7 @@ Key principles:
 
 ## Documentation
 
-Full documentation can be found [here](https://jackadi.io/docs/)
+Full documentation can be found [here](https://jackadi.io/docs/).
 
 ## Architecture
 
