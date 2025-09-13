@@ -1,0 +1,45 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tests:
+    name: "Lint and test"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: 'stable'
+
+    - name: Install buf
+      uses: bufbuild/buf-setup-action@v1.50.0
+
+    - name: Install protobuf dependencies
+      run: |
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+    - name: Generate protobuf files
+      run: buf generate
+
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v8
+
+    - name: Test
+      run: go test -v ./...
+
+    - name: Build manager
+      run: go build -o manager ./cmd/manager
+
+    - name: Build agent
+      run: go build -o agent ./cmd/agent
+
+    - name: Build jack
+      run: go build -o jack ./cmd/jack
