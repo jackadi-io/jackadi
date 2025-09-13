@@ -247,7 +247,7 @@ nfpms:
 
     contents:
       - src: /dev/null
-        dst: /etc/jackadi
+        dst: /etc/sonic/jackadi
         type: dir
         file_info:
           mode: 0755
@@ -261,6 +261,14 @@ nfpms:
           mode: 0755
           owner: jackadi
           group: jackadi
+
+      - src: ./configs/agent-sonic.yaml
+        dst: /etc/sonic/jackadi/agent.yaml
+        type: config
+        file_info:
+          mode: 0644
+          owner: root
+          group: root
 
       - src: ./scripts/jackadi-agent-sonic.service
         dst: /etc/systemd/system/jackadi-agent.service
