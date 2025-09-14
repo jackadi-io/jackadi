@@ -58,13 +58,13 @@ func RunCommand() *cobra.Command {
 			if len(args) < 2 {
 				err := fmt.Errorf("requires at least %d arg(s), only received %d", 2, len(args))
 				fmt.Println(style.RenderError(err.Error()))
-				cmd.Help()
+				_ = cmd.Help()
 				os.Exit(1)
 			}
 			if args[0] == "" {
 				err := errors.New("target must not be empty")
 				fmt.Println(style.RenderError(err.Error()))
-				cmd.Help()
+				_ = cmd.Help()
 				os.Exit(1)
 			}
 			return nil
