@@ -30,6 +30,7 @@ Key principles:
 | **Specs Collection**           | Gather and store system information from agents. |
 | **Security**                   | mTLS, agent acceptance workflow, protection against rogue agents. |
 | **Developer-Friendly**         | Tasks/specs are Go function registered with a simple SDK. |
+| **SONiC ready**                | Developed with SONiC network devices in mind. |
 
 ## Documentation
 
