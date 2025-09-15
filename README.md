@@ -8,6 +8,8 @@
 
 # Jackadi
 
+[![Status](https://img.shields.io/badge/status-alpha-bue)](https://github.com/jackadi-io/jackadi)
+
 ## What is Jackadi?
 
 Jackadi is a developer-first distributed task execution platform designed for developers with a plugin system architecture consisting of a manager and agents.
