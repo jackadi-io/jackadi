@@ -1,17 +1,22 @@
 package sdk
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"log/slog"
+	"os"
 	"runtime/debug"
 	"strings"
 
 	goplugin "github.com/hashicorp/go-plugin"
+	"google.golang.org/protobuf/types/known/structpb"
 
+	"github.com/jackadi-io/jackadi/internal/parser"
 	"github.com/jackadi-io/jackadi/internal/plugin"
 	"github.com/jackadi-io/jackadi/internal/proto"
+	"github.com/jackadi-io/jackadi/internal/serializer"
 )
 
 var version = ""
@@ -152,6 +157,9 @@ func MustServe(collection *Collection) {
 		log.Fatalln("colletion must have at least one task")
 	}
 
+	// Run a task manually from the binary directly.
+	handleCommand(collection)
+
 	cfg := goplugin.ServeConfig{
 		HandshakeConfig: plugin.Handshake,
 		Plugins: map[string]goplugin.Plugin{
@@ -160,6 +168,85 @@ func MustServe(collection *Collection) {
 		GRPCServer: goplugin.DefaultGRPCServer,
 	}
 	goplugin.Serve(&cfg)
+}
+
+func printCommandHelp() {
+	fmt.Println("Usage: <plugin> run <command> [args...]")
+	fmt.Println()
+	fmt.Println("Commands:")
+	fmt.Println("  task <task_name> [args...]  Run a specific task")
+	fmt.Println("  specs                       Collect and display specs")
+	fmt.Println()
+}
+
+func handleCommand(collection *Collection) {
+	if len(os.Args) > 1 && os.Args[1] == "run" {
+		switch os.Args[2] {
+		case "task":
+			if len(os.Args) < 4 {
+				printCommandHelp()
+				os.Exit(1)
+			}
+			arguments, err := parser.ParseArgs(os.Args[4:])
+			if err != nil {
+				fmt.Printf("failed to parse arguments: %s\n", err)
+			}
+
+			in, err := structpb.NewList(arguments.Positional)
+			if err != nil {
+				fmt.Printf("invalid arguments: %s\n", err)
+				os.Exit(1)
+			}
+
+			opts, err := structpb.NewStruct(arguments.Options)
+			if err != nil {
+				fmt.Printf("invalid options: %s\n", err)
+				os.Exit(1)
+			}
+
+			args := proto.Input{
+				Args:    in,
+				Options: opts,
+			}
+
+			resp, err := collection.Do(context.Background(), os.Args[3], &args)
+			if resp.Output != nil {
+				var data any
+				if err := serializer.JSON.UnmarshalFromString(string(resp.Output), &data); err != nil {
+					fmt.Printf("unable to parse output: %s: %s\n", err, string(resp.Output))
+					os.Exit(1)
+				}
+				out, _ := serializer.JSON.MarshalIndent(data, "", "  ")
+				fmt.Println(string(out))
+			}
+
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+		case "specs":
+			if len(os.Args) < 3 {
+				printCommandHelp()
+				os.Exit(1)
+			}
+			specs, specsErr := collection.CollectSpecs(context.Background())
+			var data any
+			if err := serializer.JSON.UnmarshalFromString(string(specs), &data); err != nil {
+				fmt.Printf("unable to parse output: %s: %s\n", err, string(specs))
+				os.Exit(1)
+			}
+			out, _ := serializer.JSON.MarshalIndent(data, "", "  ")
+			fmt.Println(string(out))
+
+			if specsErr != nil {
+				fmt.Println("error:", specsErr)
+			}
+
+		default:
+			fmt.Println("unknown command")
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
 }
 
 // handleFlags processes command-line flags for the plugin and returns true if the plugin should exit.
