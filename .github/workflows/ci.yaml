@@ -17,17 +17,6 @@ jobs:
         with:
           go-version: 'stable'
 
-      - name: Install buf
-        uses: bufbuild/buf-setup-action@v1.50.0
-
-      - name: Install protobuf dependencies
-        run: |
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-
-      - name: Generate protobuf files
-        run: buf generate
-
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v8
 
