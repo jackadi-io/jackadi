@@ -171,21 +171,6 @@ func targetsFromFile(file string) (string, error) {
 	return strings.Join(agents, ","), nil
 }
 
-// convertToListValue converts a list of any type to a protobuf ListValue.
-func convertToListValue(list []any) (*structpb.ListValue, error) {
-	values := make([]*structpb.Value, len(list))
-
-	for i, v := range list {
-		val, err := structpb.NewValue(v)
-		if err != nil {
-			return nil, err
-		}
-		values[i] = val
-	}
-
-	return &structpb.ListValue{Values: values}, nil
-}
-
 func sendTask(target string, targetMode proto.TargetMode, lockMode proto.LockMode, timeout int, task string, args ...string) (*proto.FwdResponse, error) {
 	conn, err := connection.DialCLI()
 	if err != nil {
@@ -205,7 +190,7 @@ func sendTask(target string, targetMode proto.TargetMode, lockMode proto.LockMod
 		return nil, fmt.Errorf("failed to parse arguments: %w", err)
 	}
 
-	argList, err := convertToListValue(arguments.Positional)
+	argList, err := structpb.NewList(arguments.Positional)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert arguments to protobuf list: %w", err)
 	}
