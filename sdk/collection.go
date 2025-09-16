@@ -180,7 +180,11 @@ func printCommandHelp() {
 }
 
 func handleCommand(collection *Collection) {
-	if len(os.Args) > 1 && os.Args[1] == "run" {
+	if len(os.Args) >= 2 && os.Args[1] == "run" {
+		if len(os.Args) < 3 {
+			printCommandHelp()
+			os.Exit(1)
+		}
 		switch os.Args[2] {
 		case "task":
 			if len(os.Args) < 4 {
@@ -224,10 +228,6 @@ func handleCommand(collection *Collection) {
 				fmt.Println("error:", err)
 			}
 		case "specs":
-			if len(os.Args) < 3 {
-				printCommandHelp()
-				os.Exit(1)
-			}
 			specs, specsErr := collection.CollectSpecs(context.Background())
 			var data any
 			if err := serializer.JSON.UnmarshalFromString(string(specs), &data); err != nil {
@@ -242,7 +242,7 @@ func handleCommand(collection *Collection) {
 			}
 
 		default:
-			fmt.Println("unknown command")
+			printCommandHelp()
 			os.Exit(1)
 		}
 		os.Exit(0)
