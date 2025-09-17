@@ -159,7 +159,10 @@ func main() {
 	}
 
 	// Load configuration using Viper
-	configFile := flag.Lookup("config").Value.String()
+	configFile := ""
+	if flag.Lookup("config") != nil {
+		configFile = flag.Lookup("config").Value.String()
+	}
 	agentCfg, err := config.LoadAgentConfig(configFile)
 
 	if err != nil {
