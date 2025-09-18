@@ -213,7 +213,7 @@ func handleCommand(collection *Collection) {
 				Options: opts,
 			}
 
-			resp, err := collection.Do(context.Background(), os.Args[3], &args)
+			resp, _ := collection.Do(context.Background(), os.Args[3], &args)
 			if resp.Output != nil {
 				var data any
 				if err := serializer.JSON.UnmarshalFromString(string(resp.Output), &data); err != nil {
@@ -223,9 +223,8 @@ func handleCommand(collection *Collection) {
 				out, _ := serializer.JSON.MarshalIndent(data, "", "  ")
 				fmt.Println(string(out))
 			}
-
-			if err != nil {
-				fmt.Println("error:", err)
+			if resp.Error != "" {
+				fmt.Println("error:", resp.Error)
 			}
 		case "specs":
 			specs, specsErr := collection.CollectSpecs(context.Background())
