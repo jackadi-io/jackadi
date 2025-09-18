@@ -21,7 +21,7 @@ func run(ctx context.Context, args string) (string, error) {
 	cmd := exec.Command(partitions[0], partitions[1:]...) //nolint:gosec // running external inputs by design
 	// prevent signal from canceling the command to avoid unwanter signal propagation
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	res, err := cmd.Output() // TODO: cancel if context is closed
+	res, err := cmd.CombinedOutput() // TODO: cancel if context is closed
 
 	return string(res), err
 }
