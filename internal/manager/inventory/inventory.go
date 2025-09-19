@@ -35,11 +35,6 @@ type AgentState struct {
 	specs     map[string]any
 }
 
-// IsActive returns true if the agent has been active within the last 60 seconds.
-func (a AgentState) IsActive() bool {
-	return time.Since(a.LastMsg) <= config.AgentActiveThreshold
-}
-
 func NewAgentState() AgentState {
 	return AgentState{
 		specs: make(map[string]any),

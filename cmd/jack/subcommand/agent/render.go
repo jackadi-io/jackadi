@@ -54,26 +54,22 @@ func prettyAgentsHealthSprint(agents []*proto.AgentInfo, showDetails bool) strin
 
 	for _, agent := range agents {
 		connectedState := "connected"
-		activeState := "active"
 
 		if !agent.GetIsConnected() {
 			connectedState = "disconnected"
 		}
 
 		lastActive := agent.GetLastMsg().AsTime()
-		if !agent.GetIsActive() {
-			activeState = "inactive"
-		}
 
 		if !showDetails {
-			items += style.Item(fmt.Sprintf("%s (%s, %s)", agent.GetId(), connectedState, activeState))
+			items += style.Item(fmt.Sprintf("%s (%s)", agent.GetId(), connectedState))
 			continue
 		}
 
 		items += style.Item(agent.GetId())
-		items += style.SubItem(fmt.Sprintf("state: %s, %s", connectedState, activeState))
+		items += style.SubItem(fmt.Sprintf("state: %s", connectedState))
 		items += style.SubItem(fmt.Sprintf("%s since: %s", connectedState, prettyTime(agent.GetSince().AsTime())))
-		items += style.SubItem(fmt.Sprintf("last active: %s", prettyTime(lastActive)))
+		items += style.SubItem(fmt.Sprintf("last event: %s", prettyTime(lastActive)))
 	}
 
 	return style.SpacedBlock(items)

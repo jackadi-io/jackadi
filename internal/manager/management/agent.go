@@ -48,8 +48,6 @@ func toProtoAgentSlice(agents []inventory.AgentIdentity, agentsState map[agent.I
 			info.IsConnected = &state.Connected
 			info.Since = timestamppb.New(state.Since)
 			info.LastMsg = timestamppb.New(state.LastMsg)
-			isActive := state.IsActive()
-			info.IsActive = &isActive
 		}
 
 		resp = append(resp, &info)

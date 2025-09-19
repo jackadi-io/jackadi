@@ -40,7 +40,6 @@ message AgentInfo {
     optional bool isConnected = 4;
     optional google.protobuf.Timestamp since = 5;
     optional google.protobuf.Timestamp lastMsg = 7;
-    optional bool isActive = 8;  // considered active if last message seen is recent
 }
 
 message AgentRequest {

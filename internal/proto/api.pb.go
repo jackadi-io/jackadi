@@ -187,7 +187,6 @@ type AgentInfo struct {
 	IsConnected   *bool                  `protobuf:"varint,4,opt,name=isConnected,proto3,oneof" json:"isConnected,omitempty"`
 	Since         *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=since,proto3,oneof" json:"since,omitempty"`
 	LastMsg       *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=lastMsg,proto3,oneof" json:"lastMsg,omitempty"`
-	IsActive      *bool                  `protobuf:"varint,8,opt,name=isActive,proto3,oneof" json:"isActive,omitempty"` // considered active if last message seen is recent
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -262,13 +261,6 @@ func (x *AgentInfo) GetLastMsg() *timestamppb.Timestamp {
 		return x.LastMsg
 	}
 	return nil
-}
-
-func (x *AgentInfo) GetIsActive() bool {
-	if x != nil && x.IsActive != nil {
-		return *x.IsActive
-	}
-	return false
 }
 
 type AgentRequest struct {
@@ -787,23 +779,21 @@ const file_internal_proto_api_proto_rawDesc = "" +
 	"\n" +
 	"candidates\x18\x02 \x03(\v2\x10.proto.AgentInfoR\n" +
 	"candidates\x12,\n" +
-	"\brejected\x18\x03 \x03(\v2\x10.proto.AgentInfoR\brejected\"\xea\x02\n" +
+	"\brejected\x18\x03 \x03(\v2\x10.proto.AgentInfoR\brejected\"\xbc\x02\n" +
 	"\tAgentInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\aaddress\x18\x02 \x01(\tH\x00R\aaddress\x88\x01\x01\x12%\n" +
 	"\vcertificate\x18\x03 \x01(\tH\x01R\vcertificate\x88\x01\x01\x12%\n" +
 	"\visConnected\x18\x04 \x01(\bH\x02R\visConnected\x88\x01\x01\x125\n" +
 	"\x05since\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampH\x03R\x05since\x88\x01\x01\x129\n" +
-	"\alastMsg\x18\a \x01(\v2\x1a.google.protobuf.TimestampH\x04R\alastMsg\x88\x01\x01\x12\x1f\n" +
-	"\bisActive\x18\b \x01(\bH\x05R\bisActive\x88\x01\x01B\n" +
+	"\alastMsg\x18\a \x01(\v2\x1a.google.protobuf.TimestampH\x04R\alastMsg\x88\x01\x01B\n" +
 	"\n" +
 	"\b_addressB\x0e\n" +
 	"\f_certificateB\x0e\n" +
 	"\f_isConnectedB\b\n" +
 	"\x06_sinceB\n" +
 	"\n" +
-	"\b_lastMsgB\v\n" +
-	"\t_isActive\"6\n" +
+	"\b_lastMsg\"6\n" +
 	"\fAgentRequest\x12&\n" +
 	"\x05agent\x18\x01 \x01(\v2\x10.proto.AgentInfoR\x05agent\"7\n" +
 	"\rAgentResponse\x12&\n" +
