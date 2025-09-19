@@ -62,7 +62,7 @@ func prettyAgentsHealthSprint(agents []*proto.AgentInfo, showDetails bool) strin
 		lastActive := agent.GetLastMsg().AsTime()
 
 		if !showDetails {
-			items += style.Item(fmt.Sprintf("%s (%s)", agent.GetId(), connectedState))
+			items += style.Item(fmt.Sprintf("%s: %s", agent.GetId(), connectedState))
 			continue
 		}
 
