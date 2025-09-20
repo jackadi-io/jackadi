@@ -229,7 +229,7 @@ func (a *Agent) ListenTaskRequest(ctx context.Context) error {
 			}()
 
 			slog.Debug("exec request received", "id", req.Id, "group", req.GetGroupID(), "task", req.Task, "args", req.Input)
-			timeout := uint32(config.DefaultTaskTimeout.Seconds())
+			timeout := uint32(config.TaskTimeout.Seconds())
 			if val := req.GetTimeout(); val > 0 {
 				timeout = val
 			}

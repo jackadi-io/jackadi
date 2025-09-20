@@ -75,7 +75,7 @@ func getBuiltinCollections() map[string]*CollectionInfo {
 
 // getExternalPluginCollections returns collections from external plugin files.
 func getExternalPluginCollections() map[string]*CollectionInfo {
-	pluginDir := config.DefaultPluginDir
+	pluginDir := config.DefaultPluginDir // TODO: add config file for CLI
 	collections := make(map[string]*CollectionInfo)
 
 	if _, err := os.Stat(pluginDir); os.IsNotExist(err) {

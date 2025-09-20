@@ -75,7 +75,7 @@ func (a *apiServer) GetResults(ctx context.Context, req *proto.ResultsRequest) (
 func (a *apiServer) ListResults(ctx context.Context, req *proto.ListResultsRequest) (*proto.ListResultsResponse, error) {
 	resultEntries := []*proto.ResultEntry{}
 
-	limit := int32(config.DefaultResultsLimit)
+	limit := int32(config.ResultsLimit)
 	if req.Limit > 0 {
 		limit = min(req.Limit, config.ResultsPageLimit)
 	}

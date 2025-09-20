@@ -292,7 +292,7 @@ func (s *Server) ExecTask(stream proto.Comm_ExecTaskServer) error {
 }
 
 func (s *Server) CollectAgentsSpecs(ctx context.Context) {
-	timeout := config.DefaultTaskTimeout
+	timeout := config.TaskTimeout
 	tick := time.NewTicker(config.SpecCollectionInterval)
 	for {
 		agents, _ := s.taskDispatcher.TargetedAgents("*", proto.TargetMode_GLOB)

@@ -40,7 +40,7 @@ func formatResultItem(id int64, date, agents, status string) string {
 }
 
 func listCommand() *cobra.Command {
-	limit := int32(config.DefaultResultsLimit)
+	limit := int32(config.ResultsLimit)
 	offset := int32(0)
 	fromDate := int64(0)
 	toDate := int64(0)

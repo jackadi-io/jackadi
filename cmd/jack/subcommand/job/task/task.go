@@ -48,7 +48,7 @@ type proxyResponse struct {
 
 func RunCommand() *cobra.Command {
 	target := Target{}
-	timeout := int(config.DefaultTaskTimeout.Seconds())
+	timeout := int(config.TaskTimeout.Seconds())
 	lockMode := "no-lock"
 
 	cmd := &cobra.Command{

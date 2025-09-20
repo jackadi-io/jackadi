@@ -19,7 +19,7 @@ const (
 	CLISocket        = "/run/jackadi/manager.sock" // Unix socket path for CLI communication.
 
 	// Timing and duration config.
-	DefaultTaskTimeout      = 30 * time.Second
+	TaskTimeout             = 30 * time.Second
 	DefaultReconnectDelay   = 10 * time.Second // The default delay between reconnection to the manager attempts.
 	GracefulShutdownTimeout = 30 * time.Second
 	SpecCollectionInterval  = 1 * time.Minute
@@ -39,9 +39,9 @@ const (
 	MaxWaitingRequests = 1000 // Mximum number of requests that can wait in queue.
 
 	// `jack results list` limits.
-	ResultsPageLimit    = 100 // Maximum number of results per page for pagination.
-	DefaultResultsLimit = 100 // Default number of results returned.
-	MaxResultsLimit     = 500 // Maximum number of results that can be requested..
+	ResultsPageLimit = 100 // Maximum number of results per page for pagination.
+	ResultsLimit     = 100 // Default number of results returned.
+	MaxResultsLimit  = 500 // Maximum number of results that can be requested..
 
 	// File and directory paths.
 	DefaultConfigDir      = "/etc/jackadi"              // Default configuration directory.
