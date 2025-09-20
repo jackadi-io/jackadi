@@ -55,7 +55,7 @@ message FwdResponse {
 }
 
 message ListAgentPluginsResponse {
-    repeated string plugin = 1;
+    map<string, string> plugin = 1;  // key=filename, value=checksum
 }
 
 enum InternalError {

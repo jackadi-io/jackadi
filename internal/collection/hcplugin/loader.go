@@ -8,12 +8,14 @@ import (
 	"io"
 	"log"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/go-hclog"
 	goplugin "github.com/hashicorp/go-plugin"
@@ -36,7 +38,7 @@ type PluginInfo struct {
 
 type Loader struct {
 	logger  hclog.Logger
-	plugins map[string]PluginInfo
+	plugins map[string]PluginInfo // key=filepath
 }
 
 // discover all non .so plugins in plugins/
@@ -59,7 +61,7 @@ func discover(pluginDir string) []string {
 	return pluginFiles
 }
 
-func calculateChecksum(file string) (string, error) {
+func CalculateChecksum(file string) (string, error) {
 	fd, err := os.Open(file)
 	if err != nil {
 		return "", err
@@ -87,7 +89,7 @@ func New() Loader {
 
 // Load and register a plugin.
 func (l *Loader) load(path string) error {
-	checksum, err := calculateChecksum(path)
+	checksum, err := CalculateChecksum(path)
 	if err != nil {
 		return fmt.Errorf("plugin checksum failed: %w", err)
 	}
@@ -172,7 +174,68 @@ func (l *Loader) Load(pluginDir string) {
 	}
 }
 
-func (l *Loader) Update(pluginDir, tmpDir string) ([]types.PluginChanges, bool, error) {
+// download the plugin from the provided URL.
+// The name is only the identifier of the plugin.
+func download(name, url, tmpDir string) error {
+	client := http.Client{Timeout: time.Minute}
+	resp, err := client.Get(url)
+	if err != nil {
+		return fmt.Errorf("'%s': %w", url, err)
+	}
+	if resp == nil {
+		return fmt.Errorf("'%s': received nil response", url)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return fmt.Errorf("'%s' http error %d", url, resp.StatusCode)
+	}
+
+	localPath := filepath.Join(tmpDir, name)
+	out, err := os.Create(localPath)
+	if err != nil {
+		return fmt.Errorf("failed to create/access '%s' plugin file: %w", name, err)
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to write '%s' plugin file : %w", name, err)
+	}
+
+	if err := os.Chmod(localPath, 0755); err != nil {
+		return fmt.Errorf("chmod 644 failed for '%s' plugin file : %w", name, err)
+	}
+	return nil
+}
+
+// DownloadPlugins downloads plugins from the manager, excluding already up to date plugins (same checksum).
+func (l *Loader) DownloadPlugins(agentPlugins map[string]string, managerHost, pluginDir, tmpDir string) ([]string, error) {
+	slog.Debug("sync", "values", agentPlugins)
+	upToDate := []string{}
+	var errs error
+	for file, checksum := range agentPlugins {
+		path := filepath.Join(pluginDir, file)
+		if p, ok := l.plugins[path]; ok && p.version == checksum {
+			slog.Debug("plugin not downloaded", "reason", "already up to date", "plugin_file", file)
+			upToDate = append(upToDate, p.file)
+			continue
+		}
+
+		url := fmt.Sprintf("http://%s/plugin/%s", managerHost, file)
+		slog.Debug("starting plugin sync", "plugin_file", file, "url", url)
+		if err := download(file, url, tmpDir); err != nil {
+			errs = errors.Join(errs, fmt.Errorf("new plugin not installed: '%s' file not downloaded: %w", file, err))
+			slog.Error("failed to download", "plugin_file", file, "url", url, "error", err)
+			continue
+		}
+		slog.Debug("plugin downloaded", "plugin_file", file, "url", url)
+	}
+
+	return upToDate, errs
+}
+
+func (l *Loader) Update(pluginDir, tmpDir string, upToDate []string) ([]types.PluginChanges, bool, error) {
 	pluginsFile := discover(tmpDir)
 	newPluginNameList := []string{}
 	changes := []types.PluginChanges{}
@@ -208,18 +271,6 @@ func (l *Loader) Update(pluginDir, tmpDir string) ([]types.PluginChanges, bool, 
 			continue
 		}
 
-		// ignore up to date plugin
-		if checksum, err := calculateChecksum(candidatePluginPath); err != nil {
-			slog.Error("plugin checksum failed", "error", err, "plugin_file", file)
-			errs = errors.Join(errs, fmt.Errorf("plugin update failed: '%s'file checksum failed: %w", file, err))
-			continue
-		} else if p.version == checksum {
-			slog.Debug("plugin checksum unchanged", "plugin_file", file)
-			newPluginNameList = append(newPluginNameList, p.name)
-			changes = append(changes, types.PluginChanges{Name: p.name, FileName: file})
-			continue
-		}
-
 		// reload outdated plugin
 		slog.Debug("reloading updated plugin", "plugin_file", file)
 		p.client.Kill()
@@ -248,6 +299,14 @@ func (l *Loader) Update(pluginDir, tmpDir string) ([]types.PluginChanges, bool, 
 	// unload plugins which should be removed
 	slog.Debug("new list of plugins", "list", newPluginNameList)
 	for _, p := range l.plugins {
+		// ignore up to date plugin
+		if slices.Contains(upToDate, p.file) {
+			slog.Debug("plugin checksum unchanged", "plugin_file", p.file)
+			newPluginNameList = append(newPluginNameList, p.name)
+			changes = append(changes, types.PluginChanges{Name: p.name, FileName: p.file})
+			continue
+		}
+
 		if !slices.Contains(newPluginNameList, p.name) {
 			slog.Debug("removing plugin", "name", p.name)
 			if err := collection.Registry.Unregister(p.name); err != nil {

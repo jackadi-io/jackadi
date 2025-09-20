@@ -581,7 +581,7 @@ func (x *FwdResponse) GetResponses() map[string]*TaskResponse {
 
 type ListAgentPluginsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Plugin        []string               `protobuf:"bytes,1,rep,name=plugin,proto3" json:"plugin,omitempty"`
+	Plugin        map[string]string      `protobuf:"bytes,1,rep,name=plugin,proto3" json:"plugin,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // key=filename, value=checksum
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -616,7 +616,7 @@ func (*ListAgentPluginsResponse) Descriptor() ([]byte, []int) {
 	return file_internal_proto_msg_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ListAgentPluginsResponse) GetPlugin() []string {
+func (x *ListAgentPluginsResponse) GetPlugin() map[string]string {
 	if x != nil {
 		return x.Plugin
 	}
@@ -661,9 +661,12 @@ const file_internal_proto_msg_proto_rawDesc = "" +
 	"\tresponses\x18\x01 \x03(\v2!.proto.FwdResponse.ResponsesEntryR\tresponses\x1aQ\n" +
 	"\x0eResponsesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12)\n" +
-	"\x05value\x18\x02 \x01(\v2\x13.proto.TaskResponseR\x05value:\x028\x01\"2\n" +
-	"\x18ListAgentPluginsResponse\x12\x16\n" +
-	"\x06plugin\x18\x01 \x03(\tR\x06plugin*\xb5\x01\n" +
+	"\x05value\x18\x02 \x01(\v2\x13.proto.TaskResponseR\x05value:\x028\x01\"\x9a\x01\n" +
+	"\x18ListAgentPluginsResponse\x12C\n" +
+	"\x06plugin\x18\x01 \x03(\v2+.proto.ListAgentPluginsResponse.PluginEntryR\x06plugin\x1a9\n" +
+	"\vPluginEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01*\xb5\x01\n" +
 	"\rInternalError\x12\x06\n" +
 	"\x02OK\x10\x00\x12\v\n" +
 	"\aTIMEOUT\x10\x01\x12\x13\n" +
@@ -710,7 +713,7 @@ func file_internal_proto_msg_proto_rawDescGZIP() []byte {
 }
 
 var file_internal_proto_msg_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_internal_proto_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_internal_proto_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_internal_proto_msg_proto_goTypes = []any{
 	(InternalError)(0),               // 0: proto.InternalError
 	(TargetMode)(0),                  // 1: proto.TargetMode
@@ -723,32 +726,34 @@ var file_internal_proto_msg_proto_goTypes = []any{
 	(*FwdResponse)(nil),              // 8: proto.FwdResponse
 	(*ListAgentPluginsResponse)(nil), // 9: proto.ListAgentPluginsResponse
 	nil,                              // 10: proto.FwdResponse.ResponsesEntry
-	(*structpb.ListValue)(nil),       // 11: google.protobuf.ListValue
-	(*structpb.Struct)(nil),          // 12: google.protobuf.Struct
-	(*emptypb.Empty)(nil),            // 13: google.protobuf.Empty
+	nil,                              // 11: proto.ListAgentPluginsResponse.PluginEntry
+	(*structpb.ListValue)(nil),       // 12: google.protobuf.ListValue
+	(*structpb.Struct)(nil),          // 13: google.protobuf.Struct
+	(*emptypb.Empty)(nil),            // 14: google.protobuf.Empty
 }
 var file_internal_proto_msg_proto_depIdxs = []int32{
 	1,  // 0: proto.TaskRequest.target_mode:type_name -> proto.TargetMode
 	2,  // 1: proto.TaskRequest.lock_mode:type_name -> proto.LockMode
 	6,  // 2: proto.TaskRequest.input:type_name -> proto.Input
-	11, // 3: proto.Input.args:type_name -> google.protobuf.ListValue
-	12, // 4: proto.Input.options:type_name -> google.protobuf.Struct
+	12, // 3: proto.Input.args:type_name -> google.protobuf.ListValue
+	13, // 4: proto.Input.options:type_name -> google.protobuf.Struct
 	0,  // 5: proto.TaskResponse.internalError:type_name -> proto.InternalError
 	10, // 6: proto.FwdResponse.responses:type_name -> proto.FwdResponse.ResponsesEntry
-	7,  // 7: proto.FwdResponse.ResponsesEntry.value:type_name -> proto.TaskResponse
-	3,  // 8: proto.Comm.Handshake:input_type -> proto.HandshakeRequest
-	7,  // 9: proto.Comm.ExecTask:input_type -> proto.TaskResponse
-	13, // 10: proto.Comm.ListAgentPlugins:input_type -> google.protobuf.Empty
-	5,  // 11: proto.Forwarder.ExecTask:input_type -> proto.TaskRequest
-	4,  // 12: proto.Comm.Handshake:output_type -> proto.HandshakeResponse
-	5,  // 13: proto.Comm.ExecTask:output_type -> proto.TaskRequest
-	9,  // 14: proto.Comm.ListAgentPlugins:output_type -> proto.ListAgentPluginsResponse
-	8,  // 15: proto.Forwarder.ExecTask:output_type -> proto.FwdResponse
-	12, // [12:16] is the sub-list for method output_type
-	8,  // [8:12] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	11, // 7: proto.ListAgentPluginsResponse.plugin:type_name -> proto.ListAgentPluginsResponse.PluginEntry
+	7,  // 8: proto.FwdResponse.ResponsesEntry.value:type_name -> proto.TaskResponse
+	3,  // 9: proto.Comm.Handshake:input_type -> proto.HandshakeRequest
+	7,  // 10: proto.Comm.ExecTask:input_type -> proto.TaskResponse
+	14, // 11: proto.Comm.ListAgentPlugins:input_type -> google.protobuf.Empty
+	5,  // 12: proto.Forwarder.ExecTask:input_type -> proto.TaskRequest
+	4,  // 13: proto.Comm.Handshake:output_type -> proto.HandshakeResponse
+	5,  // 14: proto.Comm.ExecTask:output_type -> proto.TaskRequest
+	9,  // 15: proto.Comm.ListAgentPlugins:output_type -> proto.ListAgentPluginsResponse
+	8,  // 16: proto.Forwarder.ExecTask:output_type -> proto.FwdResponse
+	13, // [13:17] is the sub-list for method output_type
+	9,  // [9:13] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_internal_proto_msg_proto_init() }
@@ -764,7 +769,7 @@ func file_internal_proto_msg_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_proto_msg_proto_rawDesc), len(file_internal_proto_msg_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   8,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

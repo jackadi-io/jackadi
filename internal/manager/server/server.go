@@ -26,6 +26,7 @@ type ServerConfig struct {
 	AutoAccept  bool
 	MTLSEnabled bool
 	ConfigDir   string
+	PluginDir   string
 }
 
 type Server struct {
@@ -36,11 +37,11 @@ type Server struct {
 	db              *badger.DB
 	dbMutex         *sync.Mutex
 	shutdownRequest map[agent.ID]chan struct{}
-	pluginList      pluginList
+	pluginPolicies  pluginPolicies
 }
 
-type pluginList struct {
-	cache      map[string][]string
+type pluginPolicies struct {
+	cache      map[string][]pluginInfo // key: pattern
 	lastUpdate time.Time
 	lock       *sync.Mutex
 }
@@ -53,7 +54,7 @@ func New(config ServerConfig, agentsInventory *inventory.Agents, taskDispatcher 
 		db:              jobDatabase,
 		dbMutex:         &sync.Mutex{},
 		shutdownRequest: make(map[agent.ID]chan struct{}),
-		pluginList:      pluginList{lock: &sync.Mutex{}},
+		pluginPolicies:  pluginPolicies{lock: &sync.Mutex{}},
 	}
 }
 

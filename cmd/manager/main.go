@@ -110,6 +110,7 @@ func startAppHandler(cfg managerConfig, agentsInventory *inventory.Agents, dis f
 			AutoAccept:  cfg.autoAcceptAgent,
 			MTLSEnabled: cfg.mTLS,
 			ConfigDir:   cfg.configDir,
+			PluginDir:   cfg.pluginDir,
 		},
 		agentsInventory,
 		dis,
@@ -197,7 +198,7 @@ func run(cfg managerConfig) error {
 		commServer.CollectAgentsSpecs(ctx)
 	}()
 
-	pluginDir := http.Dir(config.DefaultPluginDir)
+	pluginDir := http.Dir(cfg.pluginDir)
 	fs := http.FileServer(pluginDir)
 	mux := http.NewServeMux()
 	mux.Handle("GET "+config.PluginServerPath, http.StripPrefix(config.PluginServerPath, fs))
