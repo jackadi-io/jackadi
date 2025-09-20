@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/sagikazarmark/locafero"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -139,7 +141,19 @@ func LoadAgentConfig(configFile string) (*AgentConfig, error) {
 }
 
 func LoadManagerConfig(configFile string) (*ManagerConfig, error) {
-	v := viper.New()
+	finder := locafero.Finder{
+		Paths: []string{".", "/etc/jackadi"},
+		Names: locafero.NameWithExtensions("manager", viper.SupportedExts...),
+		Type:  locafero.FileTypeFile,
+	}
+
+	if configFile != "" {
+		path, file := filepath.Split(configFile)
+		finder.Paths = []string{path}
+		finder.Names = locafero.NameWithExtensions(file, viper.SupportedExts...)
+	}
+
+	v := viper.NewWithOptions(viper.WithFinder(finder))
 
 	v.SetDefault("manager-id", "")
 	v.SetDefault("config-dir", DefaultConfigDir)
@@ -157,21 +171,9 @@ func LoadManagerConfig(configFile string) (*ManagerConfig, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	v.AutomaticEnv()
 
-	if configFile != "" {
-		v.SetConfigFile(configFile)
-		if err := v.ReadInConfig(); err != nil {
-			return nil, fmt.Errorf("error reading config file %s: %w", configFile, err)
-		}
-	} else {
-		v.SetConfigName("manager")
-		v.SetConfigType("yaml")
-		v.AddConfigPath("/etc/jackadi/")
-		v.AddConfigPath(".")
-
-		if err := v.ReadInConfig(); err != nil {
-			if !errors.As(err, &errViperConfigNotFound) {
-				return nil, fmt.Errorf("!!error reading config file: %T", err)
-			}
+	if err := v.ReadInConfig(); err != nil {
+		if !errors.As(err, &errViperConfigNotFound) {
+			return nil, fmt.Errorf("error reading config: %w", err)
 		}
 	}
 
