@@ -1,91 +1,93 @@
 syntax = "proto3";
 
 package proto;
+
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "internal/proto/msg.proto";
-option go_package="github.com/jackadi-io/jackadi/internal/proto";
+
+option go_package = "github.com/jackadi-io/jackadi/internal/proto";
 
 service API {
-    rpc ListAgents (ListAgentsRequest) returns (ListAgentsResponse);
-    rpc AcceptAgent (AgentRequest) returns (AgentResponse);
-    rpc RemoveAgent (AgentRequest) returns (AgentsResponse);
-    rpc RejectAgent (AgentRequest) returns (AgentsResponse);
-    rpc GetResults (ResultsRequest) returns (ResultsResponse);
-    rpc ListResults (ListResultsRequest) returns (ListResultsResponse);
-    rpc GetRequest (RequestRequest) returns (RequestResponse);
+  rpc ListAgents(ListAgentsRequest) returns (ListAgentsResponse);
+  rpc AcceptAgent(AgentRequest) returns (AgentResponse);
+  rpc RemoveAgent(AgentRequest) returns (AgentsResponse);
+  rpc RejectAgent(AgentRequest) returns (AgentsResponse);
+  rpc GetResults(ResultsRequest) returns (ResultsResponse);
+  rpc ListResults(ListResultsRequest) returns (ListResultsResponse);
+  rpc GetRequest(RequestRequest) returns (RequestResponse);
 }
 
 message ListAgentsRequest {
-    Filter filter = 1;
+  Filter filter = 1;
 }
 
 enum Filter {
-    NONE = 0;
-    ONLY_ACCEPTED = 1;
-    ONLY_CANDIDATES = 2;
-    ONLY_REJECTED = 3;
+  NONE = 0;
+  ONLY_ACCEPTED = 1;
+  ONLY_CANDIDATES = 2;
+  ONLY_REJECTED = 3;
 }
 
 message ListAgentsResponse {
-    repeated AgentInfo accepted = 1;
-    repeated AgentInfo candidates = 2;
-    repeated AgentInfo rejected = 3;
+  repeated AgentInfo accepted = 1;
+  repeated AgentInfo candidates = 2;
+  repeated AgentInfo rejected = 3;
 }
 
 message AgentInfo {
-    string id = 1;
-    optional string address = 2;
-    optional string certificate = 3;
-    optional bool isConnected = 4;
-    optional google.protobuf.Timestamp since = 5;
-    optional google.protobuf.Timestamp lastMsg = 7;
+  string id = 1;
+  optional string address = 2;
+  optional string certificate = 3;
+  optional bool isConnected = 4;
+  optional google.protobuf.Timestamp since = 5;
+  optional google.protobuf.Timestamp lastMsg = 7;
 }
 
 message AgentRequest {
-    AgentInfo agent = 1;
+  AgentInfo agent = 1;
 }
 
 message AgentResponse {
-    AgentInfo agent = 1;
+  AgentInfo agent = 1;
 }
 
 message AgentsResponse {
-    repeated AgentInfo agents = 1;
+  repeated AgentInfo agents = 1;
 }
 
 message ResultsRequest {
-    string resultID = 1;
+  string resultID = 1;
 }
 
 message ResultsResponse {
-    string result = 1;  // raw result, as stored in the DB (should be a serialized JSON)
+  string result = 1; // raw result, as stored in the DB (should be a serialized JSON)
 }
 
 message RequestRequest {
-    string requestID = 1;
+  string requestID = 1;
 }
 
 message RequestResponse {
-    string request = 1;  // raw request, as stored in the DB (should be a serialized JSON)
+  string request = 1; // raw request, as stored in the DB (should be a serialized JSON)
 }
 
 message ListResultsRequest {
-    int32 offset = 1;  // Starting position for pagination (0-based)
-    int32 limit = 2;  // Maximum number of results to return, defaults to 100 if not specified
-    optional int64 from_date = 3;  // Optional Unix timestamp to filter results from this date
-    optional int64 to_date = 4;  // Optional Unix timestamp to filter results up to this date
-    repeated string targets = 5;  // Optional list of agent IDs to filter results by targets
+  int32 offset = 1; // Starting position for pagination (0-based)
+  int32 limit = 2; // Maximum number of results to return, defaults to 100 if not specified
+  optional int64 from_date = 3; // Optional Unix timestamp to filter results from this date
+  optional int64 to_date = 4; // Optional Unix timestamp to filter results up to this date
+  repeated string targets = 5; // Optional list of agent IDs to filter results by targets
 }
 
 message ResultEntry {
-    int64 id = 1;
-    string agent = 2;
-    string status = 3;  // Status of the task (success, failed, error)
-    InternalError internal_error = 4;
-    string error = 5;
+  int64 id = 1;
+  string agent = 2;
+  string status = 3; // Status of the task (success, failed, error)
+  InternalError internal_error = 4;
+  string error = 5;
 }
 
 message ListResultsResponse {
-    repeated ResultEntry results = 1;
+  repeated ResultEntry results = 1;
 }
