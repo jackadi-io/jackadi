@@ -9,7 +9,7 @@ import (
 )
 
 type GRPCClient struct {
-	client protoplugin.PluginCollectionClient
+	client protoplugin.JackadiPluginClient
 }
 
 func (c *GRPCClient) Name() (string, error) {
@@ -71,7 +71,7 @@ func (c *GRPCClient) GetTaskLockMode(task string) (proto.LockMode, error) {
 }
 
 type GRPCServer struct {
-	Impl Collection
+	Impl Plugin
 }
 
 func (s *GRPCServer) Do(ctx context.Context, req *protoplugin.DoRequest) (*protoplugin.DoResponse, error) {

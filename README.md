@@ -87,7 +87,7 @@ func Hello(name string) (string, error) {
 }
 
 func main() {
-	tour := sdk.NewCollection("tour")
+	tour := sdk.New("tour")
 	tour.MustRegisterTask("hello", Hello).WithDescription("Greetings.")
 	sdk.MustServe(tour)
 }

@@ -20,45 +20,45 @@ type TaskInfo struct {
 	Summary string
 }
 
-type CollectionInfo struct {
+type PluginInfo struct {
 	Name  string
 	Tasks map[string]*TaskInfo
 }
 
-// GetAvailableCollections returns all available collections from the manager's plugins and built-ins.
-func GetAvailableCollections() map[string]*CollectionInfo {
-	collections := make(map[string]*CollectionInfo)
+// GetAvailablePlugins returns all available plugins from the manager's plugins and built-ins.
+func GetAvailablePlugins() map[string]*PluginInfo {
+	plugins := make(map[string]*PluginInfo)
 
-	builtinCollections := getBuiltinCollections()
-	maps.Copy(collections, builtinCollections)
+	builtinPlugins := getBuiltinPlugins()
+	maps.Copy(plugins, builtinPlugins)
 
-	pluginCollections := getExternalPluginCollections()
-	maps.Copy(collections, pluginCollections)
+	externalPlugins := getExternalPlugins()
+	maps.Copy(plugins, externalPlugins)
 
-	return collections
+	return plugins
 }
 
-// getBuiltinCollections returns built-in collections from the registry.
-func getBuiltinCollections() map[string]*CollectionInfo {
-	collections := make(map[string]*CollectionInfo)
+// getBuiltinPlugins returns built-in plugins from the registry.
+func getBuiltinPlugins() map[string]*PluginInfo {
+	plugins := make(map[string]*PluginInfo)
 
 	agent.LoadBuiltins(nil)
-	collectionNames := inventory.Registry.Names()
+	pluginNames := inventory.Registry.Names()
 
-	for _, name := range collectionNames {
+	for _, name := range pluginNames {
 		coll, err := inventory.Registry.Get(name)
 		if err != nil {
-			slog.Debug("failed to get collection from registry", "name", name, "error", err)
+			slog.Debug("failed to get plugin from registry", "name", name, "error", err)
 			continue
 		}
 
 		help, err := coll.Help("")
 		if err != nil {
-			slog.Debug("failed to get help for collection", "name", name, "error", err)
+			slog.Debug("failed to get help for plugin", "name", name, "error", err)
 			continue
 		}
 
-		collInfo := &CollectionInfo{
+		collInfo := &PluginInfo{
 			Name:  name,
 			Tasks: make(map[string]*TaskInfo),
 		}
@@ -67,26 +67,26 @@ func getBuiltinCollections() map[string]*CollectionInfo {
 			parseHelpOutput(helpText, collInfo)
 		}
 
-		collections[name] = collInfo
+		plugins[name] = collInfo
 	}
 
-	return collections
+	return plugins
 }
 
-// getExternalPluginCollections returns collections from external plugin files.
-func getExternalPluginCollections() map[string]*CollectionInfo {
+// getExternalPlugins returns plugins from external plugin files.
+func getExternalPlugins() map[string]*PluginInfo {
 	pluginDir := config.DefaultPluginDir // TODO: add config file for CLI
-	collections := make(map[string]*CollectionInfo)
+	plugins := make(map[string]*PluginInfo)
 
 	if _, err := os.Stat(pluginDir); os.IsNotExist(err) {
 		slog.Debug("plugin directory does not exist", "path", pluginDir)
-		return collections
+		return plugins
 	}
 
 	entries, err := os.ReadDir(pluginDir)
 	if err != nil {
 		slog.Debug("failed to read plugin directory", "path", pluginDir, "error", err)
-		return collections
+		return plugins
 	}
 
 	for _, entry := range entries {
@@ -105,17 +105,17 @@ func getExternalPluginCollections() map[string]*CollectionInfo {
 			continue // Not executable
 		}
 
-		collectionInfo := getCollectionInfoFromPlugin(pluginPath)
-		if collectionInfo != nil {
-			collections[collectionInfo.Name] = collectionInfo
+		plugin := getInfoFromPlugin(pluginPath)
+		if plugin != nil {
+			plugins[plugin.Name] = plugin
 		}
 	}
 
-	return collections
+	return plugins
 }
 
-// getCollectionInfoFromPlugin executes a plugin with --describe to get its information.
-func getCollectionInfoFromPlugin(pluginPath string) *CollectionInfo {
+// getInfoFromPlugin executes a plugin with --describe to get its information.
+func getInfoFromPlugin(pluginPath string) *PluginInfo {
 	cmd := exec.Command(pluginPath, "--describe")
 	cmd.Env = os.Environ()
 
@@ -129,18 +129,18 @@ func getCollectionInfoFromPlugin(pluginPath string) *CollectionInfo {
 }
 
 // parseDescribeOutput parses the output from plugin --describe command.
-func parseDescribeOutput(pluginName string, output string) *CollectionInfo {
-	collInfo := &CollectionInfo{
+func parseDescribeOutput(pluginName string, output string) *PluginInfo {
+	info := &PluginInfo{
 		Name:  pluginName,
 		Tasks: make(map[string]*TaskInfo),
 	}
 
-	parseHelpOutput(output, collInfo)
-	return collInfo
+	parseHelpOutput(output, info)
+	return info
 }
 
-// parseHelpOutput parses help output and populates collection info.
-func parseHelpOutput(output string, collInfo *CollectionInfo) {
+// parseHelpOutput parses help output and populates plugin info.
+func parseHelpOutput(output string, collInfo *PluginInfo) {
 	lines := strings.SplitSeq(output, "\n")
 
 	for line := range lines {
@@ -158,7 +158,7 @@ func parseHelpOutput(output string, collInfo *CollectionInfo) {
 }
 
 // parseTaskLine parses a single task line from describe output.
-func parseTaskLine(line string, collInfo *CollectionInfo) {
+func parseTaskLine(line string, collInfo *PluginInfo) {
 	fields := strings.Fields(strings.TrimLeft(line, " "))
 	if len(fields) == 0 {
 		return
@@ -171,9 +171,9 @@ func parseTaskLine(line string, collInfo *CollectionInfo) {
 	}
 }
 
-// GetCollectionTaskCompletions returns completion suggestions for collection:task format.
-func GetCollectionTaskCompletions(toComplete string) ([]string, cobra.ShellCompDirective) {
-	collections := GetAvailableCollections()
+// GetTaskCompletions returns completion suggestions for plugin:task format.
+func GetTaskCompletions(toComplete string) ([]string, cobra.ShellCompDirective) {
+	plugins := GetAvailablePlugins()
 	completions := []string{}
 
 	// complete task
@@ -183,19 +183,19 @@ func GetCollectionTaskCompletions(toComplete string) ([]string, cobra.ShellCompD
 			return completions, cobra.ShellCompDirectiveDefault
 		}
 
-		collectionName := parts[0]
+		pluginName := parts[0]
 		taskPrefix := parts[1]
 
-		collInfo, exists := collections[collectionName]
+		plugin, exists := plugins[pluginName]
 		if !exists {
 			return completions, cobra.ShellCompDirectiveDefault
 		}
 
-		for taskName, taskInfo := range collInfo.Tasks {
+		for taskName, taskInfo := range plugin.Tasks {
 			if !strings.HasPrefix(taskName, taskPrefix) {
 				continue
 			}
-			completion := fmt.Sprintf("%s:%s", collectionName, taskName)
+			completion := fmt.Sprintf("%s:%s", pluginName, taskName)
 			if taskInfo.Summary != "" {
 				completion = fmt.Sprintf("%s\t%s", completion, taskInfo.Summary)
 			}
@@ -204,10 +204,10 @@ func GetCollectionTaskCompletions(toComplete string) ([]string, cobra.ShellCompD
 		return completions, cobra.ShellCompDirectiveDefault
 	}
 
-	// complete collection only
-	for collectionName := range collections {
-		if strings.HasPrefix(collectionName, toComplete) {
-			completions = append(completions, collectionName+":")
+	// complete plugin only
+	for p := range plugins {
+		if strings.HasPrefix(p, toComplete) {
+			completions = append(completions, p+":")
 		}
 	}
 

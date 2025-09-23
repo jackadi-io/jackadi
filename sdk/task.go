@@ -114,7 +114,7 @@ func (t Task) flagsString() string {
 	return strings.Join(strFlags, ", ")
 }
 
-func (t *Task) helpText(collectionName string) string {
+func (t *Task) helpText(pluginName string) string {
 	var sb strings.Builder
 
 	if t.summary != "" {
@@ -130,7 +130,7 @@ func (t *Task) helpText(collectionName string) string {
 	}
 
 	if len(t.args) > 0 {
-		sb.WriteString(fmt.Sprintf("Usage:\n  jack run <target> %s:%s", collectionName, t.name))
+		sb.WriteString(fmt.Sprintf("Usage:\n  jack run <target> %s:%s", pluginName, t.name))
 		for _, arg := range t.args {
 			sb.WriteString(fmt.Sprintf(" <%s>", arg.Name))
 		}
@@ -220,7 +220,7 @@ func (t *Plugin) MustRegisterTask(name string, function any) *Task {
 func (t Plugin) Do(ctx context.Context, task string, input *proto.Input) (core.Response, error) {
 	defer func() {
 		if r := recover(); r != nil {
-			slog.Error("recovered from panic", "collection", t.name, "task", task, "error", r)
+			slog.Error("recovered from panic", "plugin", t.name, "task", task, "error", r)
 		}
 	}()
 
@@ -234,7 +234,7 @@ func (t Plugin) Do(ctx context.Context, task string, input *proto.Input) (core.R
 			Output:  nil,
 			Error:   "",
 			Retcode: -1,
-		}, fmt.Errorf("unknown task '%s' in collection '%s'", task, t.name)
+		}, fmt.Errorf("unknown task '%s' in plugin '%s'", task, t.name)
 	}
 
 	// reflect to ensure to call the function with params defined in the signature

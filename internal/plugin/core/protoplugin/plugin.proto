@@ -8,7 +8,7 @@ import "internal/proto/msg.proto";
 
 option go_package = "github.com/jackadi-io/jackadi/pkg/plugin/protoplugin";
 
-service PluginCollection {
+service JackadiPlugin {
   rpc Name(google.protobuf.Empty) returns (NameResponse);
   rpc Tasks(google.protobuf.Empty) returns (TasksResponse);
   rpc Help(HelpRequest) returns (HelpResponse);

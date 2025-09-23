@@ -25,7 +25,7 @@ import (
 )
 
 var PluginMap = map[string]goplugin.Plugin{
-	"collection": &core.CollectionPlugin{},
+	"plugin": &core.HCPlugin{},
 }
 
 type PluginInfo struct {
@@ -109,21 +109,21 @@ func (l *Loader) load(path string) error {
 		return fmt.Errorf("plugin client error: %w", err)
 	}
 
-	raw, err := rpcClient.Dispense("collection")
+	raw, err := rpcClient.Dispense("plugin")
 	if err != nil {
 		client.Kill()
 		return fmt.Errorf("plugin dispense error: %w", err)
 	}
 
-	coll, ok := raw.(core.Collection)
+	coll, ok := raw.(core.Plugin)
 	if !ok {
 		client.Kill()
 
 		methods := describeInterface(raw, false)
-		expectedMethods := describeInterface((*core.Collection)(nil), true)
+		expectedMethods := describeInterface((*core.Plugin)(nil), true)
 
 		return fmt.Errorf(
-			"plugin not implementing the Collection interface: methods=%v, expected_methods=%v",
+			"plugin not implementing the Plugin interface: methods=%v, expected_methods=%v",
 			methods, expectedMethods,
 		)
 	}

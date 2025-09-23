@@ -147,23 +147,23 @@ func (t Plugin) GetTaskLockMode(taskName string) (proto.LockMode, error) {
 	return task.getLockMode().toProtoLockMode(), nil
 }
 
-func MustServe(collection *Plugin) {
-	if exit := handleFlags(collection); exit {
+func MustServe(plugin *Plugin) {
+	if exit := handleFlags(plugin); exit {
 		return
 	}
 
-	tasks, _ := collection.Tasks()
+	tasks, _ := plugin.Tasks()
 	if len(tasks) == 0 {
 		log.Fatalln("colletion must have at least one task")
 	}
 
 	// Run a task manually from the binary directly.
-	handleCommand(collection)
+	handleCommand(plugin)
 
 	cfg := goplugin.ServeConfig{
 		HandshakeConfig: core.Handshake,
 		Plugins: map[string]goplugin.Plugin{
-			"collection": &core.CollectionPlugin{Impl: collection},
+			"plugin": &core.HCPlugin{Impl: plugin},
 		},
 		GRPCServer: goplugin.DefaultGRPCServer,
 	}
@@ -179,7 +179,7 @@ func printCommandHelp() {
 	fmt.Println()
 }
 
-func handleCommand(collection *Plugin) {
+func handleCommand(plugin *Plugin) {
 	if len(os.Args) >= 2 && os.Args[1] == "run" {
 		if len(os.Args) < 3 {
 			printCommandHelp()
@@ -213,7 +213,7 @@ func handleCommand(collection *Plugin) {
 				Options: opts,
 			}
 
-			resp, _ := collection.Do(context.Background(), os.Args[3], &args)
+			resp, _ := plugin.Do(context.Background(), os.Args[3], &args)
 			if resp.Output != nil {
 				var data any
 				if err := serializer.JSON.UnmarshalFromString(string(resp.Output), &data); err != nil {
@@ -227,7 +227,7 @@ func handleCommand(collection *Plugin) {
 				fmt.Println("error:", resp.Error)
 			}
 		case "specs":
-			specs, specsErr := collection.CollectSpecs(context.Background())
+			specs, specsErr := plugin.CollectSpecs(context.Background())
 			var data any
 			if err := serializer.JSON.UnmarshalFromString(string(specs), &data); err != nil {
 				fmt.Printf("unable to parse output: %s: %s\n", err, string(specs))
@@ -249,7 +249,7 @@ func handleCommand(collection *Plugin) {
 }
 
 // handleFlags processes command-line flags for the plugin and returns true if the plugin should exit.
-func handleFlags(collection *Plugin) bool {
+func handleFlags(plugin *Plugin) bool {
 	versionFlag := flag.Bool("version", false, "print plugin information")
 	describeFlag := flag.Bool("describe", false, "decribe plugin")
 	flag.Parse()
@@ -260,7 +260,7 @@ func handleFlags(collection *Plugin) bool {
 	}
 
 	if *describeFlag {
-		help, _ := collection.Help("")
+		help, _ := plugin.Help("")
 		for _, h := range help {
 			fmt.Println(h)
 		}

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: internal/plugin/protoplugin/plugin.proto
+// source: internal/plugin/core/protoplugin/plugin.proto
 
 package protoplugin
 
@@ -20,19 +20,19 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PluginCollection_Name_FullMethodName            = "/protoplugin.PluginCollection/Name"
-	PluginCollection_Tasks_FullMethodName           = "/protoplugin.PluginCollection/Tasks"
-	PluginCollection_Help_FullMethodName            = "/protoplugin.PluginCollection/Help"
-	PluginCollection_Version_FullMethodName         = "/protoplugin.PluginCollection/Version"
-	PluginCollection_Do_FullMethodName              = "/protoplugin.PluginCollection/Do"
-	PluginCollection_CollectSpecs_FullMethodName    = "/protoplugin.PluginCollection/CollectSpecs"
-	PluginCollection_GetTaskLockMode_FullMethodName = "/protoplugin.PluginCollection/GetTaskLockMode"
+	JackadiPlugin_Name_FullMethodName            = "/protoplugin.JackadiPlugin/Name"
+	JackadiPlugin_Tasks_FullMethodName           = "/protoplugin.JackadiPlugin/Tasks"
+	JackadiPlugin_Help_FullMethodName            = "/protoplugin.JackadiPlugin/Help"
+	JackadiPlugin_Version_FullMethodName         = "/protoplugin.JackadiPlugin/Version"
+	JackadiPlugin_Do_FullMethodName              = "/protoplugin.JackadiPlugin/Do"
+	JackadiPlugin_CollectSpecs_FullMethodName    = "/protoplugin.JackadiPlugin/CollectSpecs"
+	JackadiPlugin_GetTaskLockMode_FullMethodName = "/protoplugin.JackadiPlugin/GetTaskLockMode"
 )
 
-// PluginCollectionClient is the client API for PluginCollection service.
+// JackadiPluginClient is the client API for JackadiPlugin service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type PluginCollectionClient interface {
+type JackadiPluginClient interface {
 	Name(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NameResponse, error)
 	Tasks(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TasksResponse, error)
 	Help(ctx context.Context, in *HelpRequest, opts ...grpc.CallOption) (*HelpResponse, error)
@@ -42,88 +42,88 @@ type PluginCollectionClient interface {
 	GetTaskLockMode(ctx context.Context, in *TaskLockModeRequest, opts ...grpc.CallOption) (*TaskLockModeResponse, error)
 }
 
-type pluginCollectionClient struct {
+type jackadiPluginClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewPluginCollectionClient(cc grpc.ClientConnInterface) PluginCollectionClient {
-	return &pluginCollectionClient{cc}
+func NewJackadiPluginClient(cc grpc.ClientConnInterface) JackadiPluginClient {
+	return &jackadiPluginClient{cc}
 }
 
-func (c *pluginCollectionClient) Name(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NameResponse, error) {
+func (c *jackadiPluginClient) Name(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NameResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(NameResponse)
-	err := c.cc.Invoke(ctx, PluginCollection_Name_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, JackadiPlugin_Name_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *pluginCollectionClient) Tasks(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TasksResponse, error) {
+func (c *jackadiPluginClient) Tasks(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TasksResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(TasksResponse)
-	err := c.cc.Invoke(ctx, PluginCollection_Tasks_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, JackadiPlugin_Tasks_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *pluginCollectionClient) Help(ctx context.Context, in *HelpRequest, opts ...grpc.CallOption) (*HelpResponse, error) {
+func (c *jackadiPluginClient) Help(ctx context.Context, in *HelpRequest, opts ...grpc.CallOption) (*HelpResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HelpResponse)
-	err := c.cc.Invoke(ctx, PluginCollection_Help_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, JackadiPlugin_Help_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *pluginCollectionClient) Version(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*VersionResponse, error) {
+func (c *jackadiPluginClient) Version(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*VersionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(VersionResponse)
-	err := c.cc.Invoke(ctx, PluginCollection_Version_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, JackadiPlugin_Version_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *pluginCollectionClient) Do(ctx context.Context, in *DoRequest, opts ...grpc.CallOption) (*DoResponse, error) {
+func (c *jackadiPluginClient) Do(ctx context.Context, in *DoRequest, opts ...grpc.CallOption) (*DoResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DoResponse)
-	err := c.cc.Invoke(ctx, PluginCollection_Do_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, JackadiPlugin_Do_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *pluginCollectionClient) CollectSpecs(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*CollectSpecsResponse, error) {
+func (c *jackadiPluginClient) CollectSpecs(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*CollectSpecsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CollectSpecsResponse)
-	err := c.cc.Invoke(ctx, PluginCollection_CollectSpecs_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, JackadiPlugin_CollectSpecs_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *pluginCollectionClient) GetTaskLockMode(ctx context.Context, in *TaskLockModeRequest, opts ...grpc.CallOption) (*TaskLockModeResponse, error) {
+func (c *jackadiPluginClient) GetTaskLockMode(ctx context.Context, in *TaskLockModeRequest, opts ...grpc.CallOption) (*TaskLockModeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(TaskLockModeResponse)
-	err := c.cc.Invoke(ctx, PluginCollection_GetTaskLockMode_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, JackadiPlugin_GetTaskLockMode_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// PluginCollectionServer is the server API for PluginCollection service.
-// All implementations should embed UnimplementedPluginCollectionServer
+// JackadiPluginServer is the server API for JackadiPlugin service.
+// All implementations should embed UnimplementedJackadiPluginServer
 // for forward compatibility.
-type PluginCollectionServer interface {
+type JackadiPluginServer interface {
 	Name(context.Context, *emptypb.Empty) (*NameResponse, error)
 	Tasks(context.Context, *emptypb.Empty) (*TasksResponse, error)
 	Help(context.Context, *HelpRequest) (*HelpResponse, error)
@@ -133,216 +133,216 @@ type PluginCollectionServer interface {
 	GetTaskLockMode(context.Context, *TaskLockModeRequest) (*TaskLockModeResponse, error)
 }
 
-// UnimplementedPluginCollectionServer should be embedded to have
+// UnimplementedJackadiPluginServer should be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedPluginCollectionServer struct{}
+type UnimplementedJackadiPluginServer struct{}
 
-func (UnimplementedPluginCollectionServer) Name(context.Context, *emptypb.Empty) (*NameResponse, error) {
+func (UnimplementedJackadiPluginServer) Name(context.Context, *emptypb.Empty) (*NameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Name not implemented")
 }
-func (UnimplementedPluginCollectionServer) Tasks(context.Context, *emptypb.Empty) (*TasksResponse, error) {
+func (UnimplementedJackadiPluginServer) Tasks(context.Context, *emptypb.Empty) (*TasksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Tasks not implemented")
 }
-func (UnimplementedPluginCollectionServer) Help(context.Context, *HelpRequest) (*HelpResponse, error) {
+func (UnimplementedJackadiPluginServer) Help(context.Context, *HelpRequest) (*HelpResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Help not implemented")
 }
-func (UnimplementedPluginCollectionServer) Version(context.Context, *emptypb.Empty) (*VersionResponse, error) {
+func (UnimplementedJackadiPluginServer) Version(context.Context, *emptypb.Empty) (*VersionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Version not implemented")
 }
-func (UnimplementedPluginCollectionServer) Do(context.Context, *DoRequest) (*DoResponse, error) {
+func (UnimplementedJackadiPluginServer) Do(context.Context, *DoRequest) (*DoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Do not implemented")
 }
-func (UnimplementedPluginCollectionServer) CollectSpecs(context.Context, *emptypb.Empty) (*CollectSpecsResponse, error) {
+func (UnimplementedJackadiPluginServer) CollectSpecs(context.Context, *emptypb.Empty) (*CollectSpecsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CollectSpecs not implemented")
 }
-func (UnimplementedPluginCollectionServer) GetTaskLockMode(context.Context, *TaskLockModeRequest) (*TaskLockModeResponse, error) {
+func (UnimplementedJackadiPluginServer) GetTaskLockMode(context.Context, *TaskLockModeRequest) (*TaskLockModeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTaskLockMode not implemented")
 }
-func (UnimplementedPluginCollectionServer) testEmbeddedByValue() {}
+func (UnimplementedJackadiPluginServer) testEmbeddedByValue() {}
 
-// UnsafePluginCollectionServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to PluginCollectionServer will
+// UnsafeJackadiPluginServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to JackadiPluginServer will
 // result in compilation errors.
-type UnsafePluginCollectionServer interface {
-	mustEmbedUnimplementedPluginCollectionServer()
+type UnsafeJackadiPluginServer interface {
+	mustEmbedUnimplementedJackadiPluginServer()
 }
 
-func RegisterPluginCollectionServer(s grpc.ServiceRegistrar, srv PluginCollectionServer) {
-	// If the following call pancis, it indicates UnimplementedPluginCollectionServer was
+func RegisterJackadiPluginServer(s grpc.ServiceRegistrar, srv JackadiPluginServer) {
+	// If the following call pancis, it indicates UnimplementedJackadiPluginServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&PluginCollection_ServiceDesc, srv)
+	s.RegisterService(&JackadiPlugin_ServiceDesc, srv)
 }
 
-func _PluginCollection_Name_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JackadiPlugin_Name_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PluginCollectionServer).Name(ctx, in)
+		return srv.(JackadiPluginServer).Name(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PluginCollection_Name_FullMethodName,
+		FullMethod: JackadiPlugin_Name_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginCollectionServer).Name(ctx, req.(*emptypb.Empty))
+		return srv.(JackadiPluginServer).Name(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PluginCollection_Tasks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JackadiPlugin_Tasks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PluginCollectionServer).Tasks(ctx, in)
+		return srv.(JackadiPluginServer).Tasks(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PluginCollection_Tasks_FullMethodName,
+		FullMethod: JackadiPlugin_Tasks_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginCollectionServer).Tasks(ctx, req.(*emptypb.Empty))
+		return srv.(JackadiPluginServer).Tasks(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PluginCollection_Help_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JackadiPlugin_Help_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HelpRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PluginCollectionServer).Help(ctx, in)
+		return srv.(JackadiPluginServer).Help(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PluginCollection_Help_FullMethodName,
+		FullMethod: JackadiPlugin_Help_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginCollectionServer).Help(ctx, req.(*HelpRequest))
+		return srv.(JackadiPluginServer).Help(ctx, req.(*HelpRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PluginCollection_Version_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JackadiPlugin_Version_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PluginCollectionServer).Version(ctx, in)
+		return srv.(JackadiPluginServer).Version(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PluginCollection_Version_FullMethodName,
+		FullMethod: JackadiPlugin_Version_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginCollectionServer).Version(ctx, req.(*emptypb.Empty))
+		return srv.(JackadiPluginServer).Version(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PluginCollection_Do_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JackadiPlugin_Do_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DoRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PluginCollectionServer).Do(ctx, in)
+		return srv.(JackadiPluginServer).Do(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PluginCollection_Do_FullMethodName,
+		FullMethod: JackadiPlugin_Do_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginCollectionServer).Do(ctx, req.(*DoRequest))
+		return srv.(JackadiPluginServer).Do(ctx, req.(*DoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PluginCollection_CollectSpecs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JackadiPlugin_CollectSpecs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PluginCollectionServer).CollectSpecs(ctx, in)
+		return srv.(JackadiPluginServer).CollectSpecs(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PluginCollection_CollectSpecs_FullMethodName,
+		FullMethod: JackadiPlugin_CollectSpecs_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginCollectionServer).CollectSpecs(ctx, req.(*emptypb.Empty))
+		return srv.(JackadiPluginServer).CollectSpecs(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PluginCollection_GetTaskLockMode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JackadiPlugin_GetTaskLockMode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TaskLockModeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PluginCollectionServer).GetTaskLockMode(ctx, in)
+		return srv.(JackadiPluginServer).GetTaskLockMode(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PluginCollection_GetTaskLockMode_FullMethodName,
+		FullMethod: JackadiPlugin_GetTaskLockMode_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginCollectionServer).GetTaskLockMode(ctx, req.(*TaskLockModeRequest))
+		return srv.(JackadiPluginServer).GetTaskLockMode(ctx, req.(*TaskLockModeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// PluginCollection_ServiceDesc is the grpc.ServiceDesc for PluginCollection service.
+// JackadiPlugin_ServiceDesc is the grpc.ServiceDesc for JackadiPlugin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var PluginCollection_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "protoplugin.PluginCollection",
-	HandlerType: (*PluginCollectionServer)(nil),
+var JackadiPlugin_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "protoplugin.JackadiPlugin",
+	HandlerType: (*JackadiPluginServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Name",
-			Handler:    _PluginCollection_Name_Handler,
+			Handler:    _JackadiPlugin_Name_Handler,
 		},
 		{
 			MethodName: "Tasks",
-			Handler:    _PluginCollection_Tasks_Handler,
+			Handler:    _JackadiPlugin_Tasks_Handler,
 		},
 		{
 			MethodName: "Help",
-			Handler:    _PluginCollection_Help_Handler,
+			Handler:    _JackadiPlugin_Help_Handler,
 		},
 		{
 			MethodName: "Version",
-			Handler:    _PluginCollection_Version_Handler,
+			Handler:    _JackadiPlugin_Version_Handler,
 		},
 		{
 			MethodName: "Do",
-			Handler:    _PluginCollection_Do_Handler,
+			Handler:    _JackadiPlugin_Do_Handler,
 		},
 		{
 			MethodName: "CollectSpecs",
-			Handler:    _PluginCollection_CollectSpecs_Handler,
+			Handler:    _JackadiPlugin_CollectSpecs_Handler,
 		},
 		{
 			MethodName: "GetTaskLockMode",
-			Handler:    _PluginCollection_GetTaskLockMode_Handler,
+			Handler:    _JackadiPlugin_GetTaskLockMode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/plugin/protoplugin/plugin.proto",
+	Metadata: "internal/plugin/core/protoplugin/plugin.proto",
 }

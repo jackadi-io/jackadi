@@ -70,10 +70,10 @@ func (s *SpecsManager) StartSpecCollector(ctx context.Context, syncReq chan stru
 	t := time.NewTicker(config.SpecCollectionInterval)
 	for {
 		slog.Debug("collecting specs")
-		collections := inventory.Registry.Names()
+		plugins := inventory.Registry.Names()
 		newSpecs := make(map[string]any)
 
-		for _, name := range collections {
+		for _, name := range plugins {
 			c, err := inventory.Registry.Get(name)
 			if err != nil {
 				slog.Error("failed to get specs tasks", "plugin", name, "error", err)

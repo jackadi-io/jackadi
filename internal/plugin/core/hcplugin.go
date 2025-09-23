@@ -16,16 +16,16 @@ var Handshake = goplugin.HandshakeConfig{
 	MagicCookieValue: "hv43fBvWLYYm0FWmur3V5KmJQXPR0woBg2F2MbyAcE8UuSCQGTlFJvTQUncCY0Xm",
 }
 
-type CollectionPlugin struct {
+type HCPlugin struct {
 	goplugin.Plugin
-	Impl Collection
+	Impl Plugin
 }
 
-func (p *CollectionPlugin) GRPCServer(broker *goplugin.GRPCBroker, s *grpc.Server) error {
-	protoplugin.RegisterPluginCollectionServer(s, &GRPCServer{Impl: p.Impl})
+func (p *HCPlugin) GRPCServer(broker *goplugin.GRPCBroker, s *grpc.Server) error {
+	protoplugin.RegisterJackadiPluginServer(s, &GRPCServer{Impl: p.Impl})
 	return nil
 }
 
-func (*CollectionPlugin) GRPCClient(ctx context.Context, broker *goplugin.GRPCBroker, c *grpc.ClientConn) (any, error) {
-	return &GRPCClient{client: protoplugin.NewPluginCollectionClient(c)}, nil
+func (*HCPlugin) GRPCClient(ctx context.Context, broker *goplugin.GRPCBroker, c *grpc.ClientConn) (any, error) {
+	return &GRPCClient{client: protoplugin.NewJackadiPluginClient(c)}, nil
 }

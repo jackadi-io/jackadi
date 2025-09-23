@@ -12,7 +12,7 @@ import (
 	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
 )
 
-func loadPlugin(pluginDir, file string) (core.Collection, error) {
+func loadPlugin(pluginDir, file string) (core.Plugin, error) {
 	f := filepath.Join(pluginDir, file)
 
 	ext, err := stdplugin.Open(f)
@@ -25,7 +25,7 @@ func loadPlugin(pluginDir, file string) (core.Collection, error) {
 		return nil, fmt.Errorf("missing 'New' symbol in plugin: %w", err)
 	}
 
-	module, ok := modNew.(func() core.Collection)
+	module, ok := modNew.(func() core.Plugin)
 	if !ok {
 		return nil, fmt.Errorf("unexpected type from 'New' module symbol")
 	}

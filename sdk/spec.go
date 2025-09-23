@@ -72,7 +72,7 @@ func (t *Plugin) MustRegisterSpecCollector(name string, function any) *SpecColle
 func (t *Plugin) CollectSpecs(ctx context.Context) ([]byte, error) {
 	defer func() {
 		if r := recover(); r != nil {
-			slog.Error("recovered from panic", "collection", t.name, "context", "CollectSpecs", "error", r)
+			slog.Error("recovered from panic", "plugin", t.name, "context", "CollectSpecs", "error", r)
 		}
 	}()
 

@@ -16,12 +16,12 @@ import (
 func parseNames(name string) (string, string, error) {
 	splitName := strings.Split(name, ":")
 	if len(splitName) == 0 {
-		return "", "", errors.New("missing collection or collection:task")
+		return "", "", errors.New("missing plugin or plugin:task")
 	}
-	collectionName := splitName[0]
+	pluginName := splitName[0]
 
-	if collectionName == "" {
-		return "", "", errors.New("missing collection or collection:task")
+	if pluginName == "" {
+		return "", "", errors.New("missing plugin or plugin:task")
 	}
 
 	taskName := ""
@@ -29,7 +29,7 @@ func parseNames(name string) (string, string, error) {
 		taskName = splitName[1]
 	}
 
-	return collectionName, taskName, nil
+	return pluginName, taskName, nil
 }
 
 type pluginMgmt struct {
@@ -38,23 +38,23 @@ type pluginMgmt struct {
 }
 
 func (s pluginMgmt) help(name string) (map[string]string, error) {
-	collectionName, taskName, err := parseNames(name)
+	pluginName, taskName, err := parseNames(name)
 	if err != nil {
 		return nil, err
 	}
 
-	c, err := inventory.Registry.Get(collectionName)
+	c, err := inventory.Registry.Get(pluginName)
 	if err != nil {
-		return nil, fmt.Errorf("unknown collection: %s", collectionName)
+		return nil, fmt.Errorf("unknown plugin: %s", pluginName)
 	}
 
 	return c.Help(taskName)
 }
 
-func (s pluginMgmt) version(collectionName string) (*core.Version, error) {
-	c, err := inventory.Registry.Get(collectionName)
+func (s pluginMgmt) version(pluginName string) (*core.Version, error) {
+	c, err := inventory.Registry.Get(pluginName)
 	if err != nil {
-		return nil, fmt.Errorf("unknown collection: %w", err)
+		return nil, fmt.Errorf("unknown plugin: %w", err)
 	}
 
 	info, err := c.Version()
@@ -120,19 +120,19 @@ func MustLoadPluginMgmt(req chan struct{}) chan types.PluginUpdateResponse {
 
 	c := sdk.New("plugins")
 	c.MustRegisterTask("help", plugingMgmt.help).
-		WithSummary("Provide help for the given collection or collection:task.").
-		WithDescription("Help for 'collection': gives the list of task with their summary.\nHelp for 'collection:task': gives the full details of the task.").
-		WithArg("name", "collection[:task]", "cmd or cmd:run")
+		WithSummary("Provide help for the given plugin or plugin:task.").
+		WithDescription("Help for 'plugin': gives the list of task with their summary.\nHelp for 'plugin:task': gives the full details of the task.").
+		WithArg("name", "plugin[:task]", "cmd or cmd:run")
 	c.MustRegisterTask("version", plugingMgmt.version).
-		WithSummary("Provide version of the given collection.").
-		WithDescription("Info for 'collection': gives version, commit id, build time, go version.").
-		WithArg("name", "collection", "cmd")
+		WithSummary("Provide version of the given plugin.").
+		WithDescription("Info for 'plugin': gives version, commit id, build time, go version.").
+		WithArg("name", "plugin", "cmd")
 	c.MustRegisterTask("list", plugingMgmt.list).
-		WithSummary("List of task in the given collection.").
-		WithArg("name", "collection", "cmd")
+		WithSummary("List of task in the given plugin.").
+		WithArg("name", "plugin", "cmd")
 	c.MustRegisterTask("sync", plugingMgmt.sync).
 		WithSummary("Sync plugin with the manager.").
-		WithDescription("The agent sync its plugins with the manager.\nIt adds, updates and removes the collections following the manager configuration.").
+		WithDescription("The agent sync its plugins with the manager.\nIt adds, updates and removes the plugins following the manager configuration.").
 		WithLockMode(sdk.ExclusiveLock)
 
 	if err := inventory.Registry.Register(c); err != nil {

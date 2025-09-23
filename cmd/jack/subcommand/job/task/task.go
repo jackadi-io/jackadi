@@ -52,7 +52,7 @@ func RunCommand() *cobra.Command {
 	lockMode := "no-lock"
 
 	cmd := &cobra.Command{
-		Use:   "run [ -t | -l | -g | -e | -f ] TARGET COLLECTION:TASK -- ARGS...",
+		Use:   "run [ -t | -l | -g | -e | -f ] TARGET PLUGIN:TASK -- ARGS...",
 		Short: "Run a task on one or multiple agents",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
@@ -75,8 +75,8 @@ func RunCommand() *cobra.Command {
 				// agent name completion
 				return agent.ListAgent(), cobra.ShellCompDirectiveNoFileComp
 			case 1:
-				// collection:task completion using plugin in plugin directory + builtins
-				return autocompletion.GetCollectionTaskCompletions(toComplete)
+				// plugin:task completion using plugin in plugin directory + built-ins
+				return autocompletion.GetTaskCompletions(toComplete)
 			default:
 				return []string{}, cobra.ShellCompDirectiveNoFileComp
 			}

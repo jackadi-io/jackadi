@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        (unknown)
-// source: internal/plugin/protoplugin/plugin.proto
+// source: internal/plugin/core/protoplugin/plugin.proto
 
 package protoplugin
 
@@ -33,7 +33,7 @@ type NameResponse struct {
 
 func (x *NameResponse) Reset() {
 	*x = NameResponse{}
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[0]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +45,7 @@ func (x *NameResponse) String() string {
 func (*NameResponse) ProtoMessage() {}
 
 func (x *NameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[0]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +58,7 @@ func (x *NameResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NameResponse.ProtoReflect.Descriptor instead.
 func (*NameResponse) Descriptor() ([]byte, []int) {
-	return file_internal_plugin_protoplugin_plugin_proto_rawDescGZIP(), []int{0}
+	return file_internal_plugin_core_protoplugin_plugin_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *NameResponse) GetName() string {
@@ -77,7 +77,7 @@ type TasksResponse struct {
 
 func (x *TasksResponse) Reset() {
 	*x = TasksResponse{}
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[1]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -89,7 +89,7 @@ func (x *TasksResponse) String() string {
 func (*TasksResponse) ProtoMessage() {}
 
 func (x *TasksResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[1]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -102,7 +102,7 @@ func (x *TasksResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TasksResponse.ProtoReflect.Descriptor instead.
 func (*TasksResponse) Descriptor() ([]byte, []int) {
-	return file_internal_plugin_protoplugin_plugin_proto_rawDescGZIP(), []int{1}
+	return file_internal_plugin_core_protoplugin_plugin_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *TasksResponse) GetNames() []string {
@@ -121,7 +121,7 @@ type HelpRequest struct {
 
 func (x *HelpRequest) Reset() {
 	*x = HelpRequest{}
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[2]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -133,7 +133,7 @@ func (x *HelpRequest) String() string {
 func (*HelpRequest) ProtoMessage() {}
 
 func (x *HelpRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[2]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -146,7 +146,7 @@ func (x *HelpRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HelpRequest.ProtoReflect.Descriptor instead.
 func (*HelpRequest) Descriptor() ([]byte, []int) {
-	return file_internal_plugin_protoplugin_plugin_proto_rawDescGZIP(), []int{2}
+	return file_internal_plugin_core_protoplugin_plugin_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *HelpRequest) GetTask() string {
@@ -165,7 +165,7 @@ type HelpResponse struct {
 
 func (x *HelpResponse) Reset() {
 	*x = HelpResponse{}
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[3]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -177,7 +177,7 @@ func (x *HelpResponse) String() string {
 func (*HelpResponse) ProtoMessage() {}
 
 func (x *HelpResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[3]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -190,7 +190,7 @@ func (x *HelpResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HelpResponse.ProtoReflect.Descriptor instead.
 func (*HelpResponse) Descriptor() ([]byte, []int) {
-	return file_internal_plugin_protoplugin_plugin_proto_rawDescGZIP(), []int{3}
+	return file_internal_plugin_core_protoplugin_plugin_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *HelpResponse) GetOutput() map[string]string {
@@ -212,7 +212,7 @@ type VersionResponse struct {
 
 func (x *VersionResponse) Reset() {
 	*x = VersionResponse{}
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[4]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -224,7 +224,7 @@ func (x *VersionResponse) String() string {
 func (*VersionResponse) ProtoMessage() {}
 
 func (x *VersionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[4]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -237,7 +237,7 @@ func (x *VersionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VersionResponse.ProtoReflect.Descriptor instead.
 func (*VersionResponse) Descriptor() ([]byte, []int) {
-	return file_internal_plugin_protoplugin_plugin_proto_rawDescGZIP(), []int{4}
+	return file_internal_plugin_core_protoplugin_plugin_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *VersionResponse) GetPluginVersion() string {
@@ -278,7 +278,7 @@ type DoRequest struct {
 
 func (x *DoRequest) Reset() {
 	*x = DoRequest{}
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[5]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -290,7 +290,7 @@ func (x *DoRequest) String() string {
 func (*DoRequest) ProtoMessage() {}
 
 func (x *DoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[5]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -303,7 +303,7 @@ func (x *DoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DoRequest.ProtoReflect.Descriptor instead.
 func (*DoRequest) Descriptor() ([]byte, []int) {
-	return file_internal_plugin_protoplugin_plugin_proto_rawDescGZIP(), []int{5}
+	return file_internal_plugin_core_protoplugin_plugin_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *DoRequest) GetTask() string {
@@ -331,7 +331,7 @@ type DoResponse struct {
 
 func (x *DoResponse) Reset() {
 	*x = DoResponse{}
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[6]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -343,7 +343,7 @@ func (x *DoResponse) String() string {
 func (*DoResponse) ProtoMessage() {}
 
 func (x *DoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[6]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -356,7 +356,7 @@ func (x *DoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DoResponse.ProtoReflect.Descriptor instead.
 func (*DoResponse) Descriptor() ([]byte, []int) {
-	return file_internal_plugin_protoplugin_plugin_proto_rawDescGZIP(), []int{6}
+	return file_internal_plugin_core_protoplugin_plugin_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *DoResponse) GetOutput() []byte {
@@ -390,7 +390,7 @@ type CollectSpecsResponse struct {
 
 func (x *CollectSpecsResponse) Reset() {
 	*x = CollectSpecsResponse{}
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[7]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -402,7 +402,7 @@ func (x *CollectSpecsResponse) String() string {
 func (*CollectSpecsResponse) ProtoMessage() {}
 
 func (x *CollectSpecsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[7]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -415,7 +415,7 @@ func (x *CollectSpecsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CollectSpecsResponse.ProtoReflect.Descriptor instead.
 func (*CollectSpecsResponse) Descriptor() ([]byte, []int) {
-	return file_internal_plugin_protoplugin_plugin_proto_rawDescGZIP(), []int{7}
+	return file_internal_plugin_core_protoplugin_plugin_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *CollectSpecsResponse) GetOutput() []byte {
@@ -441,7 +441,7 @@ type TaskLockModeRequest struct {
 
 func (x *TaskLockModeRequest) Reset() {
 	*x = TaskLockModeRequest{}
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[8]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -453,7 +453,7 @@ func (x *TaskLockModeRequest) String() string {
 func (*TaskLockModeRequest) ProtoMessage() {}
 
 func (x *TaskLockModeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[8]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -466,7 +466,7 @@ func (x *TaskLockModeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TaskLockModeRequest.ProtoReflect.Descriptor instead.
 func (*TaskLockModeRequest) Descriptor() ([]byte, []int) {
-	return file_internal_plugin_protoplugin_plugin_proto_rawDescGZIP(), []int{8}
+	return file_internal_plugin_core_protoplugin_plugin_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *TaskLockModeRequest) GetTask() string {
@@ -485,7 +485,7 @@ type TaskLockModeResponse struct {
 
 func (x *TaskLockModeResponse) Reset() {
 	*x = TaskLockModeResponse{}
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[9]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -497,7 +497,7 @@ func (x *TaskLockModeResponse) String() string {
 func (*TaskLockModeResponse) ProtoMessage() {}
 
 func (x *TaskLockModeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_plugin_protoplugin_plugin_proto_msgTypes[9]
+	mi := &file_internal_plugin_core_protoplugin_plugin_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -510,7 +510,7 @@ func (x *TaskLockModeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TaskLockModeResponse.ProtoReflect.Descriptor instead.
 func (*TaskLockModeResponse) Descriptor() ([]byte, []int) {
-	return file_internal_plugin_protoplugin_plugin_proto_rawDescGZIP(), []int{9}
+	return file_internal_plugin_core_protoplugin_plugin_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *TaskLockModeResponse) GetLockMode() proto.LockMode {
@@ -520,11 +520,11 @@ func (x *TaskLockModeResponse) GetLockMode() proto.LockMode {
 	return proto.LockMode(0)
 }
 
-var File_internal_plugin_protoplugin_plugin_proto protoreflect.FileDescriptor
+var File_internal_plugin_core_protoplugin_plugin_proto protoreflect.FileDescriptor
 
-const file_internal_plugin_protoplugin_plugin_proto_rawDesc = "" +
+const file_internal_plugin_core_protoplugin_plugin_proto_rawDesc = "" +
 	"\n" +
-	"(internal/plugin/protoplugin/plugin.proto\x12\vprotoplugin\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x18internal/proto/msg.proto\"\"\n" +
+	"-internal/plugin/core/protoplugin/plugin.proto\x12\vprotoplugin\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x18internal/proto/msg.proto\"\"\n" +
 	"\fNameResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"%\n" +
 	"\rTasksResponse\x12\x14\n" +
@@ -555,8 +555,8 @@ const file_internal_plugin_protoplugin_plugin_proto_rawDesc = "" +
 	"\x13TaskLockModeRequest\x12\x12\n" +
 	"\x04task\x18\x01 \x01(\tR\x04task\"D\n" +
 	"\x14TaskLockModeResponse\x12,\n" +
-	"\tlock_mode\x18\x01 \x01(\x0e2\x0f.proto.LockModeR\blockMode2\xe2\x03\n" +
-	"\x10PluginCollection\x129\n" +
+	"\tlock_mode\x18\x01 \x01(\x0e2\x0f.proto.LockModeR\blockMode2\xdf\x03\n" +
+	"\rJackadiPlugin\x129\n" +
 	"\x04Name\x12\x16.google.protobuf.Empty\x1a\x19.protoplugin.NameResponse\x12;\n" +
 	"\x05Tasks\x12\x16.google.protobuf.Empty\x1a\x1a.protoplugin.TasksResponse\x12;\n" +
 	"\x04Help\x12\x18.protoplugin.HelpRequest\x1a\x19.protoplugin.HelpResponse\x12?\n" +
@@ -566,19 +566,19 @@ const file_internal_plugin_protoplugin_plugin_proto_rawDesc = "" +
 	"\x0fGetTaskLockMode\x12 .protoplugin.TaskLockModeRequest\x1a!.protoplugin.TaskLockModeResponseB6Z4github.com/jackadi-io/jackadi/pkg/plugin/protopluginb\x06proto3"
 
 var (
-	file_internal_plugin_protoplugin_plugin_proto_rawDescOnce sync.Once
-	file_internal_plugin_protoplugin_plugin_proto_rawDescData []byte
+	file_internal_plugin_core_protoplugin_plugin_proto_rawDescOnce sync.Once
+	file_internal_plugin_core_protoplugin_plugin_proto_rawDescData []byte
 )
 
-func file_internal_plugin_protoplugin_plugin_proto_rawDescGZIP() []byte {
-	file_internal_plugin_protoplugin_plugin_proto_rawDescOnce.Do(func() {
-		file_internal_plugin_protoplugin_plugin_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_internal_plugin_protoplugin_plugin_proto_rawDesc), len(file_internal_plugin_protoplugin_plugin_proto_rawDesc)))
+func file_internal_plugin_core_protoplugin_plugin_proto_rawDescGZIP() []byte {
+	file_internal_plugin_core_protoplugin_plugin_proto_rawDescOnce.Do(func() {
+		file_internal_plugin_core_protoplugin_plugin_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_internal_plugin_core_protoplugin_plugin_proto_rawDesc), len(file_internal_plugin_core_protoplugin_plugin_proto_rawDesc)))
 	})
-	return file_internal_plugin_protoplugin_plugin_proto_rawDescData
+	return file_internal_plugin_core_protoplugin_plugin_proto_rawDescData
 }
 
-var file_internal_plugin_protoplugin_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
-var file_internal_plugin_protoplugin_plugin_proto_goTypes = []any{
+var file_internal_plugin_core_protoplugin_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_internal_plugin_core_protoplugin_plugin_proto_goTypes = []any{
 	(*NameResponse)(nil),         // 0: protoplugin.NameResponse
 	(*TasksResponse)(nil),        // 1: protoplugin.TasksResponse
 	(*HelpRequest)(nil),          // 2: protoplugin.HelpRequest
@@ -594,24 +594,24 @@ var file_internal_plugin_protoplugin_plugin_proto_goTypes = []any{
 	(proto.LockMode)(0),          // 12: proto.LockMode
 	(*emptypb.Empty)(nil),        // 13: google.protobuf.Empty
 }
-var file_internal_plugin_protoplugin_plugin_proto_depIdxs = []int32{
+var file_internal_plugin_core_protoplugin_plugin_proto_depIdxs = []int32{
 	10, // 0: protoplugin.HelpResponse.output:type_name -> protoplugin.HelpResponse.OutputEntry
 	11, // 1: protoplugin.DoRequest.input:type_name -> proto.Input
 	12, // 2: protoplugin.TaskLockModeResponse.lock_mode:type_name -> proto.LockMode
-	13, // 3: protoplugin.PluginCollection.Name:input_type -> google.protobuf.Empty
-	13, // 4: protoplugin.PluginCollection.Tasks:input_type -> google.protobuf.Empty
-	2,  // 5: protoplugin.PluginCollection.Help:input_type -> protoplugin.HelpRequest
-	13, // 6: protoplugin.PluginCollection.Version:input_type -> google.protobuf.Empty
-	5,  // 7: protoplugin.PluginCollection.Do:input_type -> protoplugin.DoRequest
-	13, // 8: protoplugin.PluginCollection.CollectSpecs:input_type -> google.protobuf.Empty
-	8,  // 9: protoplugin.PluginCollection.GetTaskLockMode:input_type -> protoplugin.TaskLockModeRequest
-	0,  // 10: protoplugin.PluginCollection.Name:output_type -> protoplugin.NameResponse
-	1,  // 11: protoplugin.PluginCollection.Tasks:output_type -> protoplugin.TasksResponse
-	3,  // 12: protoplugin.PluginCollection.Help:output_type -> protoplugin.HelpResponse
-	4,  // 13: protoplugin.PluginCollection.Version:output_type -> protoplugin.VersionResponse
-	6,  // 14: protoplugin.PluginCollection.Do:output_type -> protoplugin.DoResponse
-	7,  // 15: protoplugin.PluginCollection.CollectSpecs:output_type -> protoplugin.CollectSpecsResponse
-	9,  // 16: protoplugin.PluginCollection.GetTaskLockMode:output_type -> protoplugin.TaskLockModeResponse
+	13, // 3: protoplugin.JackadiPlugin.Name:input_type -> google.protobuf.Empty
+	13, // 4: protoplugin.JackadiPlugin.Tasks:input_type -> google.protobuf.Empty
+	2,  // 5: protoplugin.JackadiPlugin.Help:input_type -> protoplugin.HelpRequest
+	13, // 6: protoplugin.JackadiPlugin.Version:input_type -> google.protobuf.Empty
+	5,  // 7: protoplugin.JackadiPlugin.Do:input_type -> protoplugin.DoRequest
+	13, // 8: protoplugin.JackadiPlugin.CollectSpecs:input_type -> google.protobuf.Empty
+	8,  // 9: protoplugin.JackadiPlugin.GetTaskLockMode:input_type -> protoplugin.TaskLockModeRequest
+	0,  // 10: protoplugin.JackadiPlugin.Name:output_type -> protoplugin.NameResponse
+	1,  // 11: protoplugin.JackadiPlugin.Tasks:output_type -> protoplugin.TasksResponse
+	3,  // 12: protoplugin.JackadiPlugin.Help:output_type -> protoplugin.HelpResponse
+	4,  // 13: protoplugin.JackadiPlugin.Version:output_type -> protoplugin.VersionResponse
+	6,  // 14: protoplugin.JackadiPlugin.Do:output_type -> protoplugin.DoResponse
+	7,  // 15: protoplugin.JackadiPlugin.CollectSpecs:output_type -> protoplugin.CollectSpecsResponse
+	9,  // 16: protoplugin.JackadiPlugin.GetTaskLockMode:output_type -> protoplugin.TaskLockModeResponse
 	10, // [10:17] is the sub-list for method output_type
 	3,  // [3:10] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
@@ -619,26 +619,26 @@ var file_internal_plugin_protoplugin_plugin_proto_depIdxs = []int32{
 	0,  // [0:3] is the sub-list for field type_name
 }
 
-func init() { file_internal_plugin_protoplugin_plugin_proto_init() }
-func file_internal_plugin_protoplugin_plugin_proto_init() {
-	if File_internal_plugin_protoplugin_plugin_proto != nil {
+func init() { file_internal_plugin_core_protoplugin_plugin_proto_init() }
+func file_internal_plugin_core_protoplugin_plugin_proto_init() {
+	if File_internal_plugin_core_protoplugin_plugin_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_plugin_protoplugin_plugin_proto_rawDesc), len(file_internal_plugin_protoplugin_plugin_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_plugin_core_protoplugin_plugin_proto_rawDesc), len(file_internal_plugin_core_protoplugin_plugin_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_internal_plugin_protoplugin_plugin_proto_goTypes,
-		DependencyIndexes: file_internal_plugin_protoplugin_plugin_proto_depIdxs,
-		MessageInfos:      file_internal_plugin_protoplugin_plugin_proto_msgTypes,
+		GoTypes:           file_internal_plugin_core_protoplugin_plugin_proto_goTypes,
+		DependencyIndexes: file_internal_plugin_core_protoplugin_plugin_proto_depIdxs,
+		MessageInfos:      file_internal_plugin_core_protoplugin_plugin_proto_msgTypes,
 	}.Build()
-	File_internal_plugin_protoplugin_plugin_proto = out.File
-	file_internal_plugin_protoplugin_plugin_proto_goTypes = nil
-	file_internal_plugin_protoplugin_plugin_proto_depIdxs = nil
+	File_internal_plugin_core_protoplugin_plugin_proto = out.File
+	file_internal_plugin_core_protoplugin_plugin_proto_goTypes = nil
+	file_internal_plugin_core_protoplugin_plugin_proto_depIdxs = nil
 }

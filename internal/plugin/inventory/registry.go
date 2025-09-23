@@ -10,27 +10,27 @@ import (
 var Registry = New()
 
 type registry struct {
-	collection map[string]core.Collection
-	lock       *sync.Mutex
+	plugins map[string]core.Plugin
+	lock    *sync.Mutex
 }
 
 func New() registry {
 	return registry{
-		collection: make(map[string]core.Collection),
-		lock:       &sync.Mutex{},
+		plugins: make(map[string]core.Plugin),
+		lock:    &sync.Mutex{},
 	}
 }
 
-func (r *registry) Get(name string) (core.Collection, error) {
+func (r *registry) Get(name string) (core.Plugin, error) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	if m, ok := r.collection[name]; ok {
+	if m, ok := r.plugins[name]; ok {
 		return m, nil
 	}
 	return nil, fmt.Errorf("'%s' not registered", name)
 }
 
-func (r *registry) Register(m core.Collection) error {
+func (r *registry) Register(m core.Plugin) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
@@ -38,11 +38,11 @@ func (r *registry) Register(m core.Collection) error {
 	if err != nil {
 		return err
 	}
-	if _, exists := r.collection[name]; exists {
+	if _, exists := r.plugins[name]; exists {
 		return fmt.Errorf("%s already exists", name)
 	}
 
-	r.collection[name] = m
+	r.plugins[name] = m
 	return nil
 }
 
@@ -50,11 +50,11 @@ func (r *registry) Unregister(name string) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	if _, exists := r.collection[name]; !exists {
+	if _, exists := r.plugins[name]; !exists {
 		return fmt.Errorf("%s does not exist", name)
 	}
 
-	delete(r.collection, name)
+	delete(r.plugins, name)
 	return nil
 }
 
@@ -63,7 +63,7 @@ func (r *registry) Names() []string {
 	defer r.lock.Unlock()
 
 	tasks := []string{}
-	for name := range r.collection {
+	for name := range r.plugins {
 		tasks = append(tasks, name)
 	}
 

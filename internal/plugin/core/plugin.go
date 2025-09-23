@@ -7,7 +7,7 @@ import (
 	"github.com/jackadi-io/jackadi/internal/proto"
 )
 
-type Collection interface {
+type Plugin interface {
 	Name() (string, error)
 	Tasks() ([]string, error)
 	Help(task string) (map[string]string, error)

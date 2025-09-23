@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 AGENT_ID="agent1"
-COLLECTION="demo"
+PLUGIN="demo"
 JACK_CMD="/usr/bin/jack"
 
 # Check if jack binary exists
@@ -44,7 +44,7 @@ run_task() {
         shift 1
     else
         shift 2
-        local cmd_display="$JACK_CMD run $AGENT_ID $COLLECTION:$task_name"
+        local cmd_display="$JACK_CMD run $AGENT_ID $PLUGIN:$task_name"
         for arg in "$@"; do
             cmd_display="$cmd_display $arg"
         done
@@ -54,7 +54,7 @@ run_task() {
     echo -e "${GREEN}Command: $cmd_display${NC}"
     echo
 
-    if $JACK_CMD run $AGENT_ID $COLLECTION:$task_name "$@"; then
+    if $JACK_CMD run $AGENT_ID $PLUGIN:$task_name "$@"; then
         echo -e "${GREEN}✓ Task completed successfully${NC}"
     else
         echo -e "${RED}✗ Task failed${NC}"
@@ -72,10 +72,10 @@ run_spec() {
     local description="$2"
 
     echo -e "${YELLOW}Spec Collector: $description${NC}"
-    echo -e "${GREEN}Command: $JACK_CMD run $AGENT_ID specs:get $COLLECTION.$spec_name${NC}"
+    echo -e "${GREEN}Command: $JACK_CMD run $AGENT_ID specs:get $PLUGIN.$spec_name${NC}"
     echo
 
-    if $JACK_CMD run $AGENT_ID specs:get $COLLECTION.$spec_name; then
+    if $JACK_CMD run $AGENT_ID specs:get $PLUGIN.$spec_name; then
         echo -e "${GREEN}✓ Spec retrieved successfully${NC}"
     else
         echo -e "${RED}✗ Spec retrieval failed${NC}"
@@ -91,7 +91,7 @@ print_header "JACKADI DEMO - TASK EXECUTION SHOWCASE"
 
 echo "This demo showcases Jackadi's distributed task execution capabilities."
 echo "All tasks will be executed on agent: $AGENT_ID"
-echo "Plugin collection: $COLLECTION"
+echo "Plugin: $PLUGIN"
 echo
 
 # Wait for user confirmation
@@ -121,7 +121,7 @@ run_task "monitor_health" "System health monitoring (context-aware)"
 print_header "2. COMPLEX INPUT TYPES"
 
 run_task "create_user" "Create user with multiple argument types" --display \
-    "$JACK_CMD run $AGENT_ID $COLLECTION:create_user 12345 johndoe john@jackadi.io true '[\"read\",\"write\",\"admin\"]' '{\"department\":\"engineering\",\"team\":\"backend\"}' '{\"hostname\":\"web-01\",\"cpu_cores\":8,\"memory_gb\":16,\"is_production\":true}' '[100,200,300]'" \
+    "$JACK_CMD run $AGENT_ID $PLUGIN:create_user 12345 johndoe john@jackadi.io true '[\"read\",\"write\",\"admin\"]' '{\"department\":\"engineering\",\"team\":\"backend\"}' '{\"hostname\":\"web-01\",\"cpu_cores\":8,\"memory_gb\":16,\"is_production\":true}' '[100,200,300]'" \
     12345 johndoe john@jackadi.io true \
     '["read","write","admin"]' \
     '{"department":"engineering","team":"backend"}' \
@@ -172,11 +172,11 @@ run_task "upgrade_system" "OS upgrade (dry run)" \
     DryRun=true SecurityOnly=true BackupBefore=true
 
 run_task "upgrade_system" "OS upgrade (exclude packages)" --display \
-    "$JACK_CMD run $AGENT_ID $COLLECTION:upgrade_system ExcludePackages='[\"kernel-default\",\"systemd\"]' RebootRequired=true" \
+    "$JACK_CMD run $AGENT_ID $PLUGIN:upgrade_system ExcludePackages='[\"kernel-default\",\"systemd\"]' RebootRequired=true" \
     ExcludePackages='["kernel-default","systemd"]' RebootRequired=true
 
 # ============================================================================
-# SPEC COLLECTION
+# SPEC PLUGIN
 # ============================================================================
 
 print_header "5. SPEC COLLECTORS (SYSTEM INVENTORY)"
@@ -219,7 +219,7 @@ echo "• Simple tasks (hello, configure, monitor)"
 echo "• Complex input types (user creation with mixed arguments)"
 echo "• Various output types (strings, numbers, arrays, structs, maps)"
 echo "• System operations with write locks (OS upgrades)"
-echo "• Spec collection for system inventory"
+echo "• Spec collector for system inventory"
 echo
 echo "You can now:"
 echo "• Check task results: $JACK_CMD results list"

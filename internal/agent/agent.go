@@ -323,24 +323,24 @@ func effectiveLockMode(req *proto.TaskRequest) proto.LockMode {
 	}
 
 	// get lock mode from the task itself
-	var collection, task string
-	parts := strings.Split(req.GetTask(), config.CollectionSeparator)
+	var plugin, task string
+	parts := strings.Split(req.GetTask(), config.PluginSeparator)
 
 	switch {
 	case len(parts) == 1:
-		collection = parts[0]
+		plugin = parts[0]
 		task = parts[0]
 	case len(parts) == 2:
-		collection = parts[0]
+		plugin = parts[0]
 		task = parts[1]
 	default:
 		slog.Debug("bad task name, using NO_LOCK", "task", req.GetTask())
 		return proto.LockMode_NO_LOCK
 	}
 
-	coll, err := inventory.Registry.Get(collection)
+	coll, err := inventory.Registry.Get(plugin)
 	if err != nil {
-		slog.Debug("collection not found, using NO_LOCK", "collection", collection, "error", err)
+		slog.Debug("plugin not found, using NO_LOCK", "plugin", plugin, "error", err)
 		return proto.LockMode_NO_LOCK
 	}
 
@@ -354,18 +354,18 @@ func effectiveLockMode(req *proto.TaskRequest) proto.LockMode {
 	return pluginLockMode
 }
 
-// doTask route the request to the collection containing the wanted task.
+// doTask route the request to the plugin containing the wanted task.
 func doTask(ctx context.Context, req *proto.TaskRequest) *proto.TaskResponse {
 	slog.Debug("starting task", "id", req.Id)
-	var collection, task string
-	parts := strings.Split(req.GetTask(), config.CollectionSeparator)
+	var plugin, task string
+	parts := strings.Split(req.GetTask(), config.PluginSeparator)
 
 	switch {
 	case len(parts) == 1:
-		collection = parts[0]
+		plugin = parts[0]
 		task = parts[0]
 	case len(parts) == 2:
-		collection = parts[0]
+		plugin = parts[0]
 		task = parts[1]
 	default:
 		slog.Error("bad task name")
@@ -376,7 +376,7 @@ func doTask(ctx context.Context, req *proto.TaskRequest) *proto.TaskResponse {
 		}
 	}
 
-	t, err := inventory.Registry.Get(collection)
+	t, err := inventory.Registry.Get(plugin)
 	if err != nil {
 		slog.Error("bad request", "error", err)
 		return &proto.TaskResponse{

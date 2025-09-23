@@ -4,10 +4,10 @@ import "time"
 
 const (
 	// Grammar.
-	CollectionSeparator = ":"
-	ListSeparator       = ","
-	SpecManagerPrefix   = "specs" // Prefix used for specs-related tasks.
-	InstantPingName     = "instant-ping"
+	PluginSeparator   = ":"
+	ListSeparator     = ","
+	SpecManagerPrefix = "specs" // Prefix used for specs-related tasks.
+	InstantPingName   = "instant-ping"
 
 	// Network.
 	DefaultManagerAddress   = "127.0.0.1"

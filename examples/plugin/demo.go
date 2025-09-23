@@ -308,7 +308,7 @@ func UpgradeSystem(ctx context.Context, options *UpgradeOptions) (map[string]any
 	return result, nil
 }
 
-// Spec collection examples - these gather system information.
+// Spec collector examples - these gather system information.
 
 // Simple spec returning basic OS info.
 func GetOSInfo() (map[string]string, error) {
@@ -374,26 +374,26 @@ func GetInstalledPackages() (map[string]any, error) {
 }
 
 func main() {
-	collection := sdk.New("demo")
+	plugin := sdk.New("demo")
 
 	// Register tasks with meaningful descriptions and examples.
 
-	collection.MustRegisterTask("hello", HelloWorld).
+	plugin.MustRegisterTask("hello", HelloWorld).
 		WithSummary("Simple hello world task").
 		WithDescription("A basic task that returns a greeting message. Perfect for testing connectivity and basic functionality.")
 
-	collection.MustRegisterTask("configure_service", ConfigureService).
+	plugin.MustRegisterTask("configure_service", ConfigureService).
 		WithSummary("Configure a system service").
 		WithDescription("Configures a named service with regional settings and timeout controls. Demonstrates option usage.").
 		WithArg("serviceName", "string", "webserver-pro").
 		WithLockMode(sdk.WriteLock)
 
-	collection.MustRegisterTask("monitor_health", MonitorSystemHealth).
+	plugin.MustRegisterTask("monitor_health", MonitorSystemHealth).
 		WithSummary("Monitor system health metrics").
 		WithDescription("Performs system health monitoring with context timeout awareness. Returns comprehensive health metrics.").
 		WithLockMode(sdk.NoLock)
 
-	collection.MustRegisterTask("create_user", CreateUserAccount).
+	plugin.MustRegisterTask("create_user", CreateUserAccount).
 		WithSummary("Create a new user account").
 		WithDescription("Creates a user account demonstrating various input types: int64, string, bool, slice, map, struct, and array.").
 		WithArg("userID", "int64", "12345").
@@ -406,76 +406,76 @@ func main() {
 		WithArg("limits", "[3]int", `[100, 200, 300]`).
 		WithLockMode(sdk.WriteLock)
 
-	collection.MustRegisterTask("get_system_version", GetSystemVersion).
+	plugin.MustRegisterTask("get_system_version", GetSystemVersion).
 		WithSummary("Get system version (returns string)").
 		WithDescription("Returns the operating system version as a string.")
 
-	collection.MustRegisterTask("get_connection_count", GetActiveConnectionCount).
+	plugin.MustRegisterTask("get_connection_count", GetActiveConnectionCount).
 		WithSummary("Get active connections (returns int64)").
 		WithDescription("Returns the number of active database connections as an integer.")
 
-	collection.MustRegisterTask("is_maintenance_mode", IsMaintenanceModeEnabled).
+	plugin.MustRegisterTask("is_maintenance_mode", IsMaintenanceModeEnabled).
 		WithSummary("Check maintenance mode (returns bool)").
 		WithDescription("Returns whether the system is currently in maintenance mode.")
 
-	collection.MustRegisterTask("get_cpu_usage", GetCPUUsagePercent).
+	plugin.MustRegisterTask("get_cpu_usage", GetCPUUsagePercent).
 		WithSummary("Get CPU usage (returns float64)").
 		WithDescription("Returns current CPU usage percentage as a floating-point number.")
 
-	collection.MustRegisterTask("list_services", ListActiveServices).
+	plugin.MustRegisterTask("list_services", ListActiveServices).
 		WithSummary("List active services (returns []string)").
 		WithDescription("Returns a list of currently active system services.")
 
-	collection.MustRegisterTask("get_users", GetUserList).
+	plugin.MustRegisterTask("get_users", GetUserList).
 		WithSummary("Get user list (returns []User)").
 		WithDescription("Returns a list of system users as a slice of User structs.")
 
-	collection.MustRegisterTask("get_env_vars", GetEnvironmentVariables).
+	plugin.MustRegisterTask("get_env_vars", GetEnvironmentVariables).
 		WithSummary("Get environment variables (returns map[string]string)").
 		WithDescription("Returns system environment variables as a string-to-string map.")
 
-	collection.MustRegisterTask("get_metrics", GetSystemMetrics).
+	plugin.MustRegisterTask("get_metrics", GetSystemMetrics).
 		WithSummary("Get system metrics (returns map[string]any)").
 		WithDescription("Returns comprehensive system metrics with mixed value types.")
 
-	collection.MustRegisterTask("get_server_info", GetServerInformation).
+	plugin.MustRegisterTask("get_server_info", GetServerInformation).
 		WithSummary("Get server information (returns ServerInfo)").
 		WithDescription("Returns detailed server information as a complex struct.")
 
-	collection.MustRegisterTask("get_reboot_history", GetLastThreeReboots).
+	plugin.MustRegisterTask("get_reboot_history", GetLastThreeReboots).
 		WithSummary("Get reboot history (returns [3]string)").
 		WithDescription("Returns the last three system reboots as a fixed-size array.")
 
-	collection.MustRegisterTask("get_db_stats", GetDatabaseStats).
+	plugin.MustRegisterTask("get_db_stats", GetDatabaseStats).
 		WithSummary("Get database statistics (returns map[string]DatabaseStats)").
 		WithDescription("Returns database statistics for multiple databases with complex nested structures.")
 
-	collection.MustRegisterTask("find_user", FindUserByEmail).
+	plugin.MustRegisterTask("find_user", FindUserByEmail).
 		WithSummary("Find user by email (returns *User)").
 		WithDescription("Searches for a user by email address. Returns pointer (may be nil if not found).").
 		WithArg("email", "string", "admin@jackadi.io")
 
-	collection.MustRegisterTask("upgrade_system", UpgradeSystem).
+	plugin.MustRegisterTask("upgrade_system", UpgradeSystem).
 		WithSummary("Upgrade system packages").
 		WithDescription("Performs system package upgrades with various options. Uses write lock to prevent conflicts during upgrades.").
 		WithLockMode(sdk.WriteLock)
 
 	// Register spec collectors - these gather system information for inventory and targeting.
-	collection.MustRegisterSpecCollector("os", GetOSInfo).
+	plugin.MustRegisterSpecCollector("os", GetOSInfo).
 		WithSummary("Operating system information").
 		WithDescription("Collects basic operating system and kernel information for system identification.")
 
-	collection.MustRegisterSpecCollector("hardware", GetHardwareInfo).
+	plugin.MustRegisterSpecCollector("hardware", GetHardwareInfo).
 		WithSummary("Hardware specifications").
 		WithDescription("Gathers hardware information including CPU, memory, disk usage, and network details.")
 
-	collection.MustRegisterSpecCollector("network", GetNetworkConfig).
+	plugin.MustRegisterSpecCollector("network", GetNetworkConfig).
 		WithSummary("Network configuration").
 		WithDescription("Retrieves network interface configuration, routing, and DNS settings.")
 
-	collection.MustRegisterSpecCollector("software", GetInstalledPackages).
+	plugin.MustRegisterSpecCollector("software", GetInstalledPackages).
 		WithSummary("Software inventory").
 		WithDescription("Collects information about installed packages, versions, and available updates.")
 
-	sdk.MustServe(collection)
+	sdk.MustServe(plugin)
 }
