@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/jackadi-io/jackadi/internal/plugin"
+	"github.com/jackadi-io/jackadi/internal/plugin/core"
 	"github.com/jackadi-io/jackadi/internal/proto"
 	"github.com/jackadi-io/jackadi/internal/serializer"
 )
@@ -217,7 +217,7 @@ func (t *Plugin) MustRegisterTask(name string, function any) *Task {
 	return t.tasks[name]
 }
 
-func (t Plugin) Do(ctx context.Context, task string, input *proto.Input) (plugin.Response, error) {
+func (t Plugin) Do(ctx context.Context, task string, input *proto.Input) (core.Response, error) {
 	defer func() {
 		if r := recover(); r != nil {
 			slog.Error("recovered from panic", "collection", t.name, "task", task, "error", r)
@@ -225,12 +225,12 @@ func (t Plugin) Do(ctx context.Context, task string, input *proto.Input) (plugin
 	}()
 
 	if input == nil {
-		return plugin.Response{}, errors.New("internal error: proto input args cannot be nil")
+		return core.Response{}, errors.New("internal error: proto input args cannot be nil")
 	}
 
 	selectedTask, ok := t.tasks[task]
 	if !ok {
-		return plugin.Response{
+		return core.Response{
 			Output:  nil,
 			Error:   "",
 			Retcode: -1,
@@ -244,7 +244,7 @@ func (t Plugin) Do(ctx context.Context, task string, input *proto.Input) (plugin
 
 	inputs, err := handleInputs(ctx, funcType, input)
 	if err != nil {
-		return plugin.Response{}, err
+		return core.Response{}, err
 	}
 
 	// call the task
@@ -253,10 +253,10 @@ func (t Plugin) Do(ctx context.Context, task string, input *proto.Input) (plugin
 	// parse return
 	taskOut, taskErr, err := parseReturn(ret)
 	if err != nil {
-		return plugin.Response{}, err
+		return core.Response{}, err
 	}
 
-	return plugin.Response{
+	return core.Response{
 		Output: taskOut,
 		Error:  taskErr,
 	}, nil
@@ -352,7 +352,7 @@ func handleInputs(ctx context.Context, funcType reflect.Type, input *proto.Input
 			continue
 		}
 
-		out, err := plugin.StructpbValueToInput(in.AsInterface(), funcType.In(i+offset))
+		out, err := core.StructpbValueToInput(in.AsInterface(), funcType.In(i+offset))
 		if err != nil {
 			log.Println(err)
 			return nil, fmt.Errorf("unable to convert argument n°%d to %s", i, funcType.In(i+offset))
@@ -382,7 +382,7 @@ func handleOptions(optionElemType reflect.Type, input *proto.Input) (reflect.Val
 			return reflect.Value{}, fmt.Errorf("invalid '%s' option", k)
 		}
 
-		res, err := plugin.StructpbValueToInput(input.Options.Fields[k].AsInterface(), field.Type())
+		res, err := core.StructpbValueToInput(input.Options.Fields[k].AsInterface(), field.Type())
 		if err != nil {
 			return reflect.Value{}, fmt.Errorf("unable to convert '%s' option to '%s'", k, field.Type())
 		}

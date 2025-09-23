@@ -1,27 +1,27 @@
-package collection
+package inventory
 
 import (
 	"fmt"
 	"sync"
 
-	"github.com/jackadi-io/jackadi/internal/plugin"
+	"github.com/jackadi-io/jackadi/internal/plugin/core"
 )
 
 var Registry = New()
 
 type registry struct {
-	collection map[string]plugin.Collection
+	collection map[string]core.Collection
 	lock       *sync.Mutex
 }
 
 func New() registry {
 	return registry{
-		collection: make(map[string]plugin.Collection),
+		collection: make(map[string]core.Collection),
 		lock:       &sync.Mutex{},
 	}
 }
 
-func (r *registry) Get(name string) (plugin.Collection, error) {
+func (r *registry) Get(name string) (core.Collection, error) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	if m, ok := r.collection[name]; ok {
@@ -30,7 +30,7 @@ func (r *registry) Get(name string) (plugin.Collection, error) {
 	return nil, fmt.Errorf("'%s' not registered", name)
 }
 
-func (r *registry) Register(m plugin.Collection) error {
+func (r *registry) Register(m core.Collection) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 

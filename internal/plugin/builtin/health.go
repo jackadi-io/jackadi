@@ -4,8 +4,8 @@ import (
 	"log"
 	"log/slog"
 
-	"github.com/jackadi-io/jackadi/internal/collection"
 	"github.com/jackadi-io/jackadi/internal/config"
+	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
 	"github.com/jackadi-io/jackadi/sdk"
 )
 
@@ -25,7 +25,7 @@ func MustLoadHealth() {
 		WithSummary("Ping.").
 		WithDescription("Normal healthcheck using the task queue.")
 
-	if err := collection.Registry.Register(cmd); err != nil {
+	if err := inventory.Registry.Register(cmd); err != nil {
 		name, _ := cmd.Name()
 		slog.Error("could not load builtin task", "error", err, "task", name)
 		log.Fatal(err)

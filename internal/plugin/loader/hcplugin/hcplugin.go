@@ -19,13 +19,13 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	goplugin "github.com/hashicorp/go-plugin"
-	"github.com/jackadi-io/jackadi/internal/collection"
-	"github.com/jackadi-io/jackadi/internal/collection/types"
-	"github.com/jackadi-io/jackadi/internal/plugin"
+	"github.com/jackadi-io/jackadi/internal/plugin/core"
+	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
+	"github.com/jackadi-io/jackadi/internal/plugin/types"
 )
 
 var PluginMap = map[string]goplugin.Plugin{
-	"collection": &plugin.CollectionPlugin{},
+	"collection": &core.CollectionPlugin{},
 }
 
 type PluginInfo struct {
@@ -95,7 +95,7 @@ func (l *Loader) load(path string) error {
 	}
 
 	cfg := goplugin.ClientConfig{
-		HandshakeConfig:  plugin.Handshake,
+		HandshakeConfig:  core.Handshake,
 		Plugins:          PluginMap,
 		Cmd:              exec.Command("sh", "-c", path),
 		AllowedProtocols: []goplugin.Protocol{goplugin.ProtocolNetRPC, goplugin.ProtocolGRPC},
@@ -115,12 +115,12 @@ func (l *Loader) load(path string) error {
 		return fmt.Errorf("plugin dispense error: %w", err)
 	}
 
-	coll, ok := raw.(plugin.Collection)
+	coll, ok := raw.(core.Collection)
 	if !ok {
 		client.Kill()
 
 		methods := describeInterface(raw, false)
-		expectedMethods := describeInterface((*plugin.Collection)(nil), true)
+		expectedMethods := describeInterface((*core.Collection)(nil), true)
 
 		return fmt.Errorf(
 			"plugin not implementing the Collection interface: methods=%v, expected_methods=%v",
@@ -135,7 +135,7 @@ func (l *Loader) load(path string) error {
 	}
 
 	// register the loaded plugin publicly
-	if err := collection.Registry.Register(coll); err != nil {
+	if err := inventory.Registry.Register(coll); err != nil {
 		client.Kill()
 		return fmt.Errorf("failed to register hcplugin: %w", err)
 	}
@@ -274,7 +274,7 @@ func (l *Loader) Update(pluginDir, tmpDir string, upToDate []string) ([]types.Pl
 		// reload outdated plugin
 		slog.Debug("reloading updated plugin", "plugin_file", file)
 		p.client.Kill()
-		if err := collection.Registry.Unregister(p.name); err != nil {
+		if err := inventory.Registry.Unregister(p.name); err != nil {
 			slog.Error("failed to unload plugin", "error", err, "plugin_file", file)
 			errs = errors.Join(errs, fmt.Errorf("plugin update failed: unable to unregister existing '%s' file: %w", file, err))
 		}
@@ -309,7 +309,7 @@ func (l *Loader) Update(pluginDir, tmpDir string, upToDate []string) ([]types.Pl
 
 		if !slices.Contains(newPluginNameList, p.name) {
 			slog.Debug("removing plugin", "name", p.name)
-			if err := collection.Registry.Unregister(p.name); err != nil {
+			if err := inventory.Registry.Unregister(p.name); err != nil {
 				slog.Error("failed to unload plugin", "error", err, "plugin_name", p.name)
 				errs = errors.Join(errs, fmt.Errorf("plugin removal failed: failed to unload '%s' plugin: %w", p.name, err))
 				continue

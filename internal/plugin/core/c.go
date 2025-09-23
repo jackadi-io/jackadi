@@ -1,10 +1,10 @@
-package plugin
+package core
 
 import (
 	"context"
 
 	goplugin "github.com/hashicorp/go-plugin"
-	"github.com/jackadi-io/jackadi/internal/plugin/protoplugin"
+	"github.com/jackadi-io/jackadi/internal/plugin/core/protoplugin"
 	"google.golang.org/grpc"
 )
 

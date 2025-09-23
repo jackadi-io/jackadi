@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/jackadi-io/jackadi/internal/collection"
-	"github.com/jackadi-io/jackadi/internal/collection/types"
-	"github.com/jackadi-io/jackadi/internal/plugin"
+	"github.com/jackadi-io/jackadi/internal/plugin/core"
+	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
+	"github.com/jackadi-io/jackadi/internal/plugin/types"
 	"github.com/jackadi-io/jackadi/sdk"
 )
 
@@ -43,7 +43,7 @@ func (s pluginMgmt) help(name string) (map[string]string, error) {
 		return nil, err
 	}
 
-	c, err := collection.Registry.Get(collectionName)
+	c, err := inventory.Registry.Get(collectionName)
 	if err != nil {
 		return nil, fmt.Errorf("unknown collection: %s", collectionName)
 	}
@@ -51,8 +51,8 @@ func (s pluginMgmt) help(name string) (map[string]string, error) {
 	return c.Help(taskName)
 }
 
-func (s pluginMgmt) version(collectionName string) (*plugin.Version, error) {
-	c, err := collection.Registry.Get(collectionName)
+func (s pluginMgmt) version(collectionName string) (*core.Version, error) {
+	c, err := inventory.Registry.Get(collectionName)
 	if err != nil {
 		return nil, fmt.Errorf("unknown collection: %w", err)
 	}
@@ -62,7 +62,7 @@ func (s pluginMgmt) version(collectionName string) (*plugin.Version, error) {
 		return nil, fmt.Errorf("failed to get version: %w", err)
 	}
 
-	out := plugin.Version{
+	out := core.Version{
 		PluginVersion: info.PluginVersion,
 		Commit:        info.Commit,
 		BuildTime:     info.BuildTime,
@@ -73,7 +73,7 @@ func (s pluginMgmt) version(collectionName string) (*plugin.Version, error) {
 }
 
 func (s pluginMgmt) list() ([]string, error) {
-	return collection.Registry.Names(), nil
+	return inventory.Registry.Names(), nil
 }
 
 type pluginInfo struct {
@@ -135,7 +135,7 @@ func MustLoadPluginMgmt(req chan struct{}) chan types.PluginUpdateResponse {
 		WithDescription("The agent sync its plugins with the manager.\nIt adds, updates and removes the collections following the manager configuration.").
 		WithLockMode(sdk.ExclusiveLock)
 
-	if err := collection.Registry.Register(c); err != nil {
+	if err := inventory.Registry.Register(c); err != nil {
 		name, _ := c.Name()
 		slog.Error("could not load builtin task", "error", err, "task", name)
 		log.Fatal(err)

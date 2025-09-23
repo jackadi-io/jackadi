@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/jackadi-io/jackadi/internal/agent"
-	_ "github.com/jackadi-io/jackadi/internal/collection/builtin"
 	"github.com/jackadi-io/jackadi/internal/config"
 	_ "github.com/jackadi-io/jackadi/internal/logs"
+	_ "github.com/jackadi-io/jackadi/internal/plugin/builtin"
 	flag "github.com/spf13/pflag"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

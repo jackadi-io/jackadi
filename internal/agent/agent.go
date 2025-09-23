@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	colls "github.com/jackadi-io/jackadi/internal/collection"
-	"github.com/jackadi-io/jackadi/internal/collection/hcplugin"
 	"github.com/jackadi-io/jackadi/internal/config"
+	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
+	"github.com/jackadi-io/jackadi/internal/plugin/loader/hcplugin"
 	"github.com/jackadi-io/jackadi/internal/proto"
 	"github.com/jackadi-io/jackadi/internal/serializer"
 	"google.golang.org/grpc"
@@ -338,7 +338,7 @@ func effectiveLockMode(req *proto.TaskRequest) proto.LockMode {
 		return proto.LockMode_NO_LOCK
 	}
 
-	coll, err := colls.Registry.Get(collection)
+	coll, err := inventory.Registry.Get(collection)
 	if err != nil {
 		slog.Debug("collection not found, using NO_LOCK", "collection", collection, "error", err)
 		return proto.LockMode_NO_LOCK
@@ -376,7 +376,7 @@ func doTask(ctx context.Context, req *proto.TaskRequest) *proto.TaskResponse {
 		}
 	}
 
-	t, err := colls.Registry.Get(collection)
+	t, err := inventory.Registry.Get(collection)
 	if err != nil {
 		slog.Error("bad request", "error", err)
 		return &proto.TaskResponse{

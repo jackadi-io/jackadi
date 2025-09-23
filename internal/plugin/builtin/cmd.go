@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	"github.com/google/shlex"
-	"github.com/jackadi-io/jackadi/internal/collection"
+	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
 	"github.com/jackadi-io/jackadi/sdk"
 )
 
@@ -33,7 +33,7 @@ func MustLoadCmd() {
 		WithDescription("The executed command is not canceled when the agent is closed.\nIt leverages exec.Command.").
 		WithArg("cmd", "string", "ls -l")
 
-	if err := collection.Registry.Register(cmd); err != nil {
+	if err := inventory.Registry.Register(cmd); err != nil {
 		name, _ := cmd.Name()
 		slog.Error("could not load builtin task", "error", err, "task", name)
 		log.Fatal(err)

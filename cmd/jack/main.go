@@ -8,7 +8,7 @@ import (
 	"github.com/jackadi-io/jackadi/cmd/jack/subcommand/agent"
 	"github.com/jackadi-io/jackadi/cmd/jack/subcommand/job/result"
 	"github.com/jackadi-io/jackadi/cmd/jack/subcommand/job/task"
-	_ "github.com/jackadi-io/jackadi/internal/collection/builtin"
+	_ "github.com/jackadi-io/jackadi/internal/plugin/builtin"
 	"github.com/spf13/cobra"
 )
 

@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/claytonsingh/golib/dotaccess"
-	"github.com/jackadi-io/jackadi/internal/collection"
 	"github.com/jackadi-io/jackadi/internal/config"
+	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
 	"github.com/jackadi-io/jackadi/internal/serializer"
 	"github.com/jackadi-io/jackadi/sdk"
 )
@@ -27,7 +27,7 @@ func NewSpecsManager() (*SpecsManager, error) {
 	c.MustRegisterTask("all", s.All)
 	c.MustRegisterTask("get", s.Get)
 
-	if err := collection.Registry.Register(c); err != nil {
+	if err := inventory.Registry.Register(c); err != nil {
 		return nil, fmt.Errorf("cannot register as a plugin: %w", err)
 	}
 
@@ -70,11 +70,11 @@ func (s *SpecsManager) StartSpecCollector(ctx context.Context, syncReq chan stru
 	t := time.NewTicker(config.SpecCollectionInterval)
 	for {
 		slog.Debug("collecting specs")
-		collections := collection.Registry.Names()
+		collections := inventory.Registry.Names()
 		newSpecs := make(map[string]any)
 
 		for _, name := range collections {
-			c, err := collection.Registry.Get(name)
+			c, err := inventory.Registry.Get(name)
 			if err != nil {
 				slog.Error("failed to get specs tasks", "plugin", name, "error", err)
 				continue

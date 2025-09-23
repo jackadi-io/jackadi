@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/goccy/go-yaml"
-	"github.com/jackadi-io/jackadi/internal/collection/hcplugin"
+	"github.com/jackadi-io/jackadi/internal/plugin/loader/hcplugin"
 	"github.com/jackadi-io/jackadi/internal/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

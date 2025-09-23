@@ -8,11 +8,11 @@ import (
 	stdplugin "plugin"
 	"strings"
 
-	"github.com/jackadi-io/jackadi/internal/collection"
-	"github.com/jackadi-io/jackadi/internal/plugin"
+	"github.com/jackadi-io/jackadi/internal/plugin/core"
+	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
 )
 
-func loadPlugin(pluginDir, file string) (plugin.Collection, error) {
+func loadPlugin(pluginDir, file string) (core.Collection, error) {
 	f := filepath.Join(pluginDir, file)
 
 	ext, err := stdplugin.Open(f)
@@ -25,7 +25,7 @@ func loadPlugin(pluginDir, file string) (plugin.Collection, error) {
 		return nil, fmt.Errorf("missing 'New' symbol in plugin: %w", err)
 	}
 
-	module, ok := modNew.(func() plugin.Collection)
+	module, ok := modNew.(func() core.Collection)
 	if !ok {
 		return nil, fmt.Errorf("unexpected type from 'New' module symbol")
 	}
@@ -55,7 +55,7 @@ func Load(pluginDir string) {
 			continue
 		}
 
-		if err := collection.Registry.Register(t); err != nil {
+		if err := inventory.Registry.Register(t); err != nil {
 			name, _ := t.Name()
 			slog.Error("plugin not loaded", "error", err, "task", name)
 			continue

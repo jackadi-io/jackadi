@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/jackadi-io/jackadi/internal/agent"
-	"github.com/jackadi-io/jackadi/internal/collection"
 	"github.com/jackadi-io/jackadi/internal/config"
+	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
 	"github.com/spf13/cobra"
 )
 
@@ -43,10 +43,10 @@ func getBuiltinCollections() map[string]*CollectionInfo {
 	collections := make(map[string]*CollectionInfo)
 
 	agent.LoadBuiltins(nil)
-	collectionNames := collection.Registry.Names()
+	collectionNames := inventory.Registry.Names()
 
 	for _, name := range collectionNames {
-		coll, err := collection.Registry.Get(name)
+		coll, err := inventory.Registry.Get(name)
 		if err != nil {
 			slog.Debug("failed to get collection from registry", "name", name, "error", err)
 			continue

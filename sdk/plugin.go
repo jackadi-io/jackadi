@@ -14,7 +14,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/jackadi-io/jackadi/internal/parser"
-	"github.com/jackadi-io/jackadi/internal/plugin"
+	"github.com/jackadi-io/jackadi/internal/plugin/core"
 	"github.com/jackadi-io/jackadi/internal/proto"
 	"github.com/jackadi-io/jackadi/internal/serializer"
 )
@@ -26,8 +26,8 @@ var date = ""
 // getVersion returns plugin information.
 //
 // LDFLAGS (manually or via goreleaser) are used, with debug.RealBuildInfo as fallback.
-func getVersion() plugin.Version {
-	v := plugin.Version{
+func getVersion() core.Version {
+	v := core.Version{
 		PluginVersion: version,
 		Commit:        commit,
 		BuildTime:     date,
@@ -135,7 +135,7 @@ func (t Plugin) Help(taskName string) (map[string]string, error) {
 	return res, nil
 }
 
-func (t Plugin) Version() (plugin.Version, error) {
+func (t Plugin) Version() (core.Version, error) {
 	return getVersion(), nil
 }
 
@@ -161,9 +161,9 @@ func MustServe(collection *Plugin) {
 	handleCommand(collection)
 
 	cfg := goplugin.ServeConfig{
-		HandshakeConfig: plugin.Handshake,
+		HandshakeConfig: core.Handshake,
 		Plugins: map[string]goplugin.Plugin{
-			"collection": &plugin.CollectionPlugin{Impl: collection},
+			"collection": &core.CollectionPlugin{Impl: collection},
 		},
 		GRPCServer: goplugin.DefaultGRPCServer,
 	}

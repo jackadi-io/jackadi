@@ -1,9 +1,9 @@
-package plugin
+package core
 
 import (
 	"context"
 
-	"github.com/jackadi-io/jackadi/internal/plugin/protoplugin"
+	"github.com/jackadi-io/jackadi/internal/plugin/core/protoplugin"
 	"github.com/jackadi-io/jackadi/internal/proto"
 	empty "google.golang.org/protobuf/types/known/emptypb"
 )

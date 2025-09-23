@@ -9,12 +9,12 @@ import (
 	"os"
 	"sync"
 
-	"github.com/jackadi-io/jackadi/internal/collection"
-	"github.com/jackadi-io/jackadi/internal/collection/builtin"
-	"github.com/jackadi-io/jackadi/internal/collection/hcplugin"
-	"github.com/jackadi-io/jackadi/internal/collection/stdplugin"
-	"github.com/jackadi-io/jackadi/internal/collection/types"
 	"github.com/jackadi-io/jackadi/internal/config"
+	"github.com/jackadi-io/jackadi/internal/plugin/builtin"
+	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
+	"github.com/jackadi-io/jackadi/internal/plugin/loader/hcplugin"
+	"github.com/jackadi-io/jackadi/internal/plugin/loader/stdplugin"
+	"github.com/jackadi-io/jackadi/internal/plugin/types"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -44,7 +44,7 @@ func (a *Agent) KeepPluginsUpToDate(ctxMetadata context.Context, specsSync chan 
 	// Load hashicorp type plugins
 	hcplugins := hcplugin.New()
 	hcplugins.Load(a.config.PluginDir)
-	slog.Info("loaded plugins", "plugins", collection.Registry.Names())
+	slog.Info("loaded plugins", "plugins", inventory.Registry.Names())
 
 	mu.Lock()
 	a.pluginLoader = hcplugins
