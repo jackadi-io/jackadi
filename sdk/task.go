@@ -170,7 +170,7 @@ func indentMultiline(text, prefix string) string {
 }
 
 // MustRegisterTask registers a task (function) with a string identifier.
-func (t *Collection) MustRegisterTask(name string, function any) *Task {
+func (t *Plugin) MustRegisterTask(name string, function any) *Task {
 	funcValue := reflect.ValueOf(function)
 	funcType := funcValue.Type()
 
@@ -217,7 +217,7 @@ func (t *Collection) MustRegisterTask(name string, function any) *Task {
 	return t.tasks[name]
 }
 
-func (t Collection) Do(ctx context.Context, task string, input *proto.Input) (plugin.Response, error) {
+func (t Plugin) Do(ctx context.Context, task string, input *proto.Input) (plugin.Response, error) {
 	defer func() {
 		if r := recover(); r != nil {
 			slog.Error("recovered from panic", "collection", t.name, "task", task, "error", r)

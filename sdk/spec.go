@@ -38,7 +38,7 @@ func (p *SpecCollector) WithFlags(flags ...Flag) *SpecCollector {
 }
 
 // MustRegister registers a task (function) with a string identifier.
-func (t *Collection) MustRegisterSpecCollector(name string, function any) *SpecCollector {
+func (t *Plugin) MustRegisterSpecCollector(name string, function any) *SpecCollector {
 	funcValue := reflect.ValueOf(function)
 	funcType := funcValue.Type()
 
@@ -69,7 +69,7 @@ func (t *Collection) MustRegisterSpecCollector(name string, function any) *SpecC
 	return t.specs[name]
 }
 
-func (t *Collection) CollectSpecs(ctx context.Context) ([]byte, error) {
+func (t *Plugin) CollectSpecs(ctx context.Context) ([]byte, error) {
 	defer func() {
 		if r := recover(); r != nil {
 			slog.Error("recovered from panic", "collection", t.name, "context", "CollectSpecs", "error", r)

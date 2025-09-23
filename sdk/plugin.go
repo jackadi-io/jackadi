@@ -66,7 +66,7 @@ type Options interface {
 	SetDefaults()
 }
 
-type Collection struct {
+type Plugin struct {
 	name      string
 	tasks     map[string]*Task
 	taskNames []string // to keep an ordered list
@@ -75,21 +75,21 @@ type Collection struct {
 	specsNames []string
 }
 
-func New(name string) *Collection {
-	return &Collection{
+func New(name string) *Plugin {
+	return &Plugin{
 		name:  name,
 		tasks: make(map[string]*Task),
 		specs: make(map[string]*SpecCollector),
 	}
 }
 
-func (t Collection) Name() (string, error) { return t.name, nil }
+func (t Plugin) Name() (string, error) { return t.name, nil }
 
-func (t Collection) Tasks() ([]string, error) {
+func (t Plugin) Tasks() ([]string, error) {
 	return t.taskNames, nil
 }
 
-func (t Collection) Help(taskName string) (map[string]string, error) {
+func (t Plugin) Help(taskName string) (map[string]string, error) {
 	res := make(map[string]string)
 
 	// if no specific task, returns the short description (help) of every tasks
@@ -135,11 +135,11 @@ func (t Collection) Help(taskName string) (map[string]string, error) {
 	return res, nil
 }
 
-func (t Collection) Version() (plugin.Version, error) {
+func (t Plugin) Version() (plugin.Version, error) {
 	return getVersion(), nil
 }
 
-func (t Collection) GetTaskLockMode(taskName string) (proto.LockMode, error) {
+func (t Plugin) GetTaskLockMode(taskName string) (proto.LockMode, error) {
 	task, ok := t.tasks[taskName]
 	if !ok {
 		return proto.LockMode_NO_LOCK, fmt.Errorf("unknown task: %s", taskName)
@@ -147,7 +147,7 @@ func (t Collection) GetTaskLockMode(taskName string) (proto.LockMode, error) {
 	return task.getLockMode().toProtoLockMode(), nil
 }
 
-func MustServe(collection *Collection) {
+func MustServe(collection *Plugin) {
 	if exit := handleFlags(collection); exit {
 		return
 	}
@@ -179,7 +179,7 @@ func printCommandHelp() {
 	fmt.Println()
 }
 
-func handleCommand(collection *Collection) {
+func handleCommand(collection *Plugin) {
 	if len(os.Args) >= 2 && os.Args[1] == "run" {
 		if len(os.Args) < 3 {
 			printCommandHelp()
@@ -249,7 +249,7 @@ func handleCommand(collection *Collection) {
 }
 
 // handleFlags processes command-line flags for the plugin and returns true if the plugin should exit.
-func handleFlags(collection *Collection) bool {
+func handleFlags(collection *Plugin) bool {
 	versionFlag := flag.Bool("version", false, "print plugin information")
 	describeFlag := flag.Bool("describe", false, "decribe plugin")
 	flag.Parse()
