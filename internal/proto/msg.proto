@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package proto;
 
+import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
 
@@ -14,7 +15,12 @@ service Comm {
 }
 
 service Forwarder {
-  rpc ExecTask(TaskRequest) returns (FwdResponse);
+  rpc ExecTask(TaskRequest) returns (FwdResponse) {
+    option (google.api.http) = {
+      post: "/v1/task/exec"
+      body: "*"
+    };
+  }
 }
 
 message HandshakeRequest {
@@ -46,9 +52,9 @@ message TaskResponse {
   optional int64 groupID = 2;
   bytes output = 3;
   string error = 4;
-  int32 retcode = 5;
-  InternalError internalError = 6;
-  string moduleError = 7;
+  int32 retcode = 5;  // TODO: remove
+  InternalError internalError = 6;  // Could be the global error type ( != OK when the task returned an error)
+  string moduleError = 7;  // TODO: rename SDKError? PluginError? GRPCPluginError (GRPC between HC plugin and agent)?, or InternalErrorMsg. Can it be merged with error?
 }
 
 message FwdResponse {
@@ -66,7 +72,7 @@ enum InternalError {
   BUSY_QUEUE = 3;
   FULL_QUEUE = 4;
   UNKNOWN_TASK = 5;
-  MODULE_ERROR = 6;
+  MODULE_ERROR = 6;  // TODO: rename SDKError? PluginError? GRPCPluginError (GRPC between HC plugin and agent)?
   DISCONNECTING = 7;
   DISCONNECTED = 8;
   UNKNOWN_ERROR = 9;

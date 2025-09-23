@@ -7,6 +7,7 @@
 package proto
 
 import (
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	_ "google.golang.org/protobuf/types/known/emptypb"
@@ -771,7 +772,7 @@ var File_internal_proto_api_proto protoreflect.FileDescriptor
 
 const file_internal_proto_api_proto_rawDesc = "" +
 	"\n" +
-	"\x18internal/proto/api.proto\x12\x05proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18internal/proto/msg.proto\":\n" +
+	"\x18internal/proto/api.proto\x12\x05proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18internal/proto/msg.proto\":\n" +
 	"\x11ListAgentsRequest\x12%\n" +
 	"\x06filter\x18\x01 \x01(\x0e2\r.proto.FilterR\x06filter\"\xa2\x01\n" +
 	"\x12ListAgentsResponse\x12,\n" +
@@ -830,18 +831,18 @@ const file_internal_proto_api_proto_rawDesc = "" +
 	"\x04NONE\x10\x00\x12\x11\n" +
 	"\rONLY_ACCEPTED\x10\x01\x12\x13\n" +
 	"\x0fONLY_CANDIDATES\x10\x02\x12\x11\n" +
-	"\rONLY_REJECTED\x10\x032\xb8\x03\n" +
-	"\x03API\x12A\n" +
+	"\rONLY_REJECTED\x10\x032\xfb\x04\n" +
+	"\x03API\x12Z\n" +
 	"\n" +
-	"ListAgents\x12\x18.proto.ListAgentsRequest\x1a\x19.proto.ListAgentsResponse\x128\n" +
-	"\vAcceptAgent\x12\x13.proto.AgentRequest\x1a\x14.proto.AgentResponse\x129\n" +
-	"\vRemoveAgent\x12\x13.proto.AgentRequest\x1a\x15.proto.AgentsResponse\x129\n" +
-	"\vRejectAgent\x12\x13.proto.AgentRequest\x1a\x15.proto.AgentsResponse\x12;\n" +
+	"ListAgents\x12\x18.proto.ListAgentsRequest\x1a\x19.proto.ListAgentsResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/v1/agents/list\x12V\n" +
+	"\vAcceptAgent\x12\x13.proto.AgentRequest\x1a\x14.proto.AgentResponse\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/agents/accept\x12T\n" +
+	"\vRemoveAgent\x12\x13.proto.AgentRequest\x1a\x15.proto.AgentsResponse\"\x19\x82\xd3\xe4\x93\x02\x13*\x11/v1/agents/remove\x12W\n" +
+	"\vRejectAgent\x12\x13.proto.AgentRequest\x1a\x15.proto.AgentsResponse\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/agents/reject\x12W\n" +
 	"\n" +
-	"GetResults\x12\x15.proto.ResultsRequest\x1a\x16.proto.ResultsResponse\x12D\n" +
-	"\vListResults\x12\x19.proto.ListResultsRequest\x1a\x1a.proto.ListResultsResponse\x12;\n" +
+	"GetResults\x12\x15.proto.ResultsRequest\x1a\x16.proto.ResultsResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/v1/results/result\x12^\n" +
+	"\vListResults\x12\x19.proto.ListResultsRequest\x1a\x1a.proto.ListResultsResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/v1/results/list\x12X\n" +
 	"\n" +
-	"GetRequest\x12\x15.proto.RequestRequest\x1a\x16.proto.RequestResponseB.Z,github.com/jackadi-io/jackadi/internal/protob\x06proto3"
+	"GetRequest\x12\x15.proto.RequestRequest\x1a\x16.proto.RequestResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/v1/results/requestB.Z,github.com/jackadi-io/jackadi/internal/protob\x06proto3"
 
 var (
 	file_internal_proto_api_proto_rawDescOnce sync.Once

@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package proto;
 
+import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "internal/proto/msg.proto";
@@ -9,13 +10,35 @@ import "internal/proto/msg.proto";
 option go_package = "github.com/jackadi-io/jackadi/internal/proto";
 
 service API {
-  rpc ListAgents(ListAgentsRequest) returns (ListAgentsResponse);
-  rpc AcceptAgent(AgentRequest) returns (AgentResponse);
-  rpc RemoveAgent(AgentRequest) returns (AgentsResponse);
-  rpc RejectAgent(AgentRequest) returns (AgentsResponse);
-  rpc GetResults(ResultsRequest) returns (ResultsResponse);
-  rpc ListResults(ListResultsRequest) returns (ListResultsResponse);
-  rpc GetRequest(RequestRequest) returns (RequestResponse);
+  rpc ListAgents(ListAgentsRequest) returns (ListAgentsResponse) {
+    option (google.api.http) = {
+        get: "/v1/agents/list"
+    };
+  }
+  rpc AcceptAgent(AgentRequest) returns (AgentResponse) {
+    option (google.api.http) = {
+      post: "/v1/agents/accept"
+      body: "*"
+    };
+  }
+  rpc RemoveAgent(AgentRequest) returns (AgentsResponse) {
+    option (google.api.http) = {delete: "/v1/agents/remove"};
+  }
+  rpc RejectAgent(AgentRequest) returns (AgentsResponse) {
+    option (google.api.http) = {
+      post: "/v1/agents/reject"
+      body: "*"
+    };
+  }
+  rpc GetResults(ResultsRequest) returns (ResultsResponse) {
+    option (google.api.http) = {get: "/v1/results/result"};
+  }
+  rpc ListResults(ListResultsRequest) returns (ListResultsResponse) {
+    option (google.api.http) = {get: "/v1/results/list"};
+  }
+  rpc GetRequest(RequestRequest) returns (RequestResponse) {
+    option (google.api.http) = {get: "/v1/results/request"};
+  }
 }
 
 message ListAgentsRequest {

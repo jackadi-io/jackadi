@@ -21,6 +21,8 @@ services:
       - ./tls/manager_cert.pem:/etc/jackadi/tls/manager_cert.pem
       - ./tls/manager_key.pem:/etc/jackadi/tls/manager_key.pem
       - ./tls/agent_ca_cert.pem:/etc/jackadi/tls/agent_ca_cert.pem
+    ports:
+      - 127.0.0.1:8081:8081
 
   agent1:
     image: ubuntu

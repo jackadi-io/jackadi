@@ -7,6 +7,7 @@
 package proto
 
 import (
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -627,7 +628,7 @@ var File_internal_proto_msg_proto protoreflect.FileDescriptor
 
 const file_internal_proto_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x18internal/proto/msg.proto\x12\x05proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\"\"\n" +
+	"\x18internal/proto/msg.proto\x12\x05proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\"\"\n" +
 	"\x10HandshakeRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"#\n" +
 	"\x11HandshakeResponse\x12\x0e\n" +
@@ -696,9 +697,9 @@ const file_internal_proto_msg_proto_rawDesc = "" +
 	"\x04Comm\x12>\n" +
 	"\tHandshake\x12\x17.proto.HandshakeRequest\x1a\x18.proto.HandshakeResponse\x127\n" +
 	"\bExecTask\x12\x13.proto.TaskResponse\x1a\x12.proto.TaskRequest(\x010\x01\x12K\n" +
-	"\x10ListAgentPlugins\x12\x16.google.protobuf.Empty\x1a\x1f.proto.ListAgentPluginsResponse2?\n" +
-	"\tForwarder\x122\n" +
-	"\bExecTask\x12\x12.proto.TaskRequest\x1a\x12.proto.FwdResponseB.Z,github.com/jackadi-io/jackadi/internal/protob\x06proto3"
+	"\x10ListAgentPlugins\x12\x16.google.protobuf.Empty\x1a\x1f.proto.ListAgentPluginsResponse2Y\n" +
+	"\tForwarder\x12L\n" +
+	"\bExecTask\x12\x12.proto.TaskRequest\x1a\x12.proto.FwdResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/task/execB.Z,github.com/jackadi-io/jackadi/internal/protob\x06proto3"
 
 var (
 	file_internal_proto_msg_proto_rawDescOnce sync.Once
