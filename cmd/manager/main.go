@@ -15,7 +15,7 @@ import (
 	"github.com/jackadi-io/jackadi/internal/config"
 	"github.com/jackadi-io/jackadi/internal/manager/forwarder"
 	"github.com/jackadi-io/jackadi/internal/manager/inventory"
-	pb "github.com/jackadi-io/jackadi/internal/proto"
+	"github.com/jackadi-io/jackadi/internal/proto"
 	flag "github.com/spf13/pflag"
 
 	_ "github.com/jackadi-io/jackadi/internal/logs"
@@ -82,9 +82,9 @@ func run(cfg managerConfig) error {
 	if err := agentsInventory.LoadRegistry(); err != nil {
 		slog.Info("unable to load registry", "error", err)
 	}
-	taskDispatcher := forwarder.NewDispatcher[*pb.TaskRequest, *pb.TaskResponse](&agentsInventory)
+	taskDispatcher := forwarder.NewDispatcher[*proto.TaskRequest, *proto.TaskResponse](&agentsInventory)
 
-	commServer, grpcServer, appListener, err := startManager(cfg, &agentsInventory, taskDispatcher, db)
+	clusterServer, grpcServer, appListener, err := startManager(cfg, &agentsInventory, taskDispatcher, db)
 	defer func() {
 		if grpcServer != nil {
 			grpcServer.Stop()
@@ -98,7 +98,7 @@ func run(cfg managerConfig) error {
 	}
 
 	go func() {
-		commServer.CollectAgentsSpecs(ctx)
+		clusterServer.CollectAgentsSpecs(ctx)
 	}()
 
 	pluginDir := http.Dir(cfg.pluginDir)
@@ -116,7 +116,7 @@ func run(cfg managerConfig) error {
 		}
 	}()
 
-	grpcForwarder, cliListener, err := startCLIHandler(commServer, taskDispatcher, db)
+	grpcForwarder, cliListener, err := startCLIHandler(clusterServer, taskDispatcher, db)
 	defer func() {
 		if grpcForwarder != nil {
 			grpcForwarder.Stop()

@@ -772,7 +772,7 @@ var File_internal_proto_api_proto protoreflect.FileDescriptor
 
 const file_internal_proto_api_proto_rawDesc = "" +
 	"\n" +
-	"\x18internal/proto/api.proto\x12\x05proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18internal/proto/msg.proto\":\n" +
+	"\x18internal/proto/api.proto\x12\x05proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cinternal/proto/cluster.proto\":\n" +
 	"\x11ListAgentsRequest\x12%\n" +
 	"\x06filter\x18\x01 \x01(\x0e2\r.proto.FilterR\x06filter\"\xa2\x01\n" +
 	"\x12ListAgentsResponse\x12,\n" +
@@ -914,7 +914,7 @@ func file_internal_proto_api_proto_init() {
 	if File_internal_proto_api_proto != nil {
 		return
 	}
-	file_internal_proto_msg_proto_init()
+	file_internal_proto_cluster_proto_init()
 	file_internal_proto_api_proto_msgTypes[2].OneofWrappers = []any{}
 	file_internal_proto_api_proto_msgTypes[10].OneofWrappers = []any{}
 	type x struct{}

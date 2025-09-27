@@ -8,7 +8,7 @@ import "google/protobuf/struct.proto";
 
 option go_package = "github.com/jackadi-io/jackadi/internal/proto";
 
-service Comm {
+service Cluster {
   rpc Handshake(HandshakeRequest) returns (HandshakeResponse);
   rpc ExecTask(stream TaskResponse) returns (stream TaskRequest);
   rpc ListAgentPlugins(google.protobuf.Empty) returns (ListAgentPluginsResponse);

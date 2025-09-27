@@ -524,7 +524,7 @@ var File_internal_plugin_core_protoplugin_plugin_proto protoreflect.FileDescript
 
 const file_internal_plugin_core_protoplugin_plugin_proto_rawDesc = "" +
 	"\n" +
-	"-internal/plugin/core/protoplugin/plugin.proto\x12\vprotoplugin\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x18internal/proto/msg.proto\"\"\n" +
+	"-internal/plugin/core/protoplugin/plugin.proto\x12\vprotoplugin\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1cinternal/proto/cluster.proto\"\"\n" +
 	"\fNameResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"%\n" +
 	"\rTasksResponse\x12\x14\n" +

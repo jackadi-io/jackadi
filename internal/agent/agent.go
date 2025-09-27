@@ -46,7 +46,7 @@ type Config struct {
 
 type Agent struct {
 	config               Config
-	taskClient           proto.CommClient
+	taskClient           proto.ClusterClient
 	conn                 *grpc.ClientConn
 	pluginLoader         hcplugin.Loader
 	connectedManagerAddr string
@@ -120,7 +120,7 @@ func (a *Agent) Connect(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	a.taskClient = proto.NewCommClient(a.conn)
+	a.taskClient = proto.NewClusterClient(a.conn)
 
 	return nil
 }

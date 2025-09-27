@@ -12,11 +12,11 @@ import (
 	"github.com/jackadi-io/jackadi/internal/manager/forwarder"
 	"github.com/jackadi-io/jackadi/internal/manager/management"
 	"github.com/jackadi-io/jackadi/internal/manager/server"
-	pb "github.com/jackadi-io/jackadi/internal/proto"
+	"github.com/jackadi-io/jackadi/internal/proto"
 	"google.golang.org/grpc"
 )
 
-func startCLIHandler(commServer *server.Server, dis forwarder.Dispatcher[*pb.TaskRequest, *pb.TaskResponse], db *badger.DB) (*grpc.Server, net.Listener, error) {
+func startCLIHandler(clusterServer *server.Server, dis forwarder.Dispatcher[*proto.TaskRequest, *proto.TaskResponse], db *badger.DB) (*grpc.Server, net.Listener, error) {
 	_ = os.MkdirAll(filepath.Dir(config.CLISocket), 0755)
 
 	lisCLI, err := net.Listen("unix", config.CLISocket)
@@ -31,10 +31,10 @@ func startCLIHandler(commServer *server.Server, dis forwarder.Dispatcher[*pb.Tas
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
 	fwd := forwarder.New(dis, db)
-	pb.RegisterForwarderServer(grpcServer, &fwd)
+	proto.RegisterForwarderServer(grpcServer, &fwd)
 
-	apiServer := management.New(commServer, db)
-	pb.RegisterAPIServer(grpcServer, &apiServer)
+	apiServer := management.New(clusterServer, db)
+	proto.RegisterAPIServer(grpcServer, &apiServer)
 
 	slog.Info("starting local gRPC server for CLI")
 	go func() {

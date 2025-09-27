@@ -8,10 +8,10 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/jackadi-io/jackadi/internal/config"
-	pb "github.com/jackadi-io/jackadi/internal/proto"
+	"github.com/jackadi-io/jackadi/internal/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/proto"
+	protobuf "google.golang.org/protobuf/proto"
 )
 
 type proxyResponse struct {
@@ -24,9 +24,9 @@ type proxyResponse struct {
 	ModuleError   string
 }
 
-func responseEnvelope(_ context.Context, response proto.Message) (any, error) {
+func responseEnvelope(_ context.Context, response protobuf.Message) (any, error) {
 	switch out := response.(type) {
-	case *pb.FwdResponse:
+	case *proto.FwdResponse:
 		decodedResponses := make(map[string]*proxyResponse)
 
 		for agentName, response := range out.GetResponses() {
@@ -71,10 +71,10 @@ func startHTTPProxy() error {
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	endpoint := fmt.Sprintf("unix:///%s", config.CLISocket)
 
-	if err := pb.RegisterAPIHandlerFromEndpoint(ctx, mux, endpoint, opts); err != nil {
+	if err := proto.RegisterAPIHandlerFromEndpoint(ctx, mux, endpoint, opts); err != nil {
 		return err
 	}
-	if err := pb.RegisterForwarderHandlerFromEndpoint(ctx, mux, endpoint, opts); err != nil {
+	if err := proto.RegisterForwarderHandlerFromEndpoint(ctx, mux, endpoint, opts); err != nil {
 		return err
 	}
 

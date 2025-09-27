@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        (unknown)
-// source: internal/proto/msg.proto
+// source: internal/proto/cluster.proto
 
 package proto
 
@@ -33,7 +33,7 @@ const (
 	InternalError_BUSY_QUEUE      InternalError = 3
 	InternalError_FULL_QUEUE      InternalError = 4
 	InternalError_UNKNOWN_TASK    InternalError = 5
-	InternalError_MODULE_ERROR    InternalError = 6
+	InternalError_MODULE_ERROR    InternalError = 6 // TODO: rename SDKError? PluginError? GRPCPluginError (GRPC between HC plugin and agent)?
 	InternalError_DISCONNECTING   InternalError = 7
 	InternalError_DISCONNECTED    InternalError = 8
 	InternalError_UNKNOWN_ERROR   InternalError = 9
@@ -78,11 +78,11 @@ func (x InternalError) String() string {
 }
 
 func (InternalError) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_msg_proto_enumTypes[0].Descriptor()
+	return file_internal_proto_cluster_proto_enumTypes[0].Descriptor()
 }
 
 func (InternalError) Type() protoreflect.EnumType {
-	return &file_internal_proto_msg_proto_enumTypes[0]
+	return &file_internal_proto_cluster_proto_enumTypes[0]
 }
 
 func (x InternalError) Number() protoreflect.EnumNumber {
@@ -91,7 +91,7 @@ func (x InternalError) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use InternalError.Descriptor instead.
 func (InternalError) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_msg_proto_rawDescGZIP(), []int{0}
+	return file_internal_proto_cluster_proto_rawDescGZIP(), []int{0}
 }
 
 type TargetMode int32
@@ -136,11 +136,11 @@ func (x TargetMode) String() string {
 }
 
 func (TargetMode) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_msg_proto_enumTypes[1].Descriptor()
+	return file_internal_proto_cluster_proto_enumTypes[1].Descriptor()
 }
 
 func (TargetMode) Type() protoreflect.EnumType {
-	return &file_internal_proto_msg_proto_enumTypes[1]
+	return &file_internal_proto_cluster_proto_enumTypes[1]
 }
 
 func (x TargetMode) Number() protoreflect.EnumNumber {
@@ -149,7 +149,7 @@ func (x TargetMode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use TargetMode.Descriptor instead.
 func (TargetMode) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_msg_proto_rawDescGZIP(), []int{1}
+	return file_internal_proto_cluster_proto_rawDescGZIP(), []int{1}
 }
 
 type LockMode int32
@@ -188,11 +188,11 @@ func (x LockMode) String() string {
 }
 
 func (LockMode) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_msg_proto_enumTypes[2].Descriptor()
+	return file_internal_proto_cluster_proto_enumTypes[2].Descriptor()
 }
 
 func (LockMode) Type() protoreflect.EnumType {
-	return &file_internal_proto_msg_proto_enumTypes[2]
+	return &file_internal_proto_cluster_proto_enumTypes[2]
 }
 
 func (x LockMode) Number() protoreflect.EnumNumber {
@@ -201,7 +201,7 @@ func (x LockMode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use LockMode.Descriptor instead.
 func (LockMode) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_msg_proto_rawDescGZIP(), []int{2}
+	return file_internal_proto_cluster_proto_rawDescGZIP(), []int{2}
 }
 
 type HandshakeRequest struct {
@@ -213,7 +213,7 @@ type HandshakeRequest struct {
 
 func (x *HandshakeRequest) Reset() {
 	*x = HandshakeRequest{}
-	mi := &file_internal_proto_msg_proto_msgTypes[0]
+	mi := &file_internal_proto_cluster_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -225,7 +225,7 @@ func (x *HandshakeRequest) String() string {
 func (*HandshakeRequest) ProtoMessage() {}
 
 func (x *HandshakeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_msg_proto_msgTypes[0]
+	mi := &file_internal_proto_cluster_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -238,7 +238,7 @@ func (x *HandshakeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HandshakeRequest.ProtoReflect.Descriptor instead.
 func (*HandshakeRequest) Descriptor() ([]byte, []int) {
-	return file_internal_proto_msg_proto_rawDescGZIP(), []int{0}
+	return file_internal_proto_cluster_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *HandshakeRequest) GetId() int64 {
@@ -257,7 +257,7 @@ type HandshakeResponse struct {
 
 func (x *HandshakeResponse) Reset() {
 	*x = HandshakeResponse{}
-	mi := &file_internal_proto_msg_proto_msgTypes[1]
+	mi := &file_internal_proto_cluster_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -269,7 +269,7 @@ func (x *HandshakeResponse) String() string {
 func (*HandshakeResponse) ProtoMessage() {}
 
 func (x *HandshakeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_msg_proto_msgTypes[1]
+	mi := &file_internal_proto_cluster_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -282,7 +282,7 @@ func (x *HandshakeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HandshakeResponse.ProtoReflect.Descriptor instead.
 func (*HandshakeResponse) Descriptor() ([]byte, []int) {
-	return file_internal_proto_msg_proto_rawDescGZIP(), []int{1}
+	return file_internal_proto_cluster_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *HandshakeResponse) GetId() int64 {
@@ -308,7 +308,7 @@ type TaskRequest struct {
 
 func (x *TaskRequest) Reset() {
 	*x = TaskRequest{}
-	mi := &file_internal_proto_msg_proto_msgTypes[2]
+	mi := &file_internal_proto_cluster_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -320,7 +320,7 @@ func (x *TaskRequest) String() string {
 func (*TaskRequest) ProtoMessage() {}
 
 func (x *TaskRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_msg_proto_msgTypes[2]
+	mi := &file_internal_proto_cluster_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -333,7 +333,7 @@ func (x *TaskRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TaskRequest.ProtoReflect.Descriptor instead.
 func (*TaskRequest) Descriptor() ([]byte, []int) {
-	return file_internal_proto_msg_proto_rawDescGZIP(), []int{2}
+	return file_internal_proto_cluster_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *TaskRequest) GetId() int64 {
@@ -402,7 +402,7 @@ type Input struct {
 
 func (x *Input) Reset() {
 	*x = Input{}
-	mi := &file_internal_proto_msg_proto_msgTypes[3]
+	mi := &file_internal_proto_cluster_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -414,7 +414,7 @@ func (x *Input) String() string {
 func (*Input) ProtoMessage() {}
 
 func (x *Input) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_msg_proto_msgTypes[3]
+	mi := &file_internal_proto_cluster_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -427,7 +427,7 @@ func (x *Input) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Input.ProtoReflect.Descriptor instead.
 func (*Input) Descriptor() ([]byte, []int) {
-	return file_internal_proto_msg_proto_rawDescGZIP(), []int{3}
+	return file_internal_proto_cluster_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Input) GetArgs() *structpb.ListValue {
@@ -450,16 +450,16 @@ type TaskResponse struct {
 	GroupID       *int64                 `protobuf:"varint,2,opt,name=groupID,proto3,oneof" json:"groupID,omitempty"`
 	Output        []byte                 `protobuf:"bytes,3,opt,name=output,proto3" json:"output,omitempty"`
 	Error         string                 `protobuf:"bytes,4,opt,name=error,proto3" json:"error,omitempty"`
-	Retcode       int32                  `protobuf:"varint,5,opt,name=retcode,proto3" json:"retcode,omitempty"`
-	InternalError InternalError          `protobuf:"varint,6,opt,name=internalError,proto3,enum=proto.InternalError" json:"internalError,omitempty"`
-	ModuleError   string                 `protobuf:"bytes,7,opt,name=moduleError,proto3" json:"moduleError,omitempty"`
+	Retcode       int32                  `protobuf:"varint,5,opt,name=retcode,proto3" json:"retcode,omitempty"`                                      // TODO: remove
+	InternalError InternalError          `protobuf:"varint,6,opt,name=internalError,proto3,enum=proto.InternalError" json:"internalError,omitempty"` // Could be the global error type ( != OK when the task returned an error)
+	ModuleError   string                 `protobuf:"bytes,7,opt,name=moduleError,proto3" json:"moduleError,omitempty"`                               // TODO: rename SDKError? PluginError? GRPCPluginError (GRPC between HC plugin and agent)?, or InternalErrorMsg. Can it be merged with error?
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *TaskResponse) Reset() {
 	*x = TaskResponse{}
-	mi := &file_internal_proto_msg_proto_msgTypes[4]
+	mi := &file_internal_proto_cluster_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -471,7 +471,7 @@ func (x *TaskResponse) String() string {
 func (*TaskResponse) ProtoMessage() {}
 
 func (x *TaskResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_msg_proto_msgTypes[4]
+	mi := &file_internal_proto_cluster_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -484,7 +484,7 @@ func (x *TaskResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TaskResponse.ProtoReflect.Descriptor instead.
 func (*TaskResponse) Descriptor() ([]byte, []int) {
-	return file_internal_proto_msg_proto_rawDescGZIP(), []int{4}
+	return file_internal_proto_cluster_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *TaskResponse) GetId() int64 {
@@ -545,7 +545,7 @@ type FwdResponse struct {
 
 func (x *FwdResponse) Reset() {
 	*x = FwdResponse{}
-	mi := &file_internal_proto_msg_proto_msgTypes[5]
+	mi := &file_internal_proto_cluster_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -557,7 +557,7 @@ func (x *FwdResponse) String() string {
 func (*FwdResponse) ProtoMessage() {}
 
 func (x *FwdResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_msg_proto_msgTypes[5]
+	mi := &file_internal_proto_cluster_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -570,7 +570,7 @@ func (x *FwdResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FwdResponse.ProtoReflect.Descriptor instead.
 func (*FwdResponse) Descriptor() ([]byte, []int) {
-	return file_internal_proto_msg_proto_rawDescGZIP(), []int{5}
+	return file_internal_proto_cluster_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *FwdResponse) GetResponses() map[string]*TaskResponse {
@@ -589,7 +589,7 @@ type ListAgentPluginsResponse struct {
 
 func (x *ListAgentPluginsResponse) Reset() {
 	*x = ListAgentPluginsResponse{}
-	mi := &file_internal_proto_msg_proto_msgTypes[6]
+	mi := &file_internal_proto_cluster_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -601,7 +601,7 @@ func (x *ListAgentPluginsResponse) String() string {
 func (*ListAgentPluginsResponse) ProtoMessage() {}
 
 func (x *ListAgentPluginsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_msg_proto_msgTypes[6]
+	mi := &file_internal_proto_cluster_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -614,7 +614,7 @@ func (x *ListAgentPluginsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAgentPluginsResponse.ProtoReflect.Descriptor instead.
 func (*ListAgentPluginsResponse) Descriptor() ([]byte, []int) {
-	return file_internal_proto_msg_proto_rawDescGZIP(), []int{6}
+	return file_internal_proto_cluster_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListAgentPluginsResponse) GetPlugin() map[string]string {
@@ -624,11 +624,11 @@ func (x *ListAgentPluginsResponse) GetPlugin() map[string]string {
 	return nil
 }
 
-var File_internal_proto_msg_proto protoreflect.FileDescriptor
+var File_internal_proto_cluster_proto protoreflect.FileDescriptor
 
-const file_internal_proto_msg_proto_rawDesc = "" +
+const file_internal_proto_cluster_proto_rawDesc = "" +
 	"\n" +
-	"\x18internal/proto/msg.proto\x12\x05proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\"\"\n" +
+	"\x1cinternal/proto/cluster.proto\x12\x05proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\"\"\n" +
 	"\x10HandshakeRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"#\n" +
 	"\x11HandshakeResponse\x12\x0e\n" +
@@ -693,8 +693,8 @@ const file_internal_proto_msg_proto_rawDesc = "" +
 	"\vUNSPECIFIED\x10\x00\x12\v\n" +
 	"\aNO_LOCK\x10\x01\x12\t\n" +
 	"\x05WRITE\x10\x02\x12\r\n" +
-	"\tEXCLUSIVE\x10\x032\xcc\x01\n" +
-	"\x04Comm\x12>\n" +
+	"\tEXCLUSIVE\x10\x032\xcf\x01\n" +
+	"\aCluster\x12>\n" +
 	"\tHandshake\x12\x17.proto.HandshakeRequest\x1a\x18.proto.HandshakeResponse\x127\n" +
 	"\bExecTask\x12\x13.proto.TaskResponse\x1a\x12.proto.TaskRequest(\x010\x01\x12K\n" +
 	"\x10ListAgentPlugins\x12\x16.google.protobuf.Empty\x1a\x1f.proto.ListAgentPluginsResponse2Y\n" +
@@ -702,20 +702,20 @@ const file_internal_proto_msg_proto_rawDesc = "" +
 	"\bExecTask\x12\x12.proto.TaskRequest\x1a\x12.proto.FwdResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/task/execB.Z,github.com/jackadi-io/jackadi/internal/protob\x06proto3"
 
 var (
-	file_internal_proto_msg_proto_rawDescOnce sync.Once
-	file_internal_proto_msg_proto_rawDescData []byte
+	file_internal_proto_cluster_proto_rawDescOnce sync.Once
+	file_internal_proto_cluster_proto_rawDescData []byte
 )
 
-func file_internal_proto_msg_proto_rawDescGZIP() []byte {
-	file_internal_proto_msg_proto_rawDescOnce.Do(func() {
-		file_internal_proto_msg_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_internal_proto_msg_proto_rawDesc), len(file_internal_proto_msg_proto_rawDesc)))
+func file_internal_proto_cluster_proto_rawDescGZIP() []byte {
+	file_internal_proto_cluster_proto_rawDescOnce.Do(func() {
+		file_internal_proto_cluster_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_internal_proto_cluster_proto_rawDesc), len(file_internal_proto_cluster_proto_rawDesc)))
 	})
-	return file_internal_proto_msg_proto_rawDescData
+	return file_internal_proto_cluster_proto_rawDescData
 }
 
-var file_internal_proto_msg_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_internal_proto_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
-var file_internal_proto_msg_proto_goTypes = []any{
+var file_internal_proto_cluster_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_internal_proto_cluster_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_internal_proto_cluster_proto_goTypes = []any{
 	(InternalError)(0),               // 0: proto.InternalError
 	(TargetMode)(0),                  // 1: proto.TargetMode
 	(LockMode)(0),                    // 2: proto.LockMode
@@ -732,7 +732,7 @@ var file_internal_proto_msg_proto_goTypes = []any{
 	(*structpb.Struct)(nil),          // 13: google.protobuf.Struct
 	(*emptypb.Empty)(nil),            // 14: google.protobuf.Empty
 }
-var file_internal_proto_msg_proto_depIdxs = []int32{
+var file_internal_proto_cluster_proto_depIdxs = []int32{
 	1,  // 0: proto.TaskRequest.target_mode:type_name -> proto.TargetMode
 	2,  // 1: proto.TaskRequest.lock_mode:type_name -> proto.LockMode
 	6,  // 2: proto.TaskRequest.input:type_name -> proto.Input
@@ -742,13 +742,13 @@ var file_internal_proto_msg_proto_depIdxs = []int32{
 	10, // 6: proto.FwdResponse.responses:type_name -> proto.FwdResponse.ResponsesEntry
 	11, // 7: proto.ListAgentPluginsResponse.plugin:type_name -> proto.ListAgentPluginsResponse.PluginEntry
 	7,  // 8: proto.FwdResponse.ResponsesEntry.value:type_name -> proto.TaskResponse
-	3,  // 9: proto.Comm.Handshake:input_type -> proto.HandshakeRequest
-	7,  // 10: proto.Comm.ExecTask:input_type -> proto.TaskResponse
-	14, // 11: proto.Comm.ListAgentPlugins:input_type -> google.protobuf.Empty
+	3,  // 9: proto.Cluster.Handshake:input_type -> proto.HandshakeRequest
+	7,  // 10: proto.Cluster.ExecTask:input_type -> proto.TaskResponse
+	14, // 11: proto.Cluster.ListAgentPlugins:input_type -> google.protobuf.Empty
 	5,  // 12: proto.Forwarder.ExecTask:input_type -> proto.TaskRequest
-	4,  // 13: proto.Comm.Handshake:output_type -> proto.HandshakeResponse
-	5,  // 14: proto.Comm.ExecTask:output_type -> proto.TaskRequest
-	9,  // 15: proto.Comm.ListAgentPlugins:output_type -> proto.ListAgentPluginsResponse
+	4,  // 13: proto.Cluster.Handshake:output_type -> proto.HandshakeResponse
+	5,  // 14: proto.Cluster.ExecTask:output_type -> proto.TaskRequest
+	9,  // 15: proto.Cluster.ListAgentPlugins:output_type -> proto.ListAgentPluginsResponse
 	8,  // 16: proto.Forwarder.ExecTask:output_type -> proto.FwdResponse
 	13, // [13:17] is the sub-list for method output_type
 	9,  // [9:13] is the sub-list for method input_type
@@ -757,29 +757,29 @@ var file_internal_proto_msg_proto_depIdxs = []int32{
 	0,  // [0:9] is the sub-list for field type_name
 }
 
-func init() { file_internal_proto_msg_proto_init() }
-func file_internal_proto_msg_proto_init() {
-	if File_internal_proto_msg_proto != nil {
+func init() { file_internal_proto_cluster_proto_init() }
+func file_internal_proto_cluster_proto_init() {
+	if File_internal_proto_cluster_proto != nil {
 		return
 	}
-	file_internal_proto_msg_proto_msgTypes[2].OneofWrappers = []any{}
-	file_internal_proto_msg_proto_msgTypes[4].OneofWrappers = []any{}
+	file_internal_proto_cluster_proto_msgTypes[2].OneofWrappers = []any{}
+	file_internal_proto_cluster_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_proto_msg_proto_rawDesc), len(file_internal_proto_msg_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_proto_cluster_proto_rawDesc), len(file_internal_proto_cluster_proto_rawDesc)),
 			NumEnums:      3,
 			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   2,
 		},
-		GoTypes:           file_internal_proto_msg_proto_goTypes,
-		DependencyIndexes: file_internal_proto_msg_proto_depIdxs,
-		EnumInfos:         file_internal_proto_msg_proto_enumTypes,
-		MessageInfos:      file_internal_proto_msg_proto_msgTypes,
+		GoTypes:           file_internal_proto_cluster_proto_goTypes,
+		DependencyIndexes: file_internal_proto_cluster_proto_depIdxs,
+		EnumInfos:         file_internal_proto_cluster_proto_enumTypes,
+		MessageInfos:      file_internal_proto_cluster_proto_msgTypes,
 	}.Build()
-	File_internal_proto_msg_proto = out.File
-	file_internal_proto_msg_proto_goTypes = nil
-	file_internal_proto_msg_proto_depIdxs = nil
+	File_internal_proto_cluster_proto = out.File
+	file_internal_proto_cluster_proto_goTypes = nil
+	file_internal_proto_cluster_proto_depIdxs = nil
 }

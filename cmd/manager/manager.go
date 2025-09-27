@@ -53,7 +53,7 @@ func startManager(cfg managerConfig, agentsInventory *inventory.Agents, dis forw
 	)
 
 	grpcServer := grpc.NewServer(opts...)
-	commServer := server.New(
+	clusterServer := server.New(
 		server.ServerConfig{
 			AutoAccept:  cfg.autoAcceptAgent,
 			MTLSEnabled: cfg.mTLS,
@@ -64,7 +64,7 @@ func startManager(cfg managerConfig, agentsInventory *inventory.Agents, dis forw
 		dis,
 		db,
 	)
-	proto.RegisterCommServer(grpcServer, &commServer)
+	proto.RegisterClusterServer(grpcServer, &clusterServer)
 
 	slog.Info("starting gRPC server")
 	slog.Info("listening", "address", cfg.listenAddress, "port", target)
@@ -73,5 +73,5 @@ func startManager(cfg managerConfig, agentsInventory *inventory.Agents, dis forw
 			slog.Error("gRPC server stopped", "reason", err)
 		}
 	}()
-	return &commServer, grpcServer, lis, nil
+	return &clusterServer, grpcServer, lis, nil
 }

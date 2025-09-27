@@ -30,7 +30,7 @@ type ServerConfig struct {
 }
 
 type Server struct {
-	proto.UnimplementedCommServer
+	proto.UnimplementedClusterServer
 	config          ServerConfig
 	Inventory       *inventory.Agents
 	taskDispatcher  forwarder.Dispatcher[*proto.TaskRequest, *proto.TaskResponse]
@@ -148,7 +148,7 @@ func (s *Server) storeResult(agentID agent.ID, msg *proto.TaskResponse) {
 }
 
 // dispatchRequestsToAgent waits for requests and send them to the linked agent.
-func (s *Server) dispatchRequestsToAgent(agentID agent.ID, stream proto.Comm_ExecTaskServer, responsesCh map[int64]chan *proto.TaskResponse, responsesChLock *sync.Mutex) error {
+func (s *Server) dispatchRequestsToAgent(agentID agent.ID, stream proto.Cluster_ExecTaskServer, responsesCh map[int64]chan *proto.TaskResponse, responsesChLock *sync.Mutex) error {
 	tasksCh, err := s.taskDispatcher.GetTasksChannel(agentID)
 	if err != nil {
 		return err
@@ -187,7 +187,7 @@ func (s *Server) dispatchRequestsToAgent(agentID agent.ID, stream proto.Comm_Exe
 // dispatchAgentResponse waits for agent's response and send it back to the requester.
 //
 // It stores all received responses to job database.
-func (s *Server) dispatchAgentResponse(stream proto.Comm_ExecTaskServer, agentID agent.ID, responsesCh map[int64]chan *proto.TaskResponse, responsesChLock *sync.Mutex) error {
+func (s *Server) dispatchAgentResponse(stream proto.Cluster_ExecTaskServer, agentID agent.ID, responsesCh map[int64]chan *proto.TaskResponse, responsesChLock *sync.Mutex) error {
 	ctx := stream.Context()
 
 	for {
@@ -246,7 +246,7 @@ func (s *Server) dispatchAgentResponse(stream proto.Comm_ExecTaskServer, agentID
 //
 // It handles the sending of requests and the routing of the response.
 // The responses is routed to the dispatcher (usually the forwarder).
-func (s *Server) ExecTask(stream proto.Comm_ExecTaskServer) error {
+func (s *Server) ExecTask(stream proto.Cluster_ExecTaskServer) error {
 	agent, err := signatureFromContext(stream.Context(), s.config.MTLSEnabled)
 	if err != nil {
 		return err

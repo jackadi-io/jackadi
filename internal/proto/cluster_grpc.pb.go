@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: internal/proto/msg.proto
+// source: internal/proto/cluster.proto
 
 package proto
 
@@ -20,41 +20,41 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Comm_Handshake_FullMethodName        = "/proto.Comm/Handshake"
-	Comm_ExecTask_FullMethodName         = "/proto.Comm/ExecTask"
-	Comm_ListAgentPlugins_FullMethodName = "/proto.Comm/ListAgentPlugins"
+	Cluster_Handshake_FullMethodName        = "/proto.Cluster/Handshake"
+	Cluster_ExecTask_FullMethodName         = "/proto.Cluster/ExecTask"
+	Cluster_ListAgentPlugins_FullMethodName = "/proto.Cluster/ListAgentPlugins"
 )
 
-// CommClient is the client API for Comm service.
+// ClusterClient is the client API for Cluster service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CommClient interface {
+type ClusterClient interface {
 	Handshake(ctx context.Context, in *HandshakeRequest, opts ...grpc.CallOption) (*HandshakeResponse, error)
 	ExecTask(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[TaskResponse, TaskRequest], error)
 	ListAgentPlugins(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListAgentPluginsResponse, error)
 }
 
-type commClient struct {
+type clusterClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewCommClient(cc grpc.ClientConnInterface) CommClient {
-	return &commClient{cc}
+func NewClusterClient(cc grpc.ClientConnInterface) ClusterClient {
+	return &clusterClient{cc}
 }
 
-func (c *commClient) Handshake(ctx context.Context, in *HandshakeRequest, opts ...grpc.CallOption) (*HandshakeResponse, error) {
+func (c *clusterClient) Handshake(ctx context.Context, in *HandshakeRequest, opts ...grpc.CallOption) (*HandshakeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HandshakeResponse)
-	err := c.cc.Invoke(ctx, Comm_Handshake_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Cluster_Handshake_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *commClient) ExecTask(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[TaskResponse, TaskRequest], error) {
+func (c *clusterClient) ExecTask(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[TaskResponse, TaskRequest], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Comm_ServiceDesc.Streams[0], Comm_ExecTask_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Cluster_ServiceDesc.Streams[0], Cluster_ExecTask_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,131 +63,131 @@ func (c *commClient) ExecTask(ctx context.Context, opts ...grpc.CallOption) (grp
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Comm_ExecTaskClient = grpc.BidiStreamingClient[TaskResponse, TaskRequest]
+type Cluster_ExecTaskClient = grpc.BidiStreamingClient[TaskResponse, TaskRequest]
 
-func (c *commClient) ListAgentPlugins(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListAgentPluginsResponse, error) {
+func (c *clusterClient) ListAgentPlugins(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListAgentPluginsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListAgentPluginsResponse)
-	err := c.cc.Invoke(ctx, Comm_ListAgentPlugins_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Cluster_ListAgentPlugins_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// CommServer is the server API for Comm service.
-// All implementations should embed UnimplementedCommServer
+// ClusterServer is the server API for Cluster service.
+// All implementations should embed UnimplementedClusterServer
 // for forward compatibility.
-type CommServer interface {
+type ClusterServer interface {
 	Handshake(context.Context, *HandshakeRequest) (*HandshakeResponse, error)
 	ExecTask(grpc.BidiStreamingServer[TaskResponse, TaskRequest]) error
 	ListAgentPlugins(context.Context, *emptypb.Empty) (*ListAgentPluginsResponse, error)
 }
 
-// UnimplementedCommServer should be embedded to have
+// UnimplementedClusterServer should be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedCommServer struct{}
+type UnimplementedClusterServer struct{}
 
-func (UnimplementedCommServer) Handshake(context.Context, *HandshakeRequest) (*HandshakeResponse, error) {
+func (UnimplementedClusterServer) Handshake(context.Context, *HandshakeRequest) (*HandshakeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Handshake not implemented")
 }
-func (UnimplementedCommServer) ExecTask(grpc.BidiStreamingServer[TaskResponse, TaskRequest]) error {
+func (UnimplementedClusterServer) ExecTask(grpc.BidiStreamingServer[TaskResponse, TaskRequest]) error {
 	return status.Errorf(codes.Unimplemented, "method ExecTask not implemented")
 }
-func (UnimplementedCommServer) ListAgentPlugins(context.Context, *emptypb.Empty) (*ListAgentPluginsResponse, error) {
+func (UnimplementedClusterServer) ListAgentPlugins(context.Context, *emptypb.Empty) (*ListAgentPluginsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAgentPlugins not implemented")
 }
-func (UnimplementedCommServer) testEmbeddedByValue() {}
+func (UnimplementedClusterServer) testEmbeddedByValue() {}
 
-// UnsafeCommServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CommServer will
+// UnsafeClusterServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ClusterServer will
 // result in compilation errors.
-type UnsafeCommServer interface {
-	mustEmbedUnimplementedCommServer()
+type UnsafeClusterServer interface {
+	mustEmbedUnimplementedClusterServer()
 }
 
-func RegisterCommServer(s grpc.ServiceRegistrar, srv CommServer) {
-	// If the following call pancis, it indicates UnimplementedCommServer was
+func RegisterClusterServer(s grpc.ServiceRegistrar, srv ClusterServer) {
+	// If the following call pancis, it indicates UnimplementedClusterServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&Comm_ServiceDesc, srv)
+	s.RegisterService(&Cluster_ServiceDesc, srv)
 }
 
-func _Comm_Handshake_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Cluster_Handshake_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HandshakeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CommServer).Handshake(ctx, in)
+		return srv.(ClusterServer).Handshake(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Comm_Handshake_FullMethodName,
+		FullMethod: Cluster_Handshake_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommServer).Handshake(ctx, req.(*HandshakeRequest))
+		return srv.(ClusterServer).Handshake(ctx, req.(*HandshakeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Comm_ExecTask_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(CommServer).ExecTask(&grpc.GenericServerStream[TaskResponse, TaskRequest]{ServerStream: stream})
+func _Cluster_ExecTask_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ClusterServer).ExecTask(&grpc.GenericServerStream[TaskResponse, TaskRequest]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Comm_ExecTaskServer = grpc.BidiStreamingServer[TaskResponse, TaskRequest]
+type Cluster_ExecTaskServer = grpc.BidiStreamingServer[TaskResponse, TaskRequest]
 
-func _Comm_ListAgentPlugins_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Cluster_ListAgentPlugins_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CommServer).ListAgentPlugins(ctx, in)
+		return srv.(ClusterServer).ListAgentPlugins(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Comm_ListAgentPlugins_FullMethodName,
+		FullMethod: Cluster_ListAgentPlugins_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommServer).ListAgentPlugins(ctx, req.(*emptypb.Empty))
+		return srv.(ClusterServer).ListAgentPlugins(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Comm_ServiceDesc is the grpc.ServiceDesc for Comm service.
+// Cluster_ServiceDesc is the grpc.ServiceDesc for Cluster service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Comm_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.Comm",
-	HandlerType: (*CommServer)(nil),
+var Cluster_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.Cluster",
+	HandlerType: (*ClusterServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Handshake",
-			Handler:    _Comm_Handshake_Handler,
+			Handler:    _Cluster_Handshake_Handler,
 		},
 		{
 			MethodName: "ListAgentPlugins",
-			Handler:    _Comm_ListAgentPlugins_Handler,
+			Handler:    _Cluster_ListAgentPlugins_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "ExecTask",
-			Handler:       _Comm_ExecTask_Handler,
+			Handler:       _Cluster_ExecTask_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},
 	},
-	Metadata: "internal/proto/msg.proto",
+	Metadata: "internal/proto/cluster.proto",
 }
 
 const (
@@ -287,5 +287,5 @@ var Forwarder_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/proto/msg.proto",
+	Metadata: "internal/proto/cluster.proto",
 }
