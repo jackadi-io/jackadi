@@ -96,7 +96,7 @@ func (h *Htpasswd) basicAuthMiddleware(next http.Handler) http.Handler {
 		if !ok || bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(password)) != nil {
 			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			w.WriteHeader(http.StatusUnauthorized)
-			_, _ = w.Write([]byte(`{"error":"Unauthorized","message":"Authentication required","status":401}`))
+			_, _ = w.Write([]byte(`{"error":"Unauthorized","message":"Authentication failed","status":401}`))
 			return
 		}
 
@@ -126,11 +126,6 @@ func responseEnvelope(_ context.Context, response protobuf.Message) (any, error)
 }
 
 func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
-	if !cfg.apiEnabled {
-		slog.Info("HTTP API is disabled")
-		return nil
-	}
-
 	cancelableCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
