@@ -126,6 +126,11 @@ func responseEnvelope(_ context.Context, response protobuf.Message) (any, error)
 }
 
 func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
+	if !cfg.apiEnabled {
+		slog.Info("HTTP API is disabled")
+		return nil
+	}
+
 	cancelableCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -152,9 +157,10 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 	authHandler := htpasswd.basicAuthMiddleware(mux)
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	slog.Info("starting Web API")
+	apiAddr := fmt.Sprintf("%s:%s", cfg.apiAddress, cfg.apiPort)
+	slog.Info("starting Web API", "address", apiAddr)
 	httpServer := http.Server{
-		Addr:              ":8081", // TOOD: make it configurable
+		Addr:              apiAddr,
 		Handler:           authHandler,
 		ReadHeaderTimeout: config.HTTPReadHeaderTimeout,
 	}

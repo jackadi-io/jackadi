@@ -46,6 +46,9 @@ type managerConfig struct {
 	tlsCert          string
 	tlsKey           string
 	tlsAgentCA       string
+	apiEnabled       bool
+	apiAddress       string
+	apiPort          string
 }
 
 func dbGC(ctx context.Context, db *badger.DB) {
@@ -166,13 +169,15 @@ func run(cfg managerConfig) error {
 	}()
 
 	// start API (HTTP proxy to gRPC)
-	go func() {
-		err := startHTTPProxy(ctx, cfg)
-		if err != nil {
-			slog.Error("API: HTTP proxy stopped", "reason", err)
-			closeCh <- struct{}{}
-		}
-	}()
+	if cfg.apiEnabled {
+		go func() {
+			err := startHTTPProxy(ctx, cfg)
+			if err != nil {
+				slog.Error("API: HTTP proxy stopped", "reason", err)
+				closeCh <- struct{}{}
+			}
+		}()
+	}
 
 	// graceful shutdown
 	select {
@@ -226,6 +231,9 @@ func main() {
 		tlsAgentCA:       managerCfg.TLSAgentCA,
 		autoAcceptAgent:  managerCfg.AutoAcceptAgent,
 		configDir:        managerCfg.ConfigDir,
+		apiEnabled:       managerCfg.APIEnabled,
+		apiAddress:       managerCfg.APIAddress,
+		apiPort:          managerCfg.APIPort,
 	}
 
 	slog.Info("jackadi manager", "version", version, "commit", commit, "build date", date)

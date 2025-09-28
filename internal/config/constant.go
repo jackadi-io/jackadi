@@ -12,7 +12,9 @@ const (
 	// Network.
 	DefaultManagerAddress   = "127.0.0.1"
 	DefaultManagerPort      = "40080"
-	DefaultPluginServerPort = "40081" // Default port for serving plugins.
+	DefaultPluginServerPort = "40081"     // Default port for serving plugins.
+	DefaultAPIAddress       = "127.0.0.1" // Default HTTP API address.
+	DefaultAPIPort          = "8081"      // Default HTTP API port.
 	HTTPReadHeaderTimeout   = 10 * time.Second
 
 	PluginServerPath = "/plugin/"                  // Path prefix for plugin server endpoints.
