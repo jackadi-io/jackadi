@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
@@ -17,18 +19,54 @@ import (
 	"google.golang.org/grpc/keepalive"
 )
 
-func startManager(cfg managerConfig, agentsInventory *inventory.Agents, dis forwarder.Dispatcher[*proto.TaskRequest, *proto.TaskResponse], db *badger.DB) (*server.Server, *grpc.Server, net.Listener, error) {
+type ManagerInstance struct {
+	ClusterServer *server.Server
+	grpcServer    *grpc.Server
+	listener      net.Listener
+	addr          string
+}
+
+func (m *ManagerInstance) Serve() error {
+	if m.grpcServer == nil {
+		return errors.New("grpc server is nil")
+	}
+
+	slog.Info("starting gRPC server")
+	slog.Info("listening", "socket", m.addr)
+	return m.grpcServer.Serve(m.listener)
+}
+
+func (m *ManagerInstance) Close() {
+	if m.listener != nil {
+		_ = m.listener.Close()
+	}
+
+	if m.grpcServer != nil {
+		m.grpcServer.Stop()
+	}
+}
+
+func (m *ManagerInstance) CollectAgentsSpecs(ctx context.Context) error {
+	if m.ClusterServer == nil {
+		return errors.New("server not initialized properly")
+	}
+
+	m.ClusterServer.CollectAgentsSpecs(ctx)
+	return nil
+}
+
+func newManager(cfg managerConfig, agentsInventory *inventory.Agents, dis forwarder.Dispatcher[*proto.TaskRequest, *proto.TaskResponse], db *badger.DB) (*ManagerInstance, error) {
 	target := fmt.Sprint(cfg.listenAddress, ":", cfg.listenPort)
 	lis, err := net.Listen("tcp", target)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to start TCP listener: %w", err)
+		return nil, fmt.Errorf("failed to start TCP listener: %w", err)
 	}
 
 	var opts []grpc.ServerOption
 	if cfg.mTLS {
 		certs, ca, err := config.GetMTLSCertificate(cfg.tlsCert, cfg.tlsKey, cfg.tlsAgentCA)
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
 		tlsCfg := &tls.Config{
 			MinVersion:   tls.VersionTLS12,
@@ -66,12 +104,12 @@ func startManager(cfg managerConfig, agentsInventory *inventory.Agents, dis forw
 	)
 	proto.RegisterClusterServer(grpcServer, &clusterServer)
 
-	slog.Info("starting gRPC server")
-	slog.Info("listening", "address", cfg.listenAddress, "port", target)
-	go func() {
-		if err = grpcServer.Serve(lis); err != nil {
-			slog.Error("gRPC server stopped", "reason", err)
-		}
-	}()
-	return &clusterServer, grpcServer, lis, nil
+	m := ManagerInstance{
+		ClusterServer: &clusterServer,
+		grpcServer:    grpcServer,
+		listener:      lis,
+		addr:          target,
+	}
+
+	return &m, nil
 }

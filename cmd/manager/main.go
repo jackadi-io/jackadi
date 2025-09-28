@@ -101,24 +101,31 @@ func run(cfg managerConfig) error {
 	}
 	taskDispatcher := forwarder.NewDispatcher[*proto.TaskRequest, *proto.TaskResponse](&agentsInventory)
 
-	// TODO: return close function instead of (managerGRPCServer, appListener)
-	clusterServer, managerGRPCServer, appListener, err := startManager(cfg, &agentsInventory, taskDispatcher, db)
-	defer func() {
-		if managerGRPCServer != nil {
-			managerGRPCServer.Stop()
-		}
-		if appListener != nil {
-			_ = appListener.Close()
-		}
-	}()
+	// start manager main instance
+	managerInstance, err := newManager(cfg, &agentsInventory, taskDispatcher, db)
 	if err != nil {
 		return err
 	}
-
+	defer managerInstance.Close()
 	go func() {
-		clusterServer.CollectAgentsSpecs(ctx)
+		if err := managerInstance.Serve(); err != nil {
+			slog.Error("manager failed to start", "error", err)
+			closeCh <- struct{}{}
+			return
+		}
+
+		slog.Warn("manager stoped", "error", err)
+		closeCh <- struct{}{}
 	}()
 
+	// start specs collector
+	go func() {
+		managerInstance.CollectAgentsSpecs(ctx)
+		slog.Error("spec collector stopped")
+		closeCh <- struct{}{}
+	}()
+
+	// start plugin server
 	pluginDir := http.Dir(cfg.pluginDir)
 	fs := http.FileServer(pluginDir)
 	mux := http.NewServeMux()
@@ -136,7 +143,7 @@ func run(cfg managerConfig) error {
 	}()
 
 	// GPRC server to handle CLI and API requests
-	relayGRPCServer := NewRelayGRPCServer(clusterServer, taskDispatcher, db)
+	relayGRPCServer := NewRelayGRPCServer(managerInstance.ClusterServer, taskDispatcher, db)
 	defer func() {
 		if relayGRPCServer != nil {
 			relayGRPCServer.Stop()
@@ -149,6 +156,7 @@ func run(cfg managerConfig) error {
 		return err
 	}
 
+	// server CLI
 	slog.Info("starting local gRPC server for CLI")
 	go func() {
 		if err = relayGRPCServer.Serve(cliListener); err != nil {
@@ -157,6 +165,7 @@ func run(cfg managerConfig) error {
 		}
 	}()
 
+	// start API (HTTP proxy to gRPC)
 	go func() {
 		err := startHTTPProxy(ctx, cfg)
 		if err != nil {

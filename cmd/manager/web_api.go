@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/jackadi-io/jackadi/internal/config"
@@ -56,6 +57,9 @@ func (h *Htpasswd) load(file string) error {
 	if err != nil {
 		return fmt.Errorf("htpasswd not loaded: %w", err)
 	}
+	defer func() {
+		_ = fd.Close()
+	}()
 
 	creds := make(map[string]string)
 	sc := bufio.NewScanner(fd)
@@ -71,6 +75,9 @@ func (h *Htpasswd) load(file string) error {
 		creds[parts[0]] = parts[1]
 	}
 	h.creds = creds
+	if len(h.creds) == 0 {
+		return errors.New("no credentials in htpasswd file")
+	}
 	return nil
 }
 
@@ -99,7 +106,7 @@ func (h *Htpasswd) basicAuthMiddleware(next http.Handler) http.Handler {
 
 func responseEnvelope(_ context.Context, response protobuf.Message) (any, error) {
 	if out, ok := response.(*proto.FwdResponse); ok {
-		decodedResponses := make(map[string]*proxyResponse)
+		decodedResponses := make(map[string]*proxyResponse, len(out.GetResponses()))
 
 		for agentName, response := range out.GetResponses() {
 			decodedResponse := proxyResponse{
@@ -154,7 +161,9 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 
 	go func() {
 		<-ctx.Done()
-		if err := httpServer.Shutdown(ctx); err != nil {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := httpServer.Shutdown(shutdownCtx); err != nil {
 			slog.Warn("web api failed to stop properly", "error", err)
 		}
 	}()
