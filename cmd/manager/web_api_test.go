@@ -144,7 +144,7 @@ func TestHtpasswd_load(t *testing.T) {
 				creds: make(map[string]string),
 			},
 			args:    args{},
-			wantErr: false,
+			wantErr: true,
 			setupFn: func(t *testing.T) string {
 				t.Helper()
 				return createTempHtpasswdFile(t, "")
