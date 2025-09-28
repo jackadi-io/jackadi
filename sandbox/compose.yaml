@@ -9,6 +9,7 @@ services:
       - JACKADI_MANAGER_MTLS_CERT=/etc/jackadi/tls/manager_cert.pem
       - JACKADI_MANAGER_MTLS_KEY=/etc/jackadi/tls/manager_key.pem
       - JACKADI_MANAGER_MTLS_AGENT_CA_CERT=/etc/jackadi/tls/agent_ca_cert.pem
+      - JACKADI_MANAGER_API_ADDRESS=0.0.0.0
     command: sh -c "\
       jack completion bash > /etc/bash_completion.d/_jack && \
       exec jackadi-manager"
