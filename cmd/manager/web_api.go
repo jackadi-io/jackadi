@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -153,12 +154,28 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	apiAddr := fmt.Sprintf("%s:%s", cfg.apiAddress, cfg.apiPort)
-	slog.Info("starting Web API", "address", apiAddr)
 	httpServer := http.Server{
 		Addr:              apiAddr,
 		Handler:           authHandler,
 		ReadHeaderTimeout: config.HTTPReadHeaderTimeout,
 	}
+
+	// Configure TLS if enabled
+	if cfg.apiTLSEnabled {
+		if cfg.apiTLSCert == "" || cfg.apiTLSKey == "" {
+			return errors.New("API TLS enabled but certificate or key file not specified")
+		}
+
+		certs, err := config.GetAPITLSCertificate(cfg.apiTLSCert, cfg.apiTLSKey)
+		if err != nil {
+			return fmt.Errorf("failed to load API TLS configuration: %w", err)
+		}
+
+		httpServer.TLSConfig = &tls.Config{
+			Certificates: certs,
+		}
+	}
+	slog.Info("starting Web API", "address", apiAddr)
 
 	go func() {
 		<-ctx.Done()
@@ -168,5 +185,9 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 			slog.Warn("web api failed to stop properly", "error", err)
 		}
 	}()
-	return httpServer.ListenAndServe() // TODO: TLS
+
+	if cfg.apiTLSEnabled {
+		return httpServer.ListenAndServeTLS("", "")
+	}
+	return httpServer.ListenAndServe()
 }

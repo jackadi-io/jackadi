@@ -49,6 +49,9 @@ type managerConfig struct {
 	apiEnabled       bool
 	apiAddress       string
 	apiPort          string
+	apiTLSEnabled    bool
+	apiTLSCert       string
+	apiTLSKey        string
 }
 
 func dbGC(ctx context.Context, db *badger.DB) {
@@ -234,6 +237,9 @@ func main() {
 		apiEnabled:       managerCfg.APIEnabled,
 		apiAddress:       managerCfg.APIAddress,
 		apiPort:          managerCfg.APIPort,
+		apiTLSEnabled:    managerCfg.APITLSEnabled,
+		apiTLSCert:       managerCfg.APITLSCert,
+		apiTLSKey:        managerCfg.APITLSKey,
 	}
 
 	slog.Info("jackadi manager", "version", version, "commit", commit, "build date", date)

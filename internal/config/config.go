@@ -42,6 +42,9 @@ type ManagerConfig struct {
 	APIEnabled       bool   `mapstructure:"api-enabled" yaml:"api-enabled"`
 	APIAddress       string `mapstructure:"api-address" yaml:"api-address"`
 	APIPort          string `mapstructure:"api-port" yaml:"api-port"`
+	APITLSEnabled    bool   `mapstructure:"api-tls-enabled" yaml:"api-tls-enabled"`
+	APITLSCert       string `mapstructure:"api-tls-cert" yaml:"api-tls-cert"`
+	APITLSKey        string `mapstructure:"api-tls-key" yaml:"api-tls-key"`
 }
 
 func SetupAgentFlags() {
@@ -74,6 +77,9 @@ func SetupManagerFlags() {
 	pflag.Bool("api-enabled", true, "enable HTTP REST API")
 	pflag.String("api-address", DefaultAPIAddress, "HTTP API listen address")
 	pflag.String("api-port", DefaultAPIPort, "HTTP API listen port")
+	pflag.Bool("api-tls-enabled", false, "enable TLS for HTTP REST API")
+	pflag.String("api-tls-cert", "", "API TLS certificate filepath")
+	pflag.String("api-tls-key", "", "API TLS key filepath")
 	pflag.String("config", "", "config file path")
 }
 
@@ -175,6 +181,9 @@ func LoadManagerConfig(configFile string) (*ManagerConfig, error) {
 	v.SetDefault("api-enabled", true)
 	v.SetDefault("api-address", DefaultAPIAddress)
 	v.SetDefault("api-port", DefaultAPIPort)
+	v.SetDefault("api-tls-enabled", false)
+	v.SetDefault("api-tls-cert", "")
+	v.SetDefault("api-tls-key", "")
 
 	v.SetEnvPrefix("JACKADI_MANAGER")
 	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))

@@ -34,3 +34,17 @@ func GetMTLSCertificate(localCert, localKey, peerCA string) ([]tls.Certificate, 
 
 	return []tls.Certificate{cert}, ca, nil
 }
+
+// GetAPITLSCertificate returns the TLS configuration for API server using the provided certificate and key.
+//
+// Example usage:
+//
+//	GetAPITLSCertificate("./tls-example/api_cert.pem", "./tls-example/api_key.pem")
+func GetAPITLSCertificate(certFile, keyFile string) ([]tls.Certificate, error) {
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load API certificate/privkey: %w", err)
+	}
+
+	return []tls.Certificate{cert}, nil
+}
