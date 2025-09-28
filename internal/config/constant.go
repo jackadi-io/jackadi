@@ -17,6 +17,7 @@ const (
 
 	PluginServerPath = "/plugin/"                  // Path prefix for plugin server endpoints.
 	CLISocket        = "/run/jackadi/manager.sock" // Unix socket path for CLI communication.
+	HTPasswordFile   = ".htpasswd"
 
 	// Timing and duration config.
 	TaskTimeout             = 30 * time.Second

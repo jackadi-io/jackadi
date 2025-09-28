@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -49,10 +51,10 @@ func (h *Htpasswd) Get(user string) (string, error) {
 	return password, nil
 }
 
-func (h *Htpasswd) load(file string) (map[string]string, error) {
+func (h *Htpasswd) load(file string) error {
 	fd, err := os.Open(file)
 	if err != nil {
-		return nil, fmt.Errorf("htpasswd not loaded: %w", err)
+		return fmt.Errorf("htpasswd not loaded: %w", err)
 	}
 
 	creds := make(map[string]string)
@@ -68,8 +70,8 @@ func (h *Htpasswd) load(file string) (map[string]string, error) {
 		}
 		creds[parts[0]] = parts[1]
 	}
-
-	return creds, nil
+	h.creds = creds
+	return nil
 }
 
 func (h *Htpasswd) basicAuthMiddleware(next http.Handler) http.Handler {
@@ -80,14 +82,14 @@ func (h *Htpasswd) basicAuthMiddleware(next http.Handler) http.Handler {
 		if err != nil {
 			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("401 Unauthorized\n"))
+			_, _ = w.Write([]byte(`{"error":"Unauthorized","message":"Authentication required","status":401}`))
 			return
 		}
 
-		if !ok || password != bcrypt.CompareHashAndPassword(expectedHash, []byte(password)) {
+		if !ok || bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(password)) != nil {
 			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("401 Unauthorized\n"))
+			_, _ = w.Write([]byte(`{"error":"Unauthorized","message":"Authentication required","status":401}`))
 			return
 		}
 
@@ -96,8 +98,7 @@ func (h *Htpasswd) basicAuthMiddleware(next http.Handler) http.Handler {
 }
 
 func responseEnvelope(_ context.Context, response protobuf.Message) (any, error) {
-	switch out := response.(type) {
-	case *proto.FwdResponse:
+	if out, ok := response.(*proto.FwdResponse); ok {
 		decodedResponses := make(map[string]*proxyResponse)
 
 		for agentName, response := range out.GetResponses() {
@@ -111,15 +112,14 @@ func responseEnvelope(_ context.Context, response protobuf.Message) (any, error)
 			}
 			decodedResponses[agentName] = &decodedResponse
 		}
-
 		return decodedResponses, nil
 	}
+
 	return response, nil
 }
 
-func startHTTPProxy() error {
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
+	cancelableCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	mux := runtime.NewServeMux(
@@ -128,18 +128,35 @@ func startHTTPProxy() error {
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	endpoint := fmt.Sprintf("unix:///%s", config.CLISocket)
 
-	if err := proto.RegisterAPIHandlerFromEndpoint(ctx, mux, endpoint, opts); err != nil {
-		return err
-	}
-	if err := proto.RegisterForwarderHandlerFromEndpoint(ctx, mux, endpoint, opts); err != nil {
+	if err := proto.RegisterForwarderHandlerFromEndpoint(cancelableCtx, mux, endpoint, opts); err != nil {
 		return err
 	}
 
+	if err := proto.RegisterAPIHandlerFromEndpoint(cancelableCtx, mux, endpoint, opts); err != nil {
+		return err
+	}
 	// Wrap the mux with basic auth middleware
+	slog.Info("loading htpasswd")
 	htpasswd := NewHtpasswd()
-	htpasswd.load(".htpasswd") // TODO: right location
+	err := htpasswd.load(filepath.Join(cfg.configDir, config.HTPasswordFile))
+	if err != nil {
+		slog.Warn("htpasswd not loaded", "error", err)
+	}
 	authHandler := htpasswd.basicAuthMiddleware(mux)
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	return http.ListenAndServe(":8081", authHandler)
+	slog.Info("starting Web API")
+	httpServer := http.Server{
+		Addr:              ":8081", // TOOD: make it configurable
+		Handler:           authHandler,
+		ReadHeaderTimeout: config.HTTPReadHeaderTimeout,
+	}
+
+	go func() {
+		<-ctx.Done()
+		if err := httpServer.Shutdown(ctx); err != nil {
+			slog.Warn("web api failed to stop properly", "error", err)
+		}
+	}()
+	return httpServer.ListenAndServe() // TODO: TLS
 }
