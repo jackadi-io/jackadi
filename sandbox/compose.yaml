@@ -18,6 +18,7 @@ services:
       - ./manager:/usr/bin/jackadi-manager
       - ./plugins/:/opt/jackadi/plugins/
       - ./plugins.yaml:/etc/jackadi/plugins.yaml
+      - ./authorization.yaml:/etc/jackadi/authorization.yaml
       - ./htpasswd:/etc/jackadi/.htpasswd
       - ./jack:/usr/bin/jack
       - ./tls/manager_cert.pem:/etc/jackadi/tls/manager_cert.pem

@@ -150,9 +150,13 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 	if err != nil {
 		slog.Warn("htpasswd not loaded", "error", err)
 	}
-	authHandler := htpasswd.basicAuthMiddleware(mux)
+	authorizer := NewAuthorizer("")
+	if err := authorizer.Load(); err != nil {
+		return fmt.Errorf("failed to load permissions, please check authorization.yaml: %w", err)
+	}
+	authHandler := htpasswd.basicAuthMiddleware(authorizer.handler(mux))
 
-	// Start HTTP server (and proxy calls to gRPC server endpoint)
+	// start HTTP server (and proxy calls to gRPC server endpoint)
 	apiAddr := fmt.Sprintf("%s:%s", cfg.apiAddress, cfg.apiPort)
 	httpServer := http.Server{
 		Addr:              apiAddr,
@@ -160,7 +164,6 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 		ReadHeaderTimeout: config.HTTPReadHeaderTimeout,
 	}
 
-	// Configure TLS if enabled
 	if cfg.apiTLSEnabled {
 		if cfg.apiTLSCert == "" || cfg.apiTLSKey == "" {
 			return errors.New("API TLS enabled but certificate or key file not specified")
@@ -171,9 +174,7 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 			return fmt.Errorf("failed to load API TLS configuration: %w", err)
 		}
 
-		httpServer.TLSConfig = &tls.Config{
-			Certificates: certs,
-		}
+		httpServer.TLSConfig = &tls.Config{Certificates: certs}
 	}
 	slog.Info("starting Web API", "address", apiAddr)
 
@@ -187,7 +188,7 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 	}()
 
 	if cfg.apiTLSEnabled {
-		return httpServer.ListenAndServeTLS("", "")
+		return httpServer.ListenAndServeTLS("", "") // no cert file as already configured TLS earlier
 	}
 	return httpServer.ListenAndServe()
 }

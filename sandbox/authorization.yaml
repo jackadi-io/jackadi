@@ -1,0 +1,19 @@
+users:
+  demo1:
+    roles:
+      - admin
+  demo2:
+    roles:
+      - user
+
+roles:
+  admin:
+    endpoints:
+      - "*:*"
+    tasks:
+      - "*:*"
+  user:
+    endpoints:
+      - "plugin:list"
+    tasks:
+      - "specs:*"

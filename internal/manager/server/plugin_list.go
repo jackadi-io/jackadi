@@ -30,6 +30,7 @@ func (s *Server) loadPluginsPolicies() (map[string][]pluginInfo, error) {
 		return s.pluginPolicies.cache, nil
 	}
 
+	// TODO: do we really want to "live" reload from the file? maybe make this configurable
 	configFile := path.Join(s.config.ConfigDir, "plugins.yaml")
 	slog.Debug("get plugin list from file", "file", configFile)
 	data, err := os.ReadFile(configFile)
