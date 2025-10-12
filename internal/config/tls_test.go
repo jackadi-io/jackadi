@@ -22,6 +22,7 @@ func TestGetAPITLSCertificate(t *testing.T) {
 		{
 			name: "valid certificate and key files",
 			setupFn: func(t *testing.T) (string, string) {
+				t.Helper()
 				return createTempTLSFiles(t)
 			},
 			cleanupFn: cleanupTLSFiles,
@@ -30,10 +31,12 @@ func TestGetAPITLSCertificate(t *testing.T) {
 		{
 			name: "non-existent certificate file",
 			setupFn: func(t *testing.T) (string, string) {
+				t.Helper()
 				_, keyFile := createTempTLSFiles(t)
 				return "/non/existent/cert.pem", keyFile
 			},
 			cleanupFn: func(t *testing.T, certFile, keyFile string) {
+				t.Helper()
 				// Only cleanup keyFile since certFile doesn't exist
 				if err := os.Remove(keyFile); err != nil {
 					t.Errorf("Failed to cleanup key file: %v", err)
@@ -44,10 +47,12 @@ func TestGetAPITLSCertificate(t *testing.T) {
 		{
 			name: "non-existent key file",
 			setupFn: func(t *testing.T) (string, string) {
+				t.Helper()
 				certFile, _ := createTempTLSFiles(t)
 				return certFile, "/non/existent/key.pem"
 			},
 			cleanupFn: func(t *testing.T, certFile, keyFile string) {
+				t.Helper()
 				// Only cleanup certFile since keyFile doesn't exist
 				if err := os.Remove(certFile); err != nil {
 					t.Errorf("Failed to cleanup cert file: %v", err)
@@ -58,6 +63,7 @@ func TestGetAPITLSCertificate(t *testing.T) {
 		{
 			name: "empty file paths",
 			setupFn: func(t *testing.T) (string, string) {
+				t.Helper()
 				return "", ""
 			},
 			cleanupFn: nil,
@@ -70,6 +76,7 @@ func TestGetAPITLSCertificate(t *testing.T) {
 			certFile, keyFile := tt.setupFn(t)
 
 			if tt.cleanupFn != nil {
+				t.Helper()
 				defer tt.cleanupFn(t, certFile, keyFile)
 			}
 
@@ -108,11 +115,13 @@ func TestGetMTLSCertificate(t *testing.T) {
 		{
 			name: "valid mTLS configuration",
 			setupFn: func(t *testing.T) (string, string, string) {
+				t.Helper()
 				certFile, keyFile := createTempTLSFiles(t)
 				caFile := createTempCAFile(t)
 				return certFile, keyFile, caFile
 			},
 			cleanupFn: func(t *testing.T, certFile, keyFile, caFile string) {
+				t.Helper()
 				cleanupTLSFiles(t, certFile, keyFile)
 				if err := os.Remove(caFile); err != nil {
 					t.Errorf("Failed to cleanup CA file: %v", err)
@@ -123,10 +132,12 @@ func TestGetMTLSCertificate(t *testing.T) {
 		{
 			name: "non-existent CA file",
 			setupFn: func(t *testing.T) (string, string, string) {
+				t.Helper()
 				certFile, keyFile := createTempTLSFiles(t)
 				return certFile, keyFile, "/non/existent/ca.pem"
 			},
 			cleanupFn: func(t *testing.T, certFile, keyFile, caFile string) {
+				t.Helper()
 				cleanupTLSFiles(t, certFile, keyFile)
 			},
 			wantErr: true,
@@ -160,7 +171,7 @@ func TestGetMTLSCertificate(t *testing.T) {
 	}
 }
 
-// createTempTLSFiles creates temporary certificate and key files for testing
+// createTempTLSFiles creates temporary certificate and key files for testing.
 func createTempTLSFiles(t *testing.T) (certFile, keyFile string) {
 	t.Helper()
 
@@ -227,7 +238,7 @@ func createTempTLSFiles(t *testing.T) (certFile, keyFile string) {
 	return certTempFile.Name(), keyTempFile.Name()
 }
 
-// createTempCAFile creates a temporary CA certificate file for testing
+// createTempCAFile creates a temporary CA certificate file for testing.
 func createTempCAFile(t *testing.T) string {
 	t.Helper()
 
@@ -255,13 +266,13 @@ func createTempCAFile(t *testing.T) string {
 		BasicConstraintsValid: true,
 	}
 
-	// Create CA certificate
+	// create CA certificate
 	caCertDER, err := x509.CreateCertificate(rand.Reader, &caTemplate, &caTemplate, &caPrivateKey.PublicKey, caPrivateKey)
 	if err != nil {
 		t.Fatalf("Failed to create CA certificate: %v", err)
 	}
 
-	// Create temp CA file
+	// create temp CA file
 	caTempFile, err := os.CreateTemp("", "test_ca_*.pem")
 	if err != nil {
 		t.Fatalf("Failed to create temp CA file: %v", err)
@@ -276,7 +287,7 @@ func createTempCAFile(t *testing.T) string {
 	return caTempFile.Name()
 }
 
-// cleanupTLSFiles removes temporary certificate and key files
+// cleanupTLSFiles removes temporary certificate and key files.
 func cleanupTLSFiles(t *testing.T, certFile, keyFile string) {
 	t.Helper()
 	if err := os.Remove(certFile); err != nil {

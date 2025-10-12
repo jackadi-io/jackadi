@@ -174,7 +174,7 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 			return fmt.Errorf("failed to load API TLS configuration: %w", err)
 		}
 
-		httpServer.TLSConfig = &tls.Config{Certificates: certs}
+		httpServer.TLSConfig = &tls.Config{Certificates: certs, MinVersion: tls.VersionTLS12}
 	}
 	slog.Info("starting Web API", "address", apiAddr)
 

@@ -29,11 +29,7 @@ func (p *Permission) Match(resource, action string) bool {
 	}
 
 	actionMatch := action == p.Action || p.Action == "*"
-	if !actionMatch {
-		return false
-	}
-
-	return true
+	return actionMatch
 }
 
 func parsePermission(s string) (Permission, error) {
@@ -106,7 +102,7 @@ func (a *Authorizer) Load() error {
 	}
 
 	for username, userConfig := range rawConfig.Users {
-		parsedConfig.Users[User(username)] = userConfig.Roles
+		parsedConfig.Users[username] = userConfig.Roles
 	}
 
 	for roleName, roleConfig := range rawConfig.Roles {

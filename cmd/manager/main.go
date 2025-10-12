@@ -126,8 +126,8 @@ func run(cfg managerConfig) error {
 
 	// start specs collector
 	go func() {
-		managerInstance.CollectAgentsSpecs(ctx)
-		slog.Error("spec collector stopped")
+		err := managerInstance.CollectAgentsSpecs(ctx)
+		slog.Error("spec collector stopped", "error", err)
 		closeCh <- struct{}{}
 	}()
 
