@@ -51,6 +51,7 @@ services:
     environment:
       - JACKADI_AGENT_AGENT_ID=agent2
       - JACKADI_AGENT_MANAGER_ADDRESS=manager
+      - JACKADI_AGENT_MTLS_ENABLED=true
       - JACKADI_AGENT_MTLS_CERT=/etc/jackadi/tls/agent2_cert.pem
       - JACKADI_AGENT_MTLS_KEY=/etc/jackadi/tls/agent2_key.pem
       - JACKADI_AGENT_MTLS_MANAGER_CA_CERT=/etc/jackadi/tls/manager_ca_cert.pem

@@ -211,19 +211,3 @@ read
 # ============================================================================
 
 print_header "DEMO COMPLETE"
-
-echo -e "${GREEN}✓ All tasks and specs have been executed successfully!${NC}"
-echo
-echo "Key demonstrations completed:"
-echo "• Simple tasks (hello, configure, monitor)"
-echo "• Complex input types (user creation with mixed arguments)"
-echo "• Various output types (strings, numbers, arrays, structs, maps)"
-echo "• System operations with write locks (OS upgrades)"
-echo "• Spec collector for system inventory"
-echo
-echo "You can now:"
-echo "• Check task results: $JACK_CMD results list"
-echo "• View agent information and specs: $JACK_CMD agent list"
-echo "• Target agents by specs: $JACK_CMD run -q 'specs.os.distribution == \"opensuse-tumbleweed\"' demo:hello"
-echo
-echo -e "${BLUE}Thank you for trying Jackadi!${NC}"

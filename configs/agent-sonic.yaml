@@ -15,16 +15,16 @@ reconnect-delay: 10
 plugin-dir: "/var/lib/jackadi/plugins"
 plugin-server-port: "40081"
 
-# Security settings
-# Set to true and configure certificates for production
-mtls: false
-
-# TLS configuration (required when mtls: true)
-# mtls-key: "/etc/sonic/jackadi/certs/agent.key"
-# mtls-cert: "/etc/sonic/jackadi/certs/agent.crt"
-# mtls-manager-ca-cert: "/etc/sonic/jackadi/certs/ca.crt"
-
 # Custom DNS resolvers (optional)
 # custom-resolvers:
 #   - "8.8.8.8:53"
 #   - "1.1.1.1:53"
+
+# Security settings (mTLS)
+# Set enabled to true and configure certificates for production
+mtls:
+  enabled: false
+  # TLS configuration (required when enabled: true)
+  # key: "/etc/sonic/jackadi/certs/agent.key"
+  # cert: "/etc/sonic/jackadi/certs/agent.crt"
+  # manager-ca-cert: "/etc/sonic/jackadi/certs/ca.crt"

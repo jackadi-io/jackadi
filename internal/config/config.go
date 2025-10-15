@@ -15,36 +15,53 @@ import (
 var errViperConfigNotFound viper.ConfigFileNotFoundError
 
 type AgentConfig struct {
-	AgentID          string   `mapstructure:"agent-id" yaml:"agent-id"`
-	ManagerAddress   string   `mapstructure:"manager-address" yaml:"manager-address"`
-	ManagerPort      string   `mapstructure:"manager-port" yaml:"manager-port"`
-	ReconnectDelay   int      `mapstructure:"reconnect-delay" yaml:"reconnect-delay"`
-	PluginDir        string   `mapstructure:"plugin-dir" yaml:"plugin-dir"`
-	PluginServerPort string   `mapstructure:"plugin-server-port" yaml:"plugin-server-port"`
-	MTLS             bool     `mapstructure:"mtls" yaml:"mtls"`
-	TLSKey           string   `mapstructure:"mtls-key" yaml:"mtls-key"`
-	TLSCert          string   `mapstructure:"mtls-cert" yaml:"mtls-cert"`
-	TLSManagerCA     string   `mapstructure:"mtls-manager-ca-cert" yaml:"mtls-manager-ca-cert"`
-	CustomResolvers  []string `mapstructure:"custom-resolvers" yaml:"custom-resolvers"`
+	AgentID          string     `mapstructure:"agent-id" yaml:"agent-id"`
+	ManagerAddress   string     `mapstructure:"manager-address" yaml:"manager-address"`
+	ManagerPort      string     `mapstructure:"manager-port" yaml:"manager-port"`
+	ReconnectDelay   int        `mapstructure:"reconnect-delay" yaml:"reconnect-delay"`
+	PluginDir        string     `mapstructure:"plugin-dir" yaml:"plugin-dir"`
+	PluginServerPort string     `mapstructure:"plugin-server-port" yaml:"plugin-server-port"`
+	CustomResolvers  []string   `mapstructure:"custom-resolvers" yaml:"custom-resolvers"`
+	MTLS             MTLSConfig `mapstructure:"mtls" yaml:"mtls"`
+}
+
+type MTLSConfig struct {
+	Enabled   bool   `mapstructure:"enabled" yaml:"enabled"`
+	Key       string `mapstructure:"key" yaml:"key"`
+	Cert      string `mapstructure:"cert" yaml:"cert"`
+	ManagerCA string `mapstructure:"manager-ca-cert" yaml:"manager-ca-cert"`
 }
 
 type ManagerConfig struct {
-	ConfigDir        string `mapstructure:"config-dir" yaml:"config-dir"`
-	ListenAddress    string `mapstructure:"address" yaml:"address"`
-	ListenPort       string `mapstructure:"port" yaml:"port"`
-	PluginDir        string `mapstructure:"plugin-dir" yaml:"plugin-dir"`
-	PluginServerPort string `mapstructure:"plugin-server-port" yaml:"plugin-server-port"`
-	AutoAcceptAgent  bool   `mapstructure:"auto-accept-agent" yaml:"auto-accept-agent"`
-	MTLS             bool   `mapstructure:"mtls" yaml:"mtls"`
-	TLSCert          string `mapstructure:"mtls-cert" yaml:"mtls-cert"`
-	TLSKey           string `mapstructure:"mtls-key" yaml:"mtls-key"`
-	TLSAgentCA       string `mapstructure:"mtls-agent-ca-cert" yaml:"mtls-agent-ca-cert"`
-	APIEnabled       bool   `mapstructure:"api-enabled" yaml:"api-enabled"`
-	APIAddress       string `mapstructure:"api-address" yaml:"api-address"`
-	APIPort          string `mapstructure:"api-port" yaml:"api-port"`
-	APITLSEnabled    bool   `mapstructure:"api-tls-enabled" yaml:"api-tls-enabled"`
-	APITLSCert       string `mapstructure:"api-tls-cert" yaml:"api-tls-cert"`
-	APITLSKey        string `mapstructure:"api-tls-key" yaml:"api-tls-key"`
+	ManagerID        string            `mapstructure:"manager-id" yaml:"manager-id"`
+	ConfigDir        string            `mapstructure:"config-dir" yaml:"config-dir"`
+	ListenAddress    string            `mapstructure:"address" yaml:"address"`
+	ListenPort       string            `mapstructure:"port" yaml:"port"`
+	PluginDir        string            `mapstructure:"plugin-dir" yaml:"plugin-dir"`
+	PluginServerPort string            `mapstructure:"plugin-server-port" yaml:"plugin-server-port"`
+	AutoAcceptAgent  bool              `mapstructure:"auto-accept-agent" yaml:"auto-accept-agent"`
+	MTLS             ManagerMTLSConfig `mapstructure:"mtls" yaml:"mtls"`
+	API              APIConfig         `mapstructure:"api" yaml:"api"`
+}
+
+type ManagerMTLSConfig struct {
+	Enabled bool   `mapstructure:"enabled" yaml:"enabled"`
+	Key     string `mapstructure:"key" yaml:"key"`
+	Cert    string `mapstructure:"cert" yaml:"cert"`
+	AgentCA string `mapstructure:"agent-ca-cert" yaml:"agent-ca-cert"`
+}
+
+type APIConfig struct {
+	Enabled bool         `mapstructure:"enabled" yaml:"enabled"`
+	Address string       `mapstructure:"address" yaml:"address"`
+	Port    string       `mapstructure:"port" yaml:"port"`
+	TLS     APITLSConfig `mapstructure:"tls" yaml:"tls"`
+}
+
+type APITLSConfig struct {
+	Enabled bool   `mapstructure:"enabled" yaml:"enabled"`
+	Cert    string `mapstructure:"cert" yaml:"cert"`
+	Key     string `mapstructure:"key" yaml:"key"`
 }
 
 func SetupAgentFlags() {
@@ -54,11 +71,11 @@ func SetupAgentFlags() {
 	pflag.Int("reconnect-delay", int(DefaultReconnectDelay.Seconds()), "delay between reconnect attempts to the manager, in seconds")
 	pflag.String("plugin-dir", DefaultAgentPluginDir, "installed plugin directory")
 	pflag.String("plugin-server-port", DefaultPluginServerPort, "manager port used to serve plugins")
-	pflag.Bool("mtls", true, "secure connection to managers using mTLS, recommended: true")
-	pflag.String("mtls-key", "", "agent TLS key filepath")
-	pflag.String("mtls-cert", "", "agent TLS certificate filepath")
-	pflag.String("mtls-manager-ca-cert", "", "manager TLS certificate filepath")
 	pflag.StringSlice("custom-resolvers", []string{}, "custom DNS resolvers for GRPC connections (comma-separated)")
+	pflag.Bool("mtls.enabled", true, "secure connection to managers using mTLS, recommended: true")
+	pflag.String("mtls.key", "", "agent TLS key filepath")
+	pflag.String("mtls.cert", "", "agent TLS certificate filepath")
+	pflag.String("mtls.manager-ca-cert", "", "manager TLS certificate filepath")
 	pflag.String("config", "", "config file path")
 }
 
@@ -70,16 +87,16 @@ func SetupManagerFlags() {
 	pflag.String("plugin-dir", DefaultPluginDir, "plugin inventory directory")
 	pflag.String("plugin-server-port", DefaultPluginServerPort, "set manager port used to serve plugins")
 	pflag.Bool("auto-accept-agent", false, "auto accept new agents")
-	pflag.Bool("mtls", true, "secure connections to agents using mTLS, recommended: true")
-	pflag.String("mtls-key", "", "manager TLS key filepath")
-	pflag.String("mtls-cert", "", "manager TLS certificate filepath")
-	pflag.String("mtls-agent-ca-cert", "", "agent TLS certificate filepath")
-	pflag.Bool("api-enabled", true, "enable HTTP REST API")
-	pflag.String("api-address", DefaultAPIAddress, "HTTP API listen address")
-	pflag.String("api-port", DefaultAPIPort, "HTTP API listen port")
-	pflag.Bool("api-tls-enabled", false, "enable TLS for HTTP REST API")
-	pflag.String("api-tls-cert", "", "API TLS certificate filepath")
-	pflag.String("api-tls-key", "", "API TLS key filepath")
+	pflag.Bool("mtls.enabled", true, "secure connections to agents using mTLS, recommended: true")
+	pflag.String("mtls.key", "", "manager TLS key filepath")
+	pflag.String("mtls.cert", "", "manager TLS certificate filepath")
+	pflag.String("mtls.agent-ca-cert", "", "agent TLS certificate filepath")
+	pflag.Bool("api.enabled", true, "enable HTTP REST API")
+	pflag.String("api.address", DefaultAPIAddress, "HTTP API listen address")
+	pflag.String("api.port", DefaultAPIPort, "HTTP API listen port")
+	pflag.Bool("api.tls.enabled", false, "enable TLS for HTTP REST API")
+	pflag.String("api.tls.cert", "", "API TLS certificate filepath")
+	pflag.String("api.tls.key", "", "API TLS key filepath")
 	pflag.String("config", "", "config file path")
 }
 
@@ -100,14 +117,15 @@ func LoadAgentConfig(configFile string) (*AgentConfig, error) {
 	v.SetDefault("reconnect-delay", int(DefaultReconnectDelay.Seconds()))
 	v.SetDefault("plugin-dir", DefaultAgentPluginDir)
 	v.SetDefault("plugin-server-port", DefaultPluginServerPort)
-	v.SetDefault("mtls", true)
-	v.SetDefault("mtls-key", "")
-	v.SetDefault("mtls-cert", "")
-	v.SetDefault("mtls-manager-ca-cert", "")
 	v.SetDefault("custom-resolvers", []string{})
 
+	v.SetDefault("mtls.enabled", true)
+	v.SetDefault("mtls.key", "")
+	v.SetDefault("mtls.cert", "")
+	v.SetDefault("mtls.manager-ca-cert", "")
+
 	v.SetEnvPrefix("JACKADI_AGENT")
-	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	v.AutomaticEnv()
 
 	if configFile != "" {
@@ -131,6 +149,8 @@ func LoadAgentConfig(configFile string) (*AgentConfig, error) {
 	if err := v.BindPFlags(pflag.CommandLine); err != nil {
 		return nil, fmt.Errorf("error binding flags: %w", err)
 	}
+
+	v.RegisterAlias("agent-id", "id")
 
 	var config AgentConfig
 	if err := v.Unmarshal(&config); err != nil {
@@ -174,19 +194,21 @@ func LoadManagerConfig(configFile string) (*ManagerConfig, error) {
 	v.SetDefault("plugin-dir", DefaultPluginDir)
 	v.SetDefault("plugin-server-port", DefaultPluginServerPort)
 	v.SetDefault("auto-accept-agent", false)
-	v.SetDefault("mtls", true)
-	v.SetDefault("mtls-cert", "")
-	v.SetDefault("mtls-key", "")
-	v.SetDefault("mtls-agent-ca-cert", "")
-	v.SetDefault("api-enabled", true)
-	v.SetDefault("api-address", DefaultAPIAddress)
-	v.SetDefault("api-port", DefaultAPIPort)
-	v.SetDefault("api-tls-enabled", false)
-	v.SetDefault("api-tls-cert", "")
-	v.SetDefault("api-tls-key", "")
+
+	v.SetDefault("mtls.enabled", true)
+	v.SetDefault("mtls.cert", "")
+	v.SetDefault("mtls.key", "")
+	v.SetDefault("mtls.agent-ca-cert", "")
+
+	v.SetDefault("api.enabled", true)
+	v.SetDefault("api.address", DefaultAPIAddress)
+	v.SetDefault("api.port", DefaultAPIPort)
+	v.SetDefault("api.tls.enabled", false)
+	v.SetDefault("api.tls.cert", "")
+	v.SetDefault("api.tls.key", "")
 
 	v.SetEnvPrefix("JACKADI_MANAGER")
-	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	v.AutomaticEnv()
 
 	if err := v.ReadInConfig(); err != nil {
@@ -198,6 +220,8 @@ func LoadManagerConfig(configFile string) (*ManagerConfig, error) {
 	if err := v.BindPFlags(pflag.CommandLine); err != nil {
 		return nil, fmt.Errorf("error binding flags: %w", err)
 	}
+
+	v.RegisterAlias("manager-id", "id")
 
 	var config ManagerConfig
 	if err := v.Unmarshal(&config); err != nil {

@@ -35,10 +35,10 @@ type Config struct {
 	ManagerAddress   string
 	ManagerPort      string
 	AgentID          string
-	MTLS             bool
-	TLSCert          string
-	TLSKey           string
-	TLSManagerCA     string
+	MTLSEnabled      bool
+	MTLSCert         string
+	MTLSKey          string
+	MTLSManagerCA    string
 	PluginDir        string
 	PluginServerPort string
 	CustomResolvers  []string
@@ -99,8 +99,8 @@ func (a *Agent) Connect(ctx context.Context) error {
 		opts = append(opts, grpc.WithResolvers(r))
 	}
 
-	if a.config.MTLS {
-		certs, ca, err := config.GetMTLSCertificate(a.config.TLSCert, a.config.TLSKey, a.config.TLSManagerCA)
+	if a.config.MTLSEnabled {
+		certs, ca, err := config.GetMTLSCertificate(a.config.MTLSCert, a.config.MTLSKey, a.config.MTLSManagerCA)
 		if err != nil {
 			return err
 		}

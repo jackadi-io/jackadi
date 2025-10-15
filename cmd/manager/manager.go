@@ -64,7 +64,7 @@ func newManager(cfg managerConfig, agentsInventory *inventory.Agents, dis forwar
 
 	var opts []grpc.ServerOption
 	if cfg.mTLS {
-		certs, ca, err := config.GetMTLSCertificate(cfg.tlsCert, cfg.tlsKey, cfg.tlsAgentCA)
+		certs, ca, err := config.GetMTLSCertificate(cfg.mTLSCert, cfg.mTLSKey, cfg.mTLSAgentCA)
 		if err != nil {
 			return nil, err
 		}
