@@ -2,7 +2,7 @@ module github.com/jackadi-io/jackadi
 
 go 1.24.0
 
-toolchain go1.25.1
+toolchain go1.25.3
 
 tool (
 	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
