@@ -42,16 +42,17 @@ type managerConfig struct {
 	pluginDir        string
 	pluginServerPort string
 	autoAcceptAgent  bool
-	mTLS             bool
-	tlsCert          string
-	tlsKey           string
-	tlsAgentCA       string
-	apiEnabled       bool
-	apiAddress       string
-	apiPort          string
-	apiTLSEnabled    bool
-	apiTLSCert       string
-	apiTLSKey        string
+
+	mTLS          bool
+	mTLSCert      string
+	mTLSKey       string
+	mTLSAgentCA   string
+	apiEnabled    bool
+	apiAddress    string
+	apiPort       string
+	apiTLSEnabled bool
+	apiTLSCert    string
+	apiTLSKey     string
 }
 
 func dbGC(ctx context.Context, db *badger.DB) {
@@ -228,18 +229,18 @@ func main() {
 		listenPort:       managerCfg.ListenPort,
 		pluginDir:        managerCfg.PluginDir,
 		pluginServerPort: managerCfg.PluginServerPort,
-		mTLS:             managerCfg.MTLS,
-		tlsKey:           managerCfg.TLSKey,
-		tlsCert:          managerCfg.TLSCert,
-		tlsAgentCA:       managerCfg.TLSAgentCA,
+		mTLS:             managerCfg.MTLS.Enabled,
+		mTLSKey:          managerCfg.MTLS.Key,
+		mTLSCert:         managerCfg.MTLS.Cert,
+		mTLSAgentCA:      managerCfg.MTLS.AgentCA,
 		autoAcceptAgent:  managerCfg.AutoAcceptAgent,
 		configDir:        managerCfg.ConfigDir,
-		apiEnabled:       managerCfg.APIEnabled,
-		apiAddress:       managerCfg.APIAddress,
-		apiPort:          managerCfg.APIPort,
-		apiTLSEnabled:    managerCfg.APITLSEnabled,
-		apiTLSCert:       managerCfg.APITLSCert,
-		apiTLSKey:        managerCfg.APITLSKey,
+		apiEnabled:       managerCfg.API.Enabled,
+		apiAddress:       managerCfg.API.Address,
+		apiPort:          managerCfg.API.Port,
+		apiTLSEnabled:    managerCfg.API.TLS.Enabled,
+		apiTLSCert:       managerCfg.API.TLS.Cert,
+		apiTLSKey:        managerCfg.API.TLS.Key,
 	}
 
 	slog.Info("jackadi manager", "version", version, "commit", commit, "build date", date)

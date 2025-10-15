@@ -13,18 +13,20 @@ reconnect-delay: 10  # seconds between reconnection attempts
 plugin-dir: "/var/lib/jackadi/plugins"
 plugin-server-port: "40081"
 
-# Security settings (mTLS)
-mtls: true
-mtls-key: "/etc/jackadi/certs/agent.key"
-mtls-cert: "/etc/jackadi/certs/agent.crt"
-mtls-manager-ca-cert: "/etc/jackadi/certs/ca.crt"
-
 # Custom DNS resolvers for GRPC connections (optional)
 custom-resolvers:
   - "8.8.8.8:53"
   - "1.1.1.1:53"
 
+# Security settings (mTLS)
+mtls:
+  enabled: true
+  key: "/etc/jackadi/certs/agent.key"
+  cert: "/etc/jackadi/certs/agent.crt"
+  manager-ca-cert: "/etc/jackadi/certs/ca.crt"
+
 # Alternative minimal configuration example:
 # agent-id: "simple-agent"
 # manager-address: "manager.example.com"
-# mtls: false
+# mtls:
+#   enabled: false

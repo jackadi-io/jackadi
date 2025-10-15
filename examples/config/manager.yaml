@@ -16,14 +16,30 @@ plugin-dir: "/opt/jackadi/plugins"
 # Agent management
 auto-accept-agent: false  # Set to true to automatically accept new agents
 
-# Security settings (mTLS)
-mtls: true
-mtls-key: "/etc/jackadi/certs/manager.key"
-mtls-cert: "/etc/jackadi/certs/manager.crt"
-mtls-agent-ca-cert: "/etc/jackadi/certs/ca.crt"
+# Security settings (mTLS for agent connections)
+mtls:
+  enabled: true
+  key: "/etc/jackadi/certs/manager.key"
+  cert: "/etc/jackadi/certs/manager.crt"
+  agent-ca-cert: "/etc/jackadi/certs/ca.crt"
+
+# HTTP REST API configuration
+api:
+  enabled: true
+  address: "0.0.0.0"
+  port: "8080"
+  tls:
+    enabled: false
+    cert: ""
+    key: ""
 
 # Alternative minimal configuration example:
 # manager-id: "simple-manager"
 # address: "127.0.0.1"
 # auto-accept-agent: true
-# mtls: false
+# mtls:
+#   enabled: false
+# api:
+#   enabled: true
+#   tls:
+#     enabled: false
