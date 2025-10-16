@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
+	"github.com/jackadi-io/jackadi/internal/api"
 	"github.com/jackadi-io/jackadi/internal/config"
 	"github.com/jackadi-io/jackadi/internal/manager/forwarder"
 	"github.com/jackadi-io/jackadi/internal/manager/inventory"
@@ -175,7 +176,15 @@ func run(cfg managerConfig) error {
 	// start API (HTTP proxy to gRPC)
 	if cfg.apiEnabled {
 		go func() {
-			err := startHTTPProxy(ctx, cfg)
+			apiCfg := api.Config{
+				ConfigDir:     cfg.configDir,
+				APIAddress:    cfg.apiAddress,
+				APIPort:       cfg.apiPort,
+				APITLSEnabled: cfg.apiTLSEnabled,
+				APITLSCert:    cfg.apiTLSCert,
+				APITLSKey:     cfg.apiTLSKey,
+			}
+			err := api.StartHTTPProxy(ctx, apiCfg)
 			if err != nil {
 				slog.Error("API: HTTP proxy stopped", "reason", err)
 				closeCh <- struct{}{}

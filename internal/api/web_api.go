@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"bufio"
@@ -22,6 +22,15 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	protobuf "google.golang.org/protobuf/proto"
 )
+
+type Config struct {
+	ConfigDir     string
+	APIAddress    string
+	APIPort       string
+	APITLSEnabled bool
+	APITLSCert    string
+	APITLSKey     string
+}
 
 type proxyResponse struct {
 	Id            int64
@@ -126,7 +135,7 @@ func responseEnvelope(_ context.Context, response protobuf.Message) (any, error)
 	return response, nil
 }
 
-func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
+func StartHTTPProxy(ctx context.Context, cfg Config) error {
 	cancelableCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -146,7 +155,7 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 	// Wrap the mux with basic auth middleware
 	slog.Info("loading htpasswd")
 	htpasswd := NewHtpasswd()
-	err := htpasswd.load(filepath.Join(cfg.configDir, config.HTPasswordFile))
+	err := htpasswd.load(filepath.Join(cfg.ConfigDir, config.HTPasswordFile))
 	if err != nil {
 		slog.Warn("htpasswd not loaded", "error", err)
 	}
@@ -157,19 +166,19 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 	authHandler := htpasswd.basicAuthMiddleware(authorizer.handler(mux))
 
 	// start HTTP server (and proxy calls to gRPC server endpoint)
-	apiAddr := fmt.Sprintf("%s:%s", cfg.apiAddress, cfg.apiPort)
+	apiAddr := fmt.Sprintf("%s:%s", cfg.APIAddress, cfg.APIPort)
 	httpServer := http.Server{
 		Addr:              apiAddr,
 		Handler:           authHandler,
 		ReadHeaderTimeout: config.HTTPReadHeaderTimeout,
 	}
 
-	if cfg.apiTLSEnabled {
-		if cfg.apiTLSCert == "" || cfg.apiTLSKey == "" {
+	if cfg.APITLSEnabled {
+		if cfg.APITLSCert == "" || cfg.APITLSKey == "" {
 			return errors.New("API TLS enabled but certificate or key file not specified")
 		}
 
-		certs, err := config.GetAPITLSCertificate(cfg.apiTLSCert, cfg.apiTLSKey)
+		certs, err := config.GetAPITLSCertificate(cfg.APITLSCert, cfg.APITLSKey)
 		if err != nil {
 			return fmt.Errorf("failed to load API TLS configuration: %w", err)
 		}
@@ -187,7 +196,7 @@ func startHTTPProxy(ctx context.Context, cfg managerConfig) error {
 		}
 	}()
 
-	if cfg.apiTLSEnabled {
+	if cfg.APITLSEnabled {
 		return httpServer.ListenAndServeTLS("", "") // no cert file as already configured TLS earlier
 	}
 	return httpServer.ListenAndServe()
