@@ -159,7 +159,7 @@ func StartHTTPProxy(ctx context.Context, cfg Config) error {
 	if err != nil {
 		slog.Warn("htpasswd not loaded", "error", err)
 	}
-	authorizer := NewAuthorizer("")
+	authorizer := NewAuthorizer(cfg.ConfigDir)
 	if err := authorizer.Load(); err != nil {
 		return fmt.Errorf("failed to load permissions, please check authorization.yaml: %w", err)
 	}
