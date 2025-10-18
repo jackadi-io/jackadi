@@ -160,7 +160,7 @@ func (a *Agent) ListenTaskRequest(ctx context.Context) error {
 	for {
 		slog.Debug("waiting for new requests")
 		req, err := stream.Recv()
-		if err != nil {
+		if err != nil || req == nil {
 			slog.Debug("stream error", "error", err, "component", "task listener")
 			wg.Wait()
 			if errors.Is(err, io.EOF) {
@@ -262,12 +262,12 @@ func (a *Agent) ListenTaskRequest(ctx context.Context) error {
 						slog.Debug("task done", "id", req.Id)
 					case <-t.C:
 						slog.Debug("started task timeout", "id", req.Id)
-						resp = &proto.TaskResponse{
+						respErrTimeout := &proto.TaskResponse{
 							Id:            req.GetId(),
 							GroupID:       req.GroupID,
 							InternalError: proto.InternalError_STARTED_TIMEOUT,
 						}
-						if err = stream.Send(resp); err != nil {
+						if err := stream.Send(respErrTimeout); err != nil {
 							slog.Error("failed to send response", "err", err)
 						}
 					}
@@ -276,6 +276,7 @@ func (a *Agent) ListenTaskRequest(ctx context.Context) error {
 				// We do not use the context of stream, because we don't want to cancel a maintenance
 				// in case of temporary disconnection.
 				resp = doTask(ctx, req)
+				t.Stop()
 				finished <- struct{}{}
 
 			case <-t.C:
