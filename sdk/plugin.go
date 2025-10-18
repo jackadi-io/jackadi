@@ -201,13 +201,13 @@ func handleCommand(plugin *Plugin) {
 
 			in, err := structpb.NewList(arguments.Positional)
 			if err != nil {
-				fmt.Printf("invalid arguments: %s\n", err)
+				fmt.Fprintf(os.Stderr, "invalid arguments: %s\n", err)
 				os.Exit(1)
 			}
 
 			opts, err := structpb.NewStruct(arguments.Options)
 			if err != nil {
-				fmt.Printf("invalid options: %s\n", err)
+				fmt.Fprintf(os.Stderr, "invalid options: %s\n", err)
 				os.Exit(1)
 			}
 
@@ -218,13 +218,13 @@ func handleCommand(plugin *Plugin) {
 
 			resp, err := plugin.Do(context.Background(), os.Args[3], &args)
 			if err != nil {
-				fmt.Printf("task failed: %s\n", err)
+				fmt.Fprintf(os.Stderr, "task failed: %s\n", err)
 				os.Exit(1)
 			}
 			if resp.Output != nil {
 				var data any
 				if err := serializer.JSON.UnmarshalFromString(string(resp.Output), &data); err != nil {
-					fmt.Printf("unable to parse output: %s: %s\n", err, string(resp.Output))
+					fmt.Fprintf(os.Stderr, "unable to parse output: %s: %s\n", err, string(resp.Output))
 					os.Exit(1)
 				}
 				out, _ := serializer.JSON.MarshalIndent(data, "", "  ")
@@ -237,7 +237,7 @@ func handleCommand(plugin *Plugin) {
 			specs, specsErr := plugin.CollectSpecs(context.Background())
 			var data any
 			if err := serializer.JSON.UnmarshalFromString(string(specs), &data); err != nil {
-				fmt.Printf("unable to parse output: %s: %s\n", err, string(specs))
+				fmt.Fprintf(os.Stderr, "unable to parse output: %s: %s\n", err, string(specs))
 				os.Exit(1)
 			}
 			out, _ := serializer.JSON.MarshalIndent(data, "", "  ")

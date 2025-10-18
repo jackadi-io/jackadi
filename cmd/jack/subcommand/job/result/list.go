@@ -63,7 +63,7 @@ func listCommand() *cobra.Command {
 			if fromStr != "" {
 				t, err := parseTimeString(fromStr)
 				if err != nil {
-					fmt.Printf("Invalid from-date format: %s\n", err)
+					fmt.Fprintf(os.Stderr, "Invalid from-date format: %s\n", err)
 					os.Exit(1)
 				}
 				fromDate = t.UnixNano()
@@ -72,20 +72,20 @@ func listCommand() *cobra.Command {
 			if toStr != "" {
 				t, err := parseTimeString(toStr)
 				if err != nil {
-					fmt.Printf("Invalid to-date format: %s\n", err)
+					fmt.Fprintf(os.Stderr, "Invalid to-date format: %s\n", err)
 					os.Exit(1)
 				}
 				toDate = t.UnixNano()
 			}
 
 			if fromStr != "" && toStr != "" && toDate < fromDate {
-				fmt.Printf("'to' date must be after 'from' date")
+				fmt.Fprintf(os.Stderr, "'to' date must be after 'from' date\n")
 				os.Exit(1)
 			}
 
 			res, err := list(limit, offset, fromDate, toDate, targets)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
 			}
 			style.PrettyPrint(res)

@@ -34,7 +34,7 @@ func acceptCommand() *cobra.Command {
 			acceptedAgent, err := accept(&agent)
 			if err != nil {
 				r := status.Convert(err)
-				fmt.Println(r.Message())
+				fmt.Fprintln(os.Stderr, r.Message())
 				os.Exit(1)
 			}
 

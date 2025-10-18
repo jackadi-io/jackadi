@@ -57,13 +57,13 @@ func RunCommand() *cobra.Command {
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
 				err := fmt.Errorf("requires at least %d arg(s), only received %d", 2, len(args))
-				fmt.Println(style.RenderError(err.Error()))
+				fmt.Fprintln(os.Stderr, style.RenderError(err.Error()))
 				_ = cmd.Help()
 				os.Exit(1)
 			}
 			if args[0] == "" {
 				err := errors.New("target must not be empty")
-				fmt.Println(style.RenderError(err.Error()))
+				fmt.Fprintln(os.Stderr, style.RenderError(err.Error()))
 				_ = cmd.Help()
 				os.Exit(1)
 			}
@@ -87,7 +87,7 @@ func RunCommand() *cobra.Command {
 				var err error
 				targets, err = targetsFromFile(args[0])
 				if err != nil {
-					fmt.Println(style.RenderError(err.Error()))
+					fmt.Fprintln(os.Stderr, style.RenderError(err.Error()))
 					os.Exit(1)
 				}
 			}
@@ -96,7 +96,7 @@ func RunCommand() *cobra.Command {
 			out, err := sendTask(targets, target.Mode(), protoLockMode, timeout, args[1], args[2:]...)
 			if err != nil {
 				e := status.Convert(err)
-				fmt.Println(style.RenderError(e.Message()))
+				fmt.Fprintln(os.Stderr, style.RenderError(e.Message()))
 				os.Exit(1)
 			}
 
@@ -113,7 +113,7 @@ func RunCommand() *cobra.Command {
 
 				result, err := serializer.JSON.MarshalIndent(decodedResponses, "", "  ")
 				if err != nil {
-					fmt.Println(style.RenderError(fmt.Sprintf("failed to serialize response in JSON: %s", err)))
+					fmt.Fprintln(os.Stderr, style.RenderError(fmt.Sprintf("failed to serialize response in JSON: %s", err)))
 					os.Exit(1)
 				}
 				fmt.Println(string(result))

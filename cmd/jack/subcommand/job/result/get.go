@@ -25,7 +25,7 @@ func getCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			conn, err := connection.DialCLI()
 			if err != nil {
-				fmt.Println("failed to connect the manager")
+				fmt.Fprintln(os.Stderr, "failed to connect the manager")
 				os.Exit(1)
 			}
 			defer conn.Close()
@@ -33,7 +33,7 @@ func getCommand() *cobra.Command {
 
 			res, err := getResult(client, args[0])
 			if err != nil {
-				fmt.Println(err)
+				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
 			}
 

@@ -25,14 +25,14 @@ func healthCommand() *cobra.Command {
 			resp, err := list(0)
 			if err != nil {
 				r := status.Convert(err)
-				fmt.Println(r.Message())
+				fmt.Fprintln(os.Stderr, r.Message())
 				os.Exit(1)
 			}
 
 			if option.GetJSONFormat() {
 				result, err := serializer.JSON.MarshalIndent(resp, "", "   ")
 				if err != nil {
-					fmt.Println("failed to serialize response in JSON: %w", err)
+					fmt.Fprintf(os.Stderr, "failed to serialize response in JSON: %v\n", err)
 					os.Exit(1)
 				}
 				fmt.Println(string(result))
@@ -58,14 +58,14 @@ func listCommand() *cobra.Command {
 			resp, err := list(0)
 			if err != nil {
 				r := status.Convert(err)
-				fmt.Println(r.Message())
+				fmt.Fprintln(os.Stderr, r.Message())
 				os.Exit(1)
 			}
 
 			if option.GetJSONFormat() {
 				result, err := serializer.JSON.MarshalIndent(resp, "", "   ")
 				if err != nil {
-					fmt.Println("failed to serialize response in JSON: %w", err)
+					fmt.Fprintf(os.Stderr, "failed to serialize response in JSON: %v\n", err)
 					os.Exit(1)
 				}
 				fmt.Println(string(result))

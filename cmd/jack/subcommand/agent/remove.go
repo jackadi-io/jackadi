@@ -26,7 +26,7 @@ func removeCommand() *cobra.Command {
 			}
 			if err := remove(&agent); err != nil {
 				r := status.Convert(err)
-				fmt.Println(r.Message())
+				fmt.Fprintln(os.Stderr, r.Message())
 				os.Exit(1)
 			}
 

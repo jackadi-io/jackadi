@@ -26,7 +26,7 @@ func rejectCommand() *cobra.Command {
 			}
 			if err := reject(&agent); err != nil {
 				r := status.Convert(err)
-				fmt.Println(r.Message())
+				fmt.Fprintln(os.Stderr, r.Message())
 				os.Exit(1)
 			}
 
