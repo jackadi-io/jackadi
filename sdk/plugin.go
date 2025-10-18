@@ -172,11 +172,14 @@ func MustServe(plugin *Plugin) {
 
 func printCommandHelp() {
 	fmt.Println("Usage: <plugin> run <command> [args...]")
+	fmt.Println("       <plugin> [flags]")
 	fmt.Println()
 	fmt.Println("Commands:")
 	fmt.Println("  task <task_name> [args...]  Run a specific task")
 	fmt.Println("  specs                       Collect and display specs")
 	fmt.Println()
+	fmt.Println("Flags:")
+	flag.PrintDefaults()
 }
 
 func handleCommand(plugin *Plugin) {
@@ -250,9 +253,15 @@ func handleCommand(plugin *Plugin) {
 
 // handleFlags processes command-line flags for the plugin and returns true if the plugin should exit.
 func handleFlags(plugin *Plugin) bool {
+	helpFlag := flag.Bool("help", false, "print command usage and available flags")
 	versionFlag := flag.Bool("version", false, "print plugin information")
 	describeFlag := flag.Bool("describe", false, "decribe plugin")
 	flag.Parse()
+
+	if *helpFlag {
+		printCommandHelp()
+		return true
+	}
 
 	if *versionFlag {
 		fmt.Println(getVersion())
