@@ -216,7 +216,11 @@ func handleCommand(plugin *Plugin) {
 				Options: opts,
 			}
 
-			resp, _ := plugin.Do(context.Background(), os.Args[3], &args)
+			resp, err := plugin.Do(context.Background(), os.Args[3], &args)
+			if err != nil {
+				fmt.Printf("task failed: %s\n", err)
+				os.Exit(1)
+			}
 			if resp.Output != nil {
 				var data any
 				if err := serializer.JSON.UnmarshalFromString(string(resp.Output), &data); err != nil {
