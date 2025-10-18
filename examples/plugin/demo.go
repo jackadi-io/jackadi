@@ -40,50 +40,50 @@ func (o *UpgradeOptions) SetDefaults() {
 
 // User represents a user in the system.
 type User struct {
-	ID       int64             `json:"id"`
-	Username string            `json:"username"`
-	Email    string            `json:"email"`
-	Metadata map[string]string `json:"metadata,omitempty"`
+	ID       int64             `jackadi:"id"`
+	Username string            `jackadi:"username"`
+	Email    string            `jackadi:"email"`
+	Metadata map[string]string `jackadi:"metadata,omitempty"`
 }
 
 // ServerInfo represents server information.
 type ServerInfo struct {
-	Hostname     string   `json:"hostname"`
-	IPAddresses  []string `json:"ip_addresses"`
-	Services     []string `json:"services"`
-	LastReboot   string   `json:"last_reboot"`
-	DiskUsage    float64  `json:"disk_usage_percent"`
-	CPUCores     int      `json:"cpu_cores"`
-	MemoryGB     int      `json:"memory_gb"`
-	IsProduction bool     `json:"is_production"`
+	Hostname     string   `jackadi:"hostname"`
+	IPAddresses  []string `jackadi:"ip_addresses"`
+	Services     []string `jackadi:"services"`
+	LastReboot   string   `jackadi:"last_reboot"`
+	DiskUsage    float64  `jackadi:"disk_usage_percent"`
+	CPUCores     int      `jackadi:"cpu_cores"`
+	MemoryGB     int      `jackadi:"memory_gb"`
+	IsProduction bool     `jackadi:"is_production"`
 }
 
 // DatabaseStats represents database statistics.
 type DatabaseStats struct {
-	Connections int            `json:"active_connections"`
-	QueryStats  map[string]any `json:"query_stats"`
-	TableSizes  []TableInfo    `json:"table_sizes"`
+	Connections int            `jackadi:"active_connections"`
+	QueryStats  map[string]any `jackadi:"query_stats"`
+	TableSizes  []TableInfo    `jackadi:"table_sizes"`
 }
 
 type TableInfo struct {
-	Name    string  `json:"name"`
-	SizeGB  float64 `json:"size_gb"`
-	Records int64   `json:"records"`
+	Name    string  `jackadi:"name"`
+	SizeGB  float64 `jackadi:"size_gb"`
+	Records int64   `jackadi:"records"`
 }
 
 // Network configuration spec.
 type NetworkConfig struct {
-	Interfaces []NetworkInterface `json:"interfaces"`
-	Routes     []string           `json:"default_routes"`
-	DNS        []string           `json:"dns_servers"`
+	Interfaces []NetworkInterface `jackadi:"interfaces"`
+	Routes     []string           `jackadi:"default_routes"`
+	DNS        []string           `jackadi:"dns_servers"`
 }
 
 type NetworkInterface struct {
-	Name      string `json:"name"`
-	Type      string `json:"type"`
-	State     string `json:"state"`
-	IPAddress string `json:"ip_address,omitempty"`
-	MAC       string `json:"mac_address"`
+	Name      string `jackadi:"name"`
+	Type      string `jackadi:"type"`
+	State     string `jackadi:"state"`
+	IPAddress string `jackadi:"ip_address,omitempty"`
+	MAC       string `jackadi:"mac_address"`
 }
 
 // 1. Simple hello task.
