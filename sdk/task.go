@@ -362,6 +362,35 @@ func handleInputs(ctx context.Context, funcType reflect.Type, input *proto.Input
 	return inputs, nil
 }
 
+// findField finds a struct field by its jackadi tag or field name.
+func findField(structValue reflect.Value, key string) (reflect.Value, string, bool) {
+	structType := structValue.Type()
+
+	// handle jackadi tag
+	for i := 0; i < structType.NumField(); i++ {
+		field := structType.Field(i)
+
+		if tag, ok := field.Tag.Lookup("jackadi"); ok {
+			parts := strings.Split(tag, ",")
+			if len(parts) == 0 {
+				continue
+			}
+			tagName := parts[0] // handle tags like "field_name,omitempty"
+			if tagName == key {
+				return structValue.Field(i), field.Name, true
+			}
+		}
+	}
+
+	// no jackadi tag: fallback to natural field name
+	field := structValue.FieldByName(key)
+	if field.IsValid() {
+		return field, key, true
+	}
+
+	return reflect.Value{}, "", false
+}
+
 func handleOptions(optionElemType reflect.Type, input *proto.Input) (reflect.Value, error) {
 	opts := reflect.New(optionElemType)
 	op, ok := opts.Interface().(Options)
@@ -377,14 +406,14 @@ func handleOptions(optionElemType reflect.Type, input *proto.Input) (reflect.Val
 
 	// handle Options argument of the targeted fuction
 	for k := range input.GetOptions().AsMap() {
-		field := opts.Elem().FieldByName(k)
-		if !field.IsValid() || !field.CanSet() {
+		field, fieldName, found := findField(opts.Elem(), k)
+		if !found || !field.CanSet() {
 			return reflect.Value{}, fmt.Errorf("invalid '%s' option", k)
 		}
 
 		res, err := core.StructpbValueToInput(input.Options.Fields[k].AsInterface(), field.Type())
 		if err != nil {
-			return reflect.Value{}, fmt.Errorf("unable to convert '%s' option to '%s'", k, field.Type())
+			return reflect.Value{}, fmt.Errorf("unable to convert '%s' option to '%s' (field: %s)", k, field.Type(), fieldName)
 		}
 		field.Set(reflect.ValueOf(res))
 	}
