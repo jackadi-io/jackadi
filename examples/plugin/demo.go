@@ -24,8 +24,8 @@ func (o *DemoOptions) SetDefaults() {
 
 // UpgradeOptions for OS upgrade operations.
 type UpgradeOptions struct {
-	DryRun          bool
-	SecurityOnly    bool
+	DryRun          bool `jackadi:"dry-run"`
+	SecurityOnly    bool `jackadi:"securityonly"`
 	ExcludePackages []string
 	RebootRequired  bool
 	BackupBefore    bool

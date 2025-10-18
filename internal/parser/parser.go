@@ -26,7 +26,7 @@ func NewArguments() Arguments {
 // Key value are following the pattern: key=value or key="value".
 func ParseArgs(args []string) (Arguments, error) {
 	a := NewArguments()
-	re := regexp.MustCompile("^(?P<key>[a-zA-Z09_]+)=(?P<value>.+)$")
+	re := regexp.MustCompile("^(?P<key>[a-zA-Z0-9_-]+)=(?P<value>.+)$")
 
 	for _, arg := range args {
 		groups := re.FindAllStringSubmatch(arg, -1)
