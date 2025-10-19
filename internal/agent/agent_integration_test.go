@@ -525,10 +525,14 @@ func TestListenTaskRequest_ExclusiveLock(t *testing.T) {
 	var execOrder []string
 	timeout := time.After(2 * time.Second)
 	for len(execOrder) < 4 { // 2 starts + 2 ends
+		exit := false
 		select {
 		case event := <-executing:
 			execOrder = append(execOrder, event)
 		case <-timeout:
+			exit = true
+		}
+		if exit {
 			break
 		}
 	}
