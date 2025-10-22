@@ -104,6 +104,13 @@ CGO_ENABLED=0 go build -o tour .
 
 Copy the file in the manager `/opt/jackadi/plugins` directory.
 
+Then configure `/etc/jackadi/plugins.yaml` file:
+
+```sh
+"*":
+  - tour
+```
+
 #### Synchronize the plugin to the agent
 ```sh
 jack run agent1 plugins:sync
