@@ -40,6 +40,8 @@ Full documentation can be found [here](https://jackadi.io/docs/).
 
 ## Architecture
 
+![architecture](./assets/jackadi-overview.svg)
+
 In a nutshell:
 * Agents are connected to a manager via persistent bidirectional gRPC.
 * Simple plugin system:
@@ -105,4 +107,9 @@ Copy the file in the manager `/opt/jackadi/plugins` directory.
 #### Synchronize the plugin to the agent
 ```sh
 jack run agent1 plugins:sync
+```
+
+#### Run the plugin
+```sh
+jack run agent1 tour:hello
 ```
