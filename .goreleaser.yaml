@@ -136,6 +136,14 @@ nfpms:
           group: root
 
       - src: /dev/null
+        dst: /etc/jackadi/authorization.yaml
+        type: config
+        file_info:
+          mode: 0644
+          owner: root
+          group: root
+
+      - src: /dev/null
         dst: /run/jackadi
         type: dir
         file_info:
