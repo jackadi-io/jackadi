@@ -85,7 +85,6 @@ func (a *Authorizer) Load() error {
 	data, err := os.ReadFile(configFile)
 	if err != nil {
 		if os.IsNotExist(err) {
-			slog.Warn("authorization config file not found: all endpoints and tasks are public", "missing_file", configFile)
 			return nil
 		}
 		return fmt.Errorf("failed to load authorization config: %w", err)
@@ -194,12 +193,6 @@ func (a *Authorizer) canAccessTask(username, plugin, task string) bool {
 
 func (a *Authorizer) handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// if no config is loaded, allow all requests
-		if len(a.config.Users) == 0 {
-			next.ServeHTTP(w, r)
-			return
-		}
-
 		// we expect credentials have already been validated with auth handler
 		username, _, ok := r.BasicAuth()
 		if !ok || username == "" {
