@@ -17,7 +17,6 @@ NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 ReadWritePaths=/var/lib/jackadi /etc/jackadi /run/jackadi /opt/jackadi
-PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target

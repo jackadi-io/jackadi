@@ -12,7 +12,6 @@ WorkingDirectory=/var/lib/jackadi
 ExecStart=/usr/bin/jackadi-agent --config /etc/sonic/jackadi/agent.yaml
 Restart=on-failure
 RestartSec=5
-PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target
