@@ -38,7 +38,7 @@ builds:
       - -X main.date={{.Date}}
 
   - id: cli
-    binary: jackadi
+    binary: jack
     main: ./cmd/jack
     env:
       - CGO_ENABLED=0
