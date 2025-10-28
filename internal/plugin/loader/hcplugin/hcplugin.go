@@ -254,6 +254,7 @@ func (l *Loader) Update(pluginDir, tmpDir string, upToDate []string) ([]types.Pl
 		if !ok {
 			slog.Debug("new plugin to install", "plugin_file", file)
 			if err := os.Rename(candidatePluginPath, path); err != nil {
+				// TODO: the error is not sent back to the user CLI
 				slog.Error("new plugin not installed: failed to replace plugin file", "error", err, "plugin_file", file)
 				errs = errors.Join(errs, fmt.Errorf("new plugin not installed: failed to replace '%s' file: %w", file, err))
 				continue

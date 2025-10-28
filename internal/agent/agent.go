@@ -225,6 +225,7 @@ func (a *Agent) ListenTaskRequest(ctx context.Context) error {
 					slog.Debug("read unlock")
 					exclusiveLock.RUnlock()
 				}
+				<-requestsQueue
 				wg.Done()
 			}()
 
