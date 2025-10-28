@@ -272,10 +272,7 @@ func (a *Agent) ListenTaskRequest(ctx context.Context) error {
 				// We do not use the context of stream, because we don't want to cancel a maintenance
 				// in case of temporary disconnection.
 				resp = doTask(ctx, req)
-				if !t.Stop() {
-					// Timer already fired, timeout response already sent
-					return
-				}
+				t.Stop()
 				finished <- struct{}{}
 
 			case <-t.C:
@@ -288,6 +285,7 @@ func (a *Agent) ListenTaskRequest(ctx context.Context) error {
 
 			case <-ctx.Done():
 				slog.Debug("task context closed")
+				return
 			}
 
 			slog.Debug("sending response", "id", req.Id)
