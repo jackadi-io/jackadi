@@ -103,13 +103,15 @@ func TestLoadAgentConfig_Default(t *testing.T) {
 
 	hostname, _ := os.Hostname()
 	expected := &AgentConfig{
-		AgentID:          hostname,
-		ManagerAddress:   DefaultManagerAddress,
-		ManagerPort:      DefaultManagerPort,
-		ReconnectDelay:   int(DefaultReconnectDelay.Seconds()),
-		PluginDir:        tempPluginDir,
-		PluginServerPort: DefaultPluginServerPort,
-		CustomResolvers:  []string{},
+		AgentID:            hostname,
+		ManagerAddress:     DefaultManagerAddress,
+		ManagerPort:        DefaultManagerPort,
+		ReconnectDelay:     int(DefaultReconnectDelay.Seconds()),
+		PluginDir:          tempPluginDir,
+		PluginServerPort:   DefaultPluginServerPort,
+		CustomResolvers:    []string{},
+		MaxConcurrentTasks: DefaultMaxConcurrentTasks,
+		MaxWaitingRequests: DefaultMaxWaitingRequests,
 		MTLS: MTLSConfig{
 			Enabled:   true,
 			Key:       "",
@@ -154,13 +156,15 @@ mtls:
 	}
 
 	expected := &AgentConfig{
-		AgentID:          "full-agent",
-		ManagerAddress:   "192.168.1.1",
-		ManagerPort:      "8080",
-		ReconnectDelay:   15,
-		PluginDir:        "/tmp/agent-plugins",
-		PluginServerPort: "8081",
-		CustomResolvers:  []string{"8.8.8.8", "1.1.1.1"},
+		AgentID:            "full-agent",
+		ManagerAddress:     "192.168.1.1",
+		ManagerPort:        "8080",
+		ReconnectDelay:     15,
+		PluginDir:          "/tmp/agent-plugins",
+		PluginServerPort:   "8081",
+		CustomResolvers:    []string{"8.8.8.8", "1.1.1.1"},
+		MaxConcurrentTasks: DefaultMaxConcurrentTasks,
+		MaxWaitingRequests: DefaultMaxWaitingRequests,
 		MTLS: MTLSConfig{
 			Enabled:   true,
 			Key:       "/path/to/agent.key",

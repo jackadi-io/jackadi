@@ -173,16 +173,18 @@ func main() {
 	cfg := agentConfig{
 		reconnectDelay: agentCfg.ReconnectDelay,
 		Config: agent.Config{
-			AgentID:          agentCfg.AgentID,
-			ManagerAddress:   agentCfg.ManagerAddress,
-			ManagerPort:      agentCfg.ManagerPort,
-			PluginDir:        agentCfg.PluginDir,
-			PluginServerPort: agentCfg.PluginServerPort,
-			MTLSEnabled:      agentCfg.MTLS.Enabled,
-			MTLSKey:          agentCfg.MTLS.Key,
-			MTLSCert:         agentCfg.MTLS.Cert,
-			MTLSManagerCA:    agentCfg.MTLS.ManagerCA,
-			CustomResolvers:  agentCfg.CustomResolvers,
+			AgentID:            agentCfg.AgentID,
+			ManagerAddress:     agentCfg.ManagerAddress,
+			ManagerPort:        agentCfg.ManagerPort,
+			PluginDir:          agentCfg.PluginDir,
+			PluginServerPort:   agentCfg.PluginServerPort,
+			MTLSEnabled:        agentCfg.MTLS.Enabled,
+			MTLSKey:            agentCfg.MTLS.Key,
+			MTLSCert:           agentCfg.MTLS.Cert,
+			MTLSManagerCA:      agentCfg.MTLS.ManagerCA,
+			CustomResolvers:    agentCfg.CustomResolvers,
+			MaxConcurrentTasks: agentCfg.MaxConcurrentTasks,
+			MaxWaitingRequests: agentCfg.MaxWaitingRequests,
 		},
 	}
 

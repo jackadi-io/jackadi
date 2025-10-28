@@ -15,14 +15,16 @@ import (
 var errViperConfigNotFound viper.ConfigFileNotFoundError
 
 type AgentConfig struct {
-	AgentID          string     `mapstructure:"agent-id" yaml:"agent-id"`
-	ManagerAddress   string     `mapstructure:"manager-address" yaml:"manager-address"`
-	ManagerPort      string     `mapstructure:"manager-port" yaml:"manager-port"`
-	ReconnectDelay   int        `mapstructure:"reconnect-delay" yaml:"reconnect-delay"`
-	PluginDir        string     `mapstructure:"plugin-dir" yaml:"plugin-dir"`
-	PluginServerPort string     `mapstructure:"plugin-server-port" yaml:"plugin-server-port"`
-	CustomResolvers  []string   `mapstructure:"custom-resolvers" yaml:"custom-resolvers"`
-	MTLS             MTLSConfig `mapstructure:"mtls" yaml:"mtls"`
+	AgentID            string     `mapstructure:"agent-id" yaml:"agent-id"`
+	ManagerAddress     string     `mapstructure:"manager-address" yaml:"manager-address"`
+	ManagerPort        string     `mapstructure:"manager-port" yaml:"manager-port"`
+	ReconnectDelay     int        `mapstructure:"reconnect-delay" yaml:"reconnect-delay"`
+	PluginDir          string     `mapstructure:"plugin-dir" yaml:"plugin-dir"`
+	PluginServerPort   string     `mapstructure:"plugin-server-port" yaml:"plugin-server-port"`
+	CustomResolvers    []string   `mapstructure:"custom-resolvers" yaml:"custom-resolvers"`
+	MaxConcurrentTasks int        `mapstructure:"max-concurrent-tasks" yaml:"max-concurrent-tasks"`
+	MaxWaitingRequests int        `mapstructure:"max-waiting-requests" yaml:"max-waiting-requests"`
+	MTLS               MTLSConfig `mapstructure:"mtls" yaml:"mtls"`
 }
 
 type MTLSConfig struct {
@@ -72,6 +74,8 @@ func SetupAgentFlags() {
 	pflag.String("plugin-dir", DefaultAgentPluginDir, "installed plugin directory")
 	pflag.String("plugin-server-port", DefaultPluginServerPort, "manager port used to serve plugins")
 	pflag.StringSlice("custom-resolvers", []string{}, "custom DNS resolvers for GRPC connections (comma-separated)")
+	pflag.Int("max-concurrent-tasks", DefaultMaxConcurrentTasks, "maximum number of tasks that can run concurrently (0 = use default)")
+	pflag.Int("max-waiting-requests", DefaultMaxWaitingRequests, "maximum number of requests that can wait in queue (0 = use default)")
 	pflag.Bool("mtls.enabled", true, "secure connection to managers using mTLS, recommended: true")
 	pflag.String("mtls.key", "", "agent TLS key filepath")
 	pflag.String("mtls.cert", "", "agent TLS certificate filepath")
@@ -118,6 +122,8 @@ func LoadAgentConfig(configFile string) (*AgentConfig, error) {
 	v.SetDefault("plugin-dir", DefaultAgentPluginDir)
 	v.SetDefault("plugin-server-port", DefaultPluginServerPort)
 	v.SetDefault("custom-resolvers", []string{})
+	v.SetDefault("max-concurrent-tasks", DefaultMaxConcurrentTasks)
+	v.SetDefault("max-waiting-requests", DefaultMaxWaitingRequests)
 
 	v.SetDefault("mtls.enabled", true)
 	v.SetDefault("mtls.key", "")

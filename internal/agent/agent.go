@@ -32,16 +32,18 @@ import (
 
 // Config holds the configuration for creating a new Agent.
 type Config struct {
-	ManagerAddress   string
-	ManagerPort      string
-	AgentID          string
-	MTLSEnabled      bool
-	MTLSCert         string
-	MTLSKey          string
-	MTLSManagerCA    string
-	PluginDir        string
-	PluginServerPort string
-	CustomResolvers  []string
+	ManagerAddress     string
+	ManagerPort        string
+	AgentID            string
+	MTLSEnabled        bool
+	MTLSCert           string
+	MTLSKey            string
+	MTLSManagerCA      string
+	PluginDir          string
+	PluginServerPort   string
+	CustomResolvers    []string
+	MaxConcurrentTasks int
+	MaxWaitingRequests int
 }
 
 type Agent struct {
@@ -142,9 +144,18 @@ func (a *Agent) Handshake(ctx context.Context) error {
 }
 
 func (a *Agent) ListenTaskRequest(ctx context.Context) error {
-	runningTasks := make(chan struct{}, config.MaxConcurrentTasks)
+	maxConcurrentTasks := a.config.MaxConcurrentTasks
+	if maxConcurrentTasks <= 0 {
+		maxConcurrentTasks = config.DefaultMaxConcurrentTasks
+	}
+	maxWaitingRequests := a.config.MaxWaitingRequests
+	if maxWaitingRequests <= 0 {
+		maxWaitingRequests = config.DefaultMaxWaitingRequests
+	}
+
+	runningTasks := make(chan struct{}, maxConcurrentTasks)
 	runningWriteTask := make(chan struct{}, 1) // Only one write task at a time
-	requestsQueue := make(chan struct{}, config.MaxWaitingRequests)
+	requestsQueue := make(chan struct{}, maxWaitingRequests)
 	exclusiveLock := sync.RWMutex{}
 
 	stream, err := a.taskClient.ExecTask(ctx)

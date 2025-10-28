@@ -37,9 +37,9 @@ const (
 	ClientKeepaliveTime    = 10 * time.Second
 	ClientKeepaliveTimeout = 30 * time.Second
 
-	// Task limits.
-	MaxConcurrentTasks = 2
-	MaxWaitingRequests = 1000 // Mximum number of requests that can wait in queue.
+	// Task limits (can be overridden via agent configuration).
+	DefaultMaxConcurrentTasks = 2   // Default maximum number of tasks that can run concurrently.
+	DefaultMaxWaitingRequests = 100 // Default maximum number of requests that can wait in queue.
 
 	// `jack results list` limits.
 	ResultsPageLimit = 100 // Maximum number of results per page for pagination.
