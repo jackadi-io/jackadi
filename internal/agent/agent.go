@@ -218,13 +218,6 @@ func (a *Agent) ListenTaskRequest(ctx context.Context) error {
 		wg.Add(1)
 		go func() {
 			defer func() {
-				if lockMode == proto.LockMode_EXCLUSIVE {
-					slog.Debug("unlock")
-					exclusiveLock.Unlock()
-				} else {
-					slog.Debug("read unlock")
-					exclusiveLock.RUnlock()
-				}
 				<-requestsQueue
 				wg.Done()
 			}()
@@ -238,21 +231,23 @@ func (a *Agent) ListenTaskRequest(ctx context.Context) error {
 
 			t := time.NewTimer(time.Duration(timeout) * time.Second)
 
-			// some task must be the only one to run, like plugin sync
-			if lockMode == proto.LockMode_EXCLUSIVE {
-				slog.Debug("lock")
-				exclusiveLock.Lock()
-			} else {
-				slog.Debug("rlock")
-				exclusiveLock.RLock()
-			}
-
 			var resp *proto.TaskResponse
 			select {
 			case taskSlot <- struct{}{}:
-				defer func() {
-					<-taskSlot
-				}()
+				defer func() { <-taskSlot }()
+
+				// some task must be the only one to run, like plugin sync
+				if lockMode == proto.LockMode_EXCLUSIVE {
+					slog.Debug("lock")
+					exclusiveLock.Lock()
+					defer exclusiveLock.Unlock()
+					defer slog.Debug("unlock")
+				} else {
+					slog.Debug("rlock")
+					exclusiveLock.RLock()
+					defer exclusiveLock.RUnlock()
+					defer slog.Debug("read unlock")
+				}
 
 				finished := make(chan struct{}, 1)
 				go func() {
@@ -277,7 +272,10 @@ func (a *Agent) ListenTaskRequest(ctx context.Context) error {
 				// We do not use the context of stream, because we don't want to cancel a maintenance
 				// in case of temporary disconnection.
 				resp = doTask(ctx, req)
-				t.Stop()
+				if !t.Stop() {
+					// Timer already fired, timeout response already sent
+					return
+				}
 				finished <- struct{}{}
 
 			case <-t.C:
