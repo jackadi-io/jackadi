@@ -10,14 +10,13 @@
 
 [![Status](https://img.shields.io/badge/status-alpha-bue)](https://github.com/jackadi-io/jackadi)
 
-```
-Jackadi is currently in an alpha state and is provided with no guarantees or warranties.
-You're welcome to try it out and give feedback
-
-But, it must not be used in production or in any environment where reliability, security, or data integrity are required.
-
-By using Jackadi at this stage, you acknowledge the risks and potential for breaking changes.
-```
+> [!WARNING]  
+> Jackadi is currently in an alpha state and is provided with no guarantees or warranties.
+> You're welcome to try it out and give feedback.
+>
+> But, it must not be used in production or in any environment where reliability, security, or data integrity are required.
+>
+> By using Jackadi at this stage, you acknowledge the risks and potential for breaking changes.
 
 ## What is Jackadi?
 
