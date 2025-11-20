@@ -216,8 +216,8 @@ nfpms:
         type: dir
         file_info:
           mode: 0755
-          owner: jackadi
-          group: jackadi
+          owner: root
+          group: root
 
       - src: ./scripts/jackadi-agent.service
         dst: /etc/systemd/system/jackadi-agent.service
@@ -226,10 +226,8 @@ nfpms:
           mode: 0644
 
     scripts:
-      preinstall: ./scripts/preinstall-agent.sh
       postinstall: ./scripts/postinstall-agent.sh
       preremove: ./scripts/preremove-agent.sh
-      postremove: ./scripts/postremove-agent.sh
 
   ###
   # .deb for agent for SONiC
@@ -267,8 +265,8 @@ nfpms:
         type: dir
         file_info:
           mode: 0755
-          owner: jackadi
-          group: jackadi
+          owner: root
+          group: root
 
       - src: ./configs/agent-sonic.yaml
         dst: /etc/sonic/jackadi/agent.yaml
@@ -285,10 +283,8 @@ nfpms:
           mode: 0644
 
     scripts:
-      preinstall: ./scripts/preinstall-agent-sonic.sh
       postinstall: ./scripts/postinstall-agent.sh
       preremove: ./scripts/preremove-agent.sh
-      postremove: ./scripts/postremove-agent.sh
 
 
 release:
