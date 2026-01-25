@@ -62,7 +62,7 @@ func (r *registry) Names() []string {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	tasks := []string{}
+	tasks := make([]string, 0, len(r.plugins))
 	for name := range r.plugins {
 		tasks = append(tasks, name)
 	}

@@ -90,7 +90,7 @@ func (a *Agent) Connect(ctx context.Context) error {
 
 	if len(a.config.CustomResolvers) > 0 {
 		r := manual.NewBuilderWithScheme("jack")
-		var addresses []resolver.Address
+		addresses := make([]resolver.Address, 0, len(a.config.CustomResolvers))
 		for _, addr := range a.config.CustomResolvers {
 			addresses = append(addresses, resolver.Address{Addr: addr})
 		}

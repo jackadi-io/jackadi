@@ -147,7 +147,7 @@ func (t *Task) helpText(pluginName string) string {
 
 	if len(t.flags) > 0 {
 		sb.WriteString("Flags:\n")
-		var flagNames []string
+		flagNames := make([]string, 0, len(t.flags))
 		for _, f := range t.flags {
 			flagNames = append(flagNames, string(f))
 		}

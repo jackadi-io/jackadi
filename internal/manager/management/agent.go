@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"slices"
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/jackadi-io/jackadi/internal/agent"
@@ -73,10 +74,7 @@ func (a *apiServer) AcceptAgent(ctx context.Context, req *proto.AgentRequest) (*
 	candidates := a.server.GetInventory().GetMatchingCandidates(agent.ID(req.Agent.GetId()), req.Agent.Address, req.Agent.Certificate)
 	rejected := a.server.GetInventory().GetMatchingRejected(agent.ID(req.Agent.GetId()), req.Agent.Address, req.Agent.Certificate)
 
-	agents := []inventory.AgentIdentity{}
-	agents = append(agents, candidates...)
-	agents = append(agents, rejected...)
-
+	agents := slices.Concat(candidates, rejected)
 	agent := inventory.AgentIdentity{}
 	switch len(agents) {
 	case 0:
@@ -105,11 +103,7 @@ func (a *apiServer) RemoveAgent(ctx context.Context, req *proto.AgentRequest) (*
 	candidates := a.server.GetInventory().GetMatchingCandidates(agent.ID(req.Agent.GetId()), req.Agent.Address, req.Agent.Certificate)
 	rejected := a.server.GetInventory().GetMatchingRejected(agent.ID(req.Agent.GetId()), req.Agent.Address, req.Agent.Certificate)
 
-	agents := []inventory.AgentIdentity{}
-	agents = append(agents, rejected...)
-	agents = append(agents, candidates...)
-	agents = append(agents, accepted...)
-
+	agents := slices.Concat(rejected, candidates, accepted)
 	if len(agents) == 0 {
 		return nil, status.Error(codes.NotFound, inventory.ErrAgentNotFound.Error())
 	}
@@ -143,10 +137,7 @@ func (a *apiServer) RejectAgent(ctx context.Context, req *proto.AgentRequest) (*
 	candidates := a.server.GetInventory().GetMatchingCandidates(agent.ID(req.Agent.GetId()), req.Agent.Address, req.Agent.Certificate)
 	accepted := a.server.GetInventory().GetMatchingAccepted(agent.ID(req.Agent.GetId()), req.Agent.Address, req.Agent.Certificate)
 
-	agents := []inventory.AgentIdentity{}
-	agents = append(agents, candidates...)
-	agents = append(agents, accepted...)
-
+	agents := slices.Concat(candidates, accepted)
 	if len(agents) == 0 {
 		return nil, status.Error(codes.NotFound, inventory.ErrAgentNotFound.Error())
 	}
