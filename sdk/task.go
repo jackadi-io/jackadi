@@ -130,9 +130,9 @@ func (t *Task) helpText(pluginName string) string {
 	}
 
 	if len(t.args) > 0 {
-		sb.WriteString(fmt.Sprintf("Usage:\n  jack run <target> %s:%s", pluginName, t.name))
+		fmt.Fprintf(&sb, "Usage:\n  jack run <target> %s:%s", pluginName, t.name)
 		for _, arg := range t.args {
-			sb.WriteString(fmt.Sprintf(" <%s>", arg.Name))
+			fmt.Fprintf(&sb, " <%s>", arg.Name)
 		}
 		sb.WriteString("\n\n")
 	}
@@ -140,7 +140,7 @@ func (t *Task) helpText(pluginName string) string {
 	if len(t.args) > 0 {
 		sb.WriteString("Arguments:\n")
 		for _, arg := range t.args {
-			sb.WriteString(fmt.Sprintf("%-12s %-8s e.g. %s\n", arg.Name, arg.Type, arg.Example))
+			fmt.Fprintf(&sb, "%-12s %-8s e.g. %s\n", arg.Name, arg.Type, arg.Example)
 		}
 		sb.WriteString("\n")
 	}
@@ -151,11 +151,11 @@ func (t *Task) helpText(pluginName string) string {
 		for _, f := range t.flags {
 			flagNames = append(flagNames, string(f))
 		}
-		sb.WriteString(fmt.Sprintf("  %s\n\n", strings.Join(flagNames, ", ")))
+		fmt.Fprintf(&sb, "  %s\n\n", strings.Join(flagNames, ", "))
 	}
 
 	if t.lockMode != NoLock {
-		sb.WriteString(fmt.Sprintf("Lock Mode: %s\n\n", t.lockMode.String()))
+		fmt.Fprintf(&sb, "Lock Mode: %s\n\n", t.lockMode.String())
 	}
 
 	return sb.String()

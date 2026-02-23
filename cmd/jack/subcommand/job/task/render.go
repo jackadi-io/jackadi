@@ -15,7 +15,7 @@ import (
 )
 
 func printTaskResult(responses *proto.FwdResponse) {
-	var in strings.Builder
+	var sb strings.Builder
 	allResponses := responses.GetResponses()
 	keys := maps.Keys(allResponses)
 	if option.GetSortOutput() {
@@ -28,43 +28,43 @@ func printTaskResult(responses *proto.FwdResponse) {
 			continue
 		}
 
-		in.WriteString(style.Title(id))
+		sb.WriteString(style.Title(id))
 		if res.InternalError > 0 {
-			in.WriteString(style.InlineBlockTitle("id") + fmt.Sprintf("%d", res.GetId()))
-			in.WriteString(style.InlineBlockTitle("groupID") + fmt.Sprintf("%d", res.GetGroupID()))
-			in.WriteString(style.InlineBlockTitle("internal error") + style.ErrorStyle.Render(res.GetInternalError().String()))
+			sb.WriteString(style.InlineBlockTitle("id") + fmt.Sprintf("%d", res.GetId()))
+			sb.WriteString(style.InlineBlockTitle("groupID") + fmt.Sprintf("%d", res.GetGroupID()))
+			sb.WriteString(style.InlineBlockTitle("internal error") + style.ErrorStyle.Render(res.GetInternalError().String()))
 			if res.GetModuleError() != "" {
-				in.WriteString(style.Block(res.GetModuleError()))
+				sb.WriteString(style.Block(res.GetModuleError()))
 			}
-			in.WriteString("\n")
+			sb.WriteString("\n")
 			continue
 		}
 
 		if res.GetOutput() != nil {
-			in.WriteString(style.BlockTitle("output"))
+			sb.WriteString(style.BlockTitle("output"))
 			var parsed any
 			if err := serializer.JSON.Unmarshal(res.GetOutput(), &parsed); err != nil {
-				in.WriteString(style.Block(string(res.GetOutput())))
+				sb.WriteString(style.Block(string(res.GetOutput())))
 			}
 			out, _ := yaml.MarshalWithOptions(parsed, yaml.UseLiteralStyleIfMultiline(true))
-			in.WriteString(style.Block(string(out)))
+			sb.WriteString(style.Block(string(out)))
 		} else {
-			in.WriteString(style.InlineBlockTitle("output"))
-			in.WriteString(style.Emph("empty"))
+			sb.WriteString(style.InlineBlockTitle("output"))
+			sb.WriteString(style.Emph("empty"))
 		}
 
 		if res.GetError() != "" {
-			in.WriteString(style.BlockTitle("err"))
-			in.WriteString(style.Block(res.GetError()))
+			sb.WriteString(style.BlockTitle("err"))
+			sb.WriteString(style.Block(res.GetError()))
 		}
 
 		if res.GetRetcode() > 0 {
-			in.WriteString(style.InlineBlockTitle("retcode"))
-			in.WriteString(fmt.Sprintf("%d", res.GetRetcode()))
+			sb.WriteString(style.InlineBlockTitle("retcode"))
+			fmt.Fprintf(&sb, "%d", res.GetRetcode())
 		}
 
-		in.WriteString("\n")
+		sb.WriteString("\n")
 	}
 
-	style.PrettyPrint(in.String())
+	style.PrettyPrint(sb.String())
 }

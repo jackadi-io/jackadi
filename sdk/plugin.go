@@ -224,7 +224,7 @@ func handleCommand(plugin *Plugin) {
 			if resp.Output != nil {
 				var data any
 				if err := serializer.JSON.UnmarshalFromString(string(resp.Output), &data); err != nil {
-					fmt.Fprintf(os.Stderr, "unable to parse output: %s: %s\n", err, string(resp.Output))
+					fmt.Fprintf(os.Stderr, "unable to parse output: %s: %s\n", err, string(resp.Output)) // #nosec G705
 					os.Exit(1)
 				}
 				out, _ := serializer.JSON.MarshalIndent(data, "", "  ")

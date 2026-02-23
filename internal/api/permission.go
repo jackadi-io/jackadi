@@ -142,26 +142,26 @@ func (a *Authorizer) Load() error {
 func (a *Authorizer) canAccessEndpoint(username, resource, action string) bool {
 	userRoles, ok := a.config.Users[User(username)]
 	if !ok {
-		slog.Debug("user not found in config", "username", username)
+		slog.Debug("user not found in config")
 		return false
 	}
 
 	for _, roleName := range userRoles {
 		role, ok := a.config.Roles[string(roleName)]
 		if !ok {
-			slog.Warn("role not found in config", "role", roleName)
+			slog.Warn("role not found in config")
 			continue
 		}
 
 		for _, perm := range role.Endpoints {
 			if perm.Match(resource, action) {
-				slog.Debug("permission granted", "username", username, "role", roleName, "resource", resource, "action", action)
+				slog.Debug("permission granted")
 				return true
 			}
 		}
 	}
 
-	slog.Debug("permission denied", "username", username, "resource", resource, "action", action)
+	slog.Debug("permission denied")
 	return false
 }
 
@@ -175,13 +175,13 @@ func (a *Authorizer) canAccessTask(username, plugin, task string) bool {
 	for _, roleName := range userRoles {
 		role, ok := a.config.Roles[string(roleName)]
 		if !ok {
-			slog.Debug("role not found in config", "role", roleName)
+			slog.Debug("role not found in config")
 			continue
 		}
 
 		for _, perm := range role.Tasks {
 			if perm.Match(plugin, task) {
-				slog.Debug("task permission granted", "username", username, "role", roleName, "plugin", plugin, "task", task)
+				slog.Debug("task permission granted")
 				return true
 			}
 		}
