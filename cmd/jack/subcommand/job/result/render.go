@@ -24,8 +24,8 @@ func prettySprint(in []byte) (string, error) {
 	}
 	sort.Strings(keys)
 
-	items := ""
-	title := ""
+	var items strings.Builder
+	var title strings.Builder
 	for _, k := range keys {
 		if subMap, ok := parsed[k].(map[string]any); ok {
 			subKeys := make([]string, 0, len(subMap))
@@ -42,16 +42,16 @@ func prettySprint(in []byte) (string, error) {
 
 				content := fmt.Sprintf("%v", subMap[k2])
 				if strings.Contains(content, "\n") {
-					items += style.BlockTitle(k2) + style.Block(content)
+					items.WriteString(style.BlockTitle(k2) + style.Block(content))
 				} else {
-					items += style.InlineBlockTitle(k2) + content
+					items.WriteString(style.InlineBlockTitle(k2) + content)
 				}
 			}
 		} else {
-			title += style.Title(fmt.Sprintf("%s: %v", k, parsed[k]))
+			title.WriteString(style.Title(fmt.Sprintf("%s: %v", k, parsed[k])))
 		}
 	}
-	return title + style.SpacedBlock(items), nil
+	return title.String() + style.SpacedBlock(items.String()), nil
 }
 
 func outputToPretty(subMap map[string]any, k2 string) any {

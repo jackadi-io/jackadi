@@ -59,7 +59,7 @@ func (t *Plugin) MustRegisterSpecCollector(name string, function any) *SpecColle
 		log.Fatalln("spec task first returned value must be of type: 'struct' or 'map'")
 	}
 
-	if !funcType.Out(1).Implements(reflect.TypeOf((*error)(nil)).Elem()) {
+	if !funcType.Out(1).Implements(reflect.TypeFor[error]()) {
 		log.Fatalln("spec function second returned value must be of type: 'error'")
 	}
 

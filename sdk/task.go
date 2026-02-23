@@ -174,14 +174,14 @@ func (t *Plugin) MustRegisterTask(name string, function any) *Task {
 	funcValue := reflect.ValueOf(function)
 	funcType := funcValue.Type()
 
-	contextType := reflect.TypeOf((*context.Context)(nil)).Elem()
-	optionsType := reflect.TypeOf((*Options)(nil)).Elem()
+	contextType := reflect.TypeFor[context.Context]()
+	optionsType := reflect.TypeFor[Options]()
 
 	if funcType.NumOut() != 2 {
 		log.Fatalln("function must return at least one value and an error")
 	}
 
-	errorType := reflect.TypeOf((*error)(nil)).Elem()
+	errorType := reflect.TypeFor[error]()
 	if !funcType.Out(funcType.NumOut() - 1).Implements(errorType) {
 		log.Fatalln("last return value of the task must be an error")
 	}
@@ -322,14 +322,14 @@ func handleInputs(ctx context.Context, funcType reflect.Type, input *proto.Input
 	offset := 0
 
 	// handle context
-	contextType := reflect.TypeOf((*context.Context)(nil)).Elem()
+	contextType := reflect.TypeFor[context.Context]()
 	if offset < funcType.NumIn() && funcType.In(offset).Implements(contextType) {
 		offset++
 		inputs = append(inputs, reflect.ValueOf(ctx))
 	}
 
 	// handle options
-	optionsType := reflect.TypeOf((*Options)(nil)).Elem()
+	optionsType := reflect.TypeFor[Options]()
 	if offset < funcType.NumIn() && funcType.In(offset).Implements(optionsType) {
 		opts, err := handleOptions(funcType.In(offset).Elem(), input)
 		if err != nil {

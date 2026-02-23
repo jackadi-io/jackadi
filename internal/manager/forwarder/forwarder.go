@@ -99,9 +99,7 @@ func (f *GRPCForwarder) ExecTask(ctx context.Context, req *proto.TaskRequest) (*
 			continue
 		}
 
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			resp := make(chan *proto.TaskResponse)
 			task := Task[*proto.TaskRequest, *proto.TaskResponse]{
 				Request:    req,
@@ -141,7 +139,7 @@ func (f *GRPCForwarder) ExecTask(ctx context.Context, req *proto.TaskRequest) (*
 					InternalError: proto.InternalError_TIMEOUT,
 				}
 			}
-		}()
+		})
 	}
 	wg.Wait()
 

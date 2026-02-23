@@ -122,7 +122,7 @@ func TestHandleOptions(t *testing.T) {
 				Options: options,
 			}
 
-			result, err := handleOptions(reflect.TypeOf(TestOptions{}), input)
+			result, err := handleOptions(reflect.TypeFor[TestOptions](), input)
 
 			if tt.wantErr {
 				if err == nil {

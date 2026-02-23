@@ -64,7 +64,7 @@ func getResult(client proto.APIClient, id string) (string, error) {
 
 	if value, changed := database.CutGroupPrefix(r.GetResult()); changed {
 		ids := strings.Split(value, ",")
-		out := ""
+		var out strings.Builder
 		for _, subid := range ids {
 			if id == subid {
 				return "", errors.New("groupID included in group: stopping infinite loop")
@@ -73,10 +73,10 @@ func getResult(client proto.APIClient, id string) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			out += p
+			out.WriteString(p)
 		}
 
-		return out, nil
+		return out.String(), nil
 	}
 
 	return prettySprint([]byte(r.GetResult()))

@@ -13,27 +13,27 @@ func TestConvertToType(t *testing.T) {
 	}{
 		"int": {
 			value:      "7",
-			targetType: reflect.TypeOf(int(7)),
+			targetType: reflect.TypeFor[int](),
 			want:       int(7),
 		},
 		"int8": {
 			value:      "7",
-			targetType: reflect.TypeOf(int8(7)),
+			targetType: reflect.TypeFor[int8](),
 			want:       int8(7),
 		},
 		"int16": {
 			value:      "7",
-			targetType: reflect.TypeOf(int16(7)),
+			targetType: reflect.TypeFor[int16](),
 			want:       int16(7),
 		},
 		"int32": {
 			value:      "7",
-			targetType: reflect.TypeOf(int32(7)),
+			targetType: reflect.TypeFor[int32](),
 			want:       int32(7),
 		},
 		"int64": {
 			value:      "7",
-			targetType: reflect.TypeOf(int64(7)),
+			targetType: reflect.TypeFor[int64](),
 			want:       int64(7),
 		},
 	}

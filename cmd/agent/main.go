@@ -78,24 +78,16 @@ func run(cfg agentConfig) error {
 	}()
 
 	specsSync := make(chan struct{}) // when a plugin is synced, the spec should be synced too
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		client.KeepPluginsUpToDate(ctx, specsSync)
-	}()
+	})
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		client.SpecManager.StartSpecCollector(ctx, specsSync)
-	}()
+	})
 
-	wg.Add(1)
-	go func() {
-		defer func() {
-			wg.Done()
-			slog.Info("task listener closed")
-		}()
+	wg.Go(func() {
+		defer slog.Info("task listener closed")
 		for {
 			slog.Debug("handshake with manager in progress")
 			err := func() error {
@@ -136,7 +128,7 @@ func run(cfg agentConfig) error {
 				}
 			}
 		}
-	}()
+	})
 
 	<-sig
 	slog.Warn("shutting down")

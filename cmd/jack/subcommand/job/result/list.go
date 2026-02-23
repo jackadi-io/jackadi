@@ -172,7 +172,7 @@ func list(limit, offset int32, fromDate, toDate int64, targets []string) (string
 		return out, nil
 	}
 
-	items := ""
+	var items strings.Builder
 	for _, result := range results {
 		id := result.GetId()
 		timestamp := time.Unix(0, id)
@@ -189,10 +189,10 @@ func list(limit, offset int32, fromDate, toDate int64, targets []string) (string
 		}
 
 		status := result.GetStatus()
-		items += formatResultItem(id, date, targets, status)
+		items.WriteString(formatResultItem(id, date, targets, status))
 	}
 
 	paginationInfo := fmt.Sprintf("Showing %d results (limit: %d, offset: %d)", len(results), limit, offset)
 
-	return fmt.Sprintf("%s\n%s%s", out, items, style.Subtitle(paginationInfo)), nil
+	return fmt.Sprintf("%s\n%s%s", out, items.String(), style.Subtitle(paginationInfo)), nil
 }

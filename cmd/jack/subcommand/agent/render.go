@@ -19,24 +19,24 @@ func sortAgentFunc(a *proto.AgentInfo, b *proto.AgentInfo) int {
 }
 
 func prettyAgentListSprint(agents []*proto.AgentInfo, showDetails bool) string {
-	items := ""
+	var items strings.Builder
 	if option.GetSortOutput() {
 		slices.SortFunc(agents, sortAgentFunc)
 	}
 
 	for _, agent := range agents {
 		if !showDetails {
-			items += style.Item(agent.GetId())
+			items.WriteString(style.Item(agent.GetId()))
 			continue
 		}
 		if agent.GetCertificate() != "" {
-			items += style.Item(fmt.Sprintf("%s (%s %s)", agent.GetId(), agent.GetAddress(), agent.GetCertificate()))
+			items.WriteString(style.Item(fmt.Sprintf("%s (%s %s)", agent.GetId(), agent.GetAddress(), agent.GetCertificate())))
 		} else {
-			items += style.Item(fmt.Sprintf("%s (%s)", agent.GetId(), agent.GetAddress()))
+			items.WriteString(style.Item(fmt.Sprintf("%s (%s)", agent.GetId(), agent.GetAddress())))
 		}
 	}
 
-	return style.SpacedBlock(items)
+	return style.SpacedBlock(items.String())
 }
 
 func prettyTime(t time.Time) string {
@@ -47,7 +47,7 @@ func prettyTime(t time.Time) string {
 }
 
 func prettyAgentsHealthSprint(agents []*proto.AgentInfo, showDetails bool) string {
-	items := ""
+	var items strings.Builder
 	if option.GetSortOutput() {
 		slices.SortFunc(agents, sortAgentFunc)
 	}
@@ -62,15 +62,15 @@ func prettyAgentsHealthSprint(agents []*proto.AgentInfo, showDetails bool) strin
 		lastActive := agent.GetLastMsg().AsTime()
 
 		if !showDetails {
-			items += style.Item(fmt.Sprintf("%s: %s", agent.GetId(), connectedState))
+			items.WriteString(style.Item(fmt.Sprintf("%s: %s", agent.GetId(), connectedState)))
 			continue
 		}
 
-		items += style.Item(agent.GetId())
-		items += style.SubItem(fmt.Sprintf("state: %s", connectedState))
-		items += style.SubItem(fmt.Sprintf("%s since: %s", connectedState, prettyTime(agent.GetSince().AsTime())))
-		items += style.SubItem(fmt.Sprintf("last event: %s", prettyTime(lastActive)))
+		items.WriteString(style.Item(agent.GetId()))
+		items.WriteString(style.SubItem(fmt.Sprintf("state: %s", connectedState)))
+		items.WriteString(style.SubItem(fmt.Sprintf("%s since: %s", connectedState, prettyTime(agent.GetSince().AsTime()))))
+		items.WriteString(style.SubItem(fmt.Sprintf("last event: %s", prettyTime(lastActive))))
 	}
 
-	return style.SpacedBlock(items)
+	return style.SpacedBlock(items.String())
 }
