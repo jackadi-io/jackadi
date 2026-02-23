@@ -1,8 +1,8 @@
 module github.com/jackadi-io/jackadi
 
-go 1.24.2
+go 1.25.0
 
-toolchain go1.25.6
+toolchain go1.26.0
 
 tool (
 	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
@@ -14,37 +14,36 @@ tool (
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/claytonsingh/golib/dotaccess v0.0.0-20250903052236-1cf36ee3c772
-	github.com/dgraph-io/badger/v4 v4.9.0
+	github.com/dgraph-io/badger/v4 v4.9.1
 	github.com/goccy/go-yaml v1.19.2
 	github.com/google/go-cmp v0.7.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.5
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.7.0
 	github.com/json-iterator/go v1.1.12
-	github.com/lmittmann/tint v1.1.2
+	github.com/lmittmann/tint v1.1.3
 	github.com/sagikazarmark/locafero v0.12.0
 	github.com/spf13/cast v1.10.0
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/crypto v0.47.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20260122232226-8e98ce8d340d
-	google.golang.org/grpc v1.78.0
+	golang.org/x/crypto v0.48.0
+	google.golang.org/genproto/googleapis/api v0.0.0-20260217215200-42d3e9bedb6d
+	google.golang.org/grpc v1.79.1
 	google.golang.org/protobuf v1.36.11
 )
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/charmbracelet/colorprofile v0.4.1 // indirect
-	github.com/charmbracelet/x/ansi v0.11.4 // indirect
-	github.com/charmbracelet/x/cellbuf v0.0.14 // indirect
+	github.com/charmbracelet/colorprofile v0.4.2 // indirect
+	github.com/charmbracelet/x/ansi v0.11.6 // indirect
+	github.com/charmbracelet/x/cellbuf v0.0.15 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
-	github.com/clipperhouse/displaywidth v0.7.0 // indirect
-	github.com/clipperhouse/stringish v0.1.1 // indirect
-	github.com/clipperhouse/uax29/v2 v2.4.0 // indirect
+	github.com/clipperhouse/displaywidth v0.11.0 // indirect
+	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgraph-io/ristretto/v2 v2.4.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -57,11 +56,11 @@ require (
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/klauspost/compress v1.18.3 // indirect
+	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.19 // indirect
+	github.com/mattn/go-runewidth v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
@@ -73,14 +72,14 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/otel v1.39.0 // indirect
-	go.opentelemetry.io/otel/metric v1.39.0 // indirect
-	go.opentelemetry.io/otel/trace v1.39.0 // indirect
+	go.opentelemetry.io/otel v1.40.0 // indirect
+	go.opentelemetry.io/otel/metric v1.40.0 // indirect
+	go.opentelemetry.io/otel/trace v1.40.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260122232226-8e98ce8d340d // indirect
+	golang.org/x/net v0.50.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260217215200-42d3e9bedb6d // indirect
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
