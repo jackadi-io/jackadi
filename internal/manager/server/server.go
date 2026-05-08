@@ -37,6 +37,7 @@ type Server struct {
 	db              *badger.DB
 	dbMutex         *sync.Mutex
 	shutdownRequest map[node.ID]chan struct{}
+	shutdownMu      sync.RWMutex
 	pluginPolicies  pluginPolicies
 }
 
@@ -59,6 +60,9 @@ func New(config ServerConfig, nodesInventory *inventory.Nodes, taskDispatcher fo
 }
 
 func (s *Server) RequestShutdown(nodeID node.ID) error {
+	s.shutdownMu.Lock()
+	defer s.shutdownMu.Unlock()
+
 	ch, ok := s.shutdownRequest[nodeID]
 	if !ok {
 		return errors.New("shutdownRequest channel not found")
@@ -67,7 +71,7 @@ func (s *Server) RequestShutdown(nodeID node.ID) error {
 		return errors.New("shutdownRequest channel not initialized")
 	}
 
-	close(s.shutdownRequest[nodeID])
+	close(ch)
 	s.shutdownRequest[nodeID] = nil
 	if err := s.taskDispatcher.Forget(nodeID); err != nil {
 		slog.Error("fail to forget a node", "error", err)
@@ -190,13 +194,17 @@ func (s *Server) dispatchRequestsToNode(nodeID node.ID, stream proto.Cluster_Exe
 func (s *Server) dispatchNodeResponse(stream proto.Cluster_ExecTaskServer, nodeID node.ID, responsesCh map[int64]chan *proto.TaskResponse, responsesChLock *sync.Mutex) error {
 	ctx := stream.Context()
 
+	s.shutdownMu.RLock()
+	shutdownCh := s.shutdownRequest[nodeID]
+	s.shutdownMu.RUnlock()
+
 	for {
 		msg, err := stream.Recv()
 		select {
 		case <-ctx.Done():
 			slog.Debug("stream context cancelled", "node", nodeID, "error", ctx.Err())
 			return ctx.Err()
-		case <-s.shutdownRequest[nodeID]:
+		case <-shutdownCh:
 			slog.Warn("shutdown request received", "node", nodeID)
 			slog.Debug("ignored response because received after shutdown request", "node", nodeID)
 			return errors.New("shutdown requested")
@@ -252,9 +260,13 @@ func (s *Server) ExecTask(stream proto.Cluster_ExecTaskServer) error {
 		return err
 	}
 	slog.Debug("new 'task' stream with node", "node", nd.ID)
+	s.shutdownMu.Lock()
 	s.shutdownRequest[nd.ID] = make(chan struct{})
+	s.shutdownMu.Unlock()
 	defer func() {
+		s.shutdownMu.Lock()
 		delete(s.shutdownRequest, nd.ID)
+		s.shutdownMu.Unlock()
 	}()
 
 	for !s.Inventory.IsRegistered(nd) {
