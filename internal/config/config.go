@@ -14,8 +14,8 @@ import (
 
 var errViperConfigNotFound viper.ConfigFileNotFoundError
 
-type AgentConfig struct {
-	AgentID            string     `mapstructure:"agent-id" yaml:"agent-id"`
+type NodeConfig struct {
+	NodeID             string     `mapstructure:"node-id" yaml:"node-id"`
 	ManagerAddress     string     `mapstructure:"manager-address" yaml:"manager-address"`
 	ManagerPort        string     `mapstructure:"manager-port" yaml:"manager-port"`
 	ReconnectDelay     int        `mapstructure:"reconnect-delay" yaml:"reconnect-delay"`
@@ -41,7 +41,7 @@ type ManagerConfig struct {
 	ListenPort       string            `mapstructure:"port" yaml:"port"`
 	PluginDir        string            `mapstructure:"plugin-dir" yaml:"plugin-dir"`
 	PluginServerPort string            `mapstructure:"plugin-server-port" yaml:"plugin-server-port"`
-	AutoAcceptAgent  bool              `mapstructure:"auto-accept-agent" yaml:"auto-accept-agent"`
+	AutoAcceptNode   bool              `mapstructure:"auto-accept-node" yaml:"auto-accept-node"`
 	MTLS             ManagerMTLSConfig `mapstructure:"mtls" yaml:"mtls"`
 	API              APIConfig         `mapstructure:"api" yaml:"api"`
 }
@@ -50,7 +50,7 @@ type ManagerMTLSConfig struct {
 	Enabled bool   `mapstructure:"enabled" yaml:"enabled"`
 	Key     string `mapstructure:"key" yaml:"key"`
 	Cert    string `mapstructure:"cert" yaml:"cert"`
-	AgentCA string `mapstructure:"agent-ca-cert" yaml:"agent-ca-cert"`
+	NodeCA  string `mapstructure:"node-ca-cert" yaml:"node-ca-cert"`
 }
 
 type APIConfig struct {
@@ -66,19 +66,19 @@ type APITLSConfig struct {
 	Key     string `mapstructure:"key" yaml:"key"`
 }
 
-func SetupAgentFlags() {
-	pflag.String("id", "", "set agent ID")
+func SetupNodeFlags() {
+	pflag.String("id", "", "set node ID")
 	pflag.String("manager-address", DefaultManagerAddress, "set manager address")
 	pflag.String("manager-port", DefaultManagerPort, "set manager port")
 	pflag.Int("reconnect-delay", int(DefaultReconnectDelay.Seconds()), "delay between reconnect attempts to the manager, in seconds")
-	pflag.String("plugin-dir", DefaultAgentPluginDir, "installed plugin directory")
+	pflag.String("plugin-dir", DefaultNodePluginDir, "installed plugin directory")
 	pflag.String("plugin-server-port", DefaultPluginServerPort, "manager port used to serve plugins")
 	pflag.StringSlice("custom-resolvers", []string{}, "custom DNS resolvers for GRPC connections (comma-separated)")
 	pflag.Int("max-concurrent-tasks", DefaultMaxConcurrentTasks, "maximum number of tasks that can run concurrently (0 = use default)")
 	pflag.Int("max-waiting-requests", DefaultMaxWaitingRequests, "maximum number of requests that can wait in queue (0 = use default)")
 	pflag.Bool("mtls.enabled", true, "secure connection to managers using mTLS, recommended: true")
-	pflag.String("mtls.key", "", "agent TLS key filepath")
-	pflag.String("mtls.cert", "", "agent TLS certificate filepath")
+	pflag.String("mtls.key", "", "node TLS key filepath")
+	pflag.String("mtls.cert", "", "node TLS certificate filepath")
 	pflag.String("mtls.manager-ca-cert", "", "manager TLS certificate filepath")
 	pflag.String("config", "", "config file path")
 }
@@ -90,11 +90,11 @@ func SetupManagerFlags() {
 	pflag.String("port", DefaultManagerPort, "set manager port")
 	pflag.String("plugin-dir", DefaultPluginDir, "plugin inventory directory")
 	pflag.String("plugin-server-port", DefaultPluginServerPort, "set manager port used to serve plugins")
-	pflag.Bool("auto-accept-agent", false, "auto accept new agents")
-	pflag.Bool("mtls.enabled", true, "secure connections to agents using mTLS, recommended: true")
+	pflag.Bool("auto-accept-node", false, "auto accept new nodes")
+	pflag.Bool("mtls.enabled", true, "secure connections to nodes using mTLS, recommended: true")
 	pflag.String("mtls.key", "", "manager TLS key filepath")
 	pflag.String("mtls.cert", "", "manager TLS certificate filepath")
-	pflag.String("mtls.agent-ca-cert", "", "agent TLS certificate filepath")
+	pflag.String("mtls.node-ca-cert", "", "node TLS certificate filepath")
 	pflag.Bool("api.enabled", true, "enable HTTP REST API")
 	pflag.String("api.address", DefaultAPIAddress, "HTTP API listen address")
 	pflag.String("api.port", DefaultAPIPort, "HTTP API listen port")
@@ -112,14 +112,14 @@ func GetConfigFile(v *viper.Viper) string {
 	return ""
 }
 
-func LoadAgentConfig(configFile string) (*AgentConfig, error) {
+func LoadNodeConfig(configFile string) (*NodeConfig, error) {
 	v := viper.New()
 
-	v.SetDefault("agent-id", "")
+	v.SetDefault("node-id", "")
 	v.SetDefault("manager-address", DefaultManagerAddress)
 	v.SetDefault("manager-port", DefaultManagerPort)
 	v.SetDefault("reconnect-delay", int(DefaultReconnectDelay.Seconds()))
-	v.SetDefault("plugin-dir", DefaultAgentPluginDir)
+	v.SetDefault("plugin-dir", DefaultNodePluginDir)
 	v.SetDefault("plugin-server-port", DefaultPluginServerPort)
 	v.SetDefault("custom-resolvers", []string{})
 	v.SetDefault("max-concurrent-tasks", DefaultMaxConcurrentTasks)
@@ -130,7 +130,7 @@ func LoadAgentConfig(configFile string) (*AgentConfig, error) {
 	v.SetDefault("mtls.cert", "")
 	v.SetDefault("mtls.manager-ca-cert", "")
 
-	v.SetEnvPrefix("JACKADI_AGENT")
+	v.SetEnvPrefix("JACKADI_NODE")
 	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	v.AutomaticEnv()
 
@@ -140,7 +140,7 @@ func LoadAgentConfig(configFile string) (*AgentConfig, error) {
 			return nil, fmt.Errorf("error reading config file %s: %w", configFile, err)
 		}
 	} else {
-		v.SetConfigName("agent")
+		v.SetConfigName("node")
 		v.SetConfigType("yaml")
 		v.AddConfigPath("/etc/jackadi/")
 		v.AddConfigPath(".")
@@ -156,19 +156,19 @@ func LoadAgentConfig(configFile string) (*AgentConfig, error) {
 		return nil, fmt.Errorf("error binding flags: %w", err)
 	}
 
-	v.RegisterAlias("agent-id", "id")
+	v.RegisterAlias("node-id", "id")
 
-	var config AgentConfig
+	var config NodeConfig
 	if err := v.Unmarshal(&config); err != nil {
 		return nil, fmt.Errorf("error unmarshaling config: %w", err)
 	}
 
-	if config.AgentID == "" {
+	if config.NodeID == "" {
 		hostname, err := os.Hostname()
 		if err != nil {
-			return nil, fmt.Errorf("failed to get hostname, please set the agent-id")
+			return nil, fmt.Errorf("failed to get hostname, please set the node-id")
 		}
-		config.AgentID = hostname
+		config.NodeID = hostname
 	}
 
 	if err := os.MkdirAll(config.PluginDir, 0755); err != nil {
@@ -199,12 +199,12 @@ func LoadManagerConfig(configFile string) (*ManagerConfig, error) {
 	v.SetDefault("port", DefaultManagerPort)
 	v.SetDefault("plugin-dir", DefaultPluginDir)
 	v.SetDefault("plugin-server-port", DefaultPluginServerPort)
-	v.SetDefault("auto-accept-agent", false)
+	v.SetDefault("auto-accept-node", false)
 
 	v.SetDefault("mtls.enabled", true)
 	v.SetDefault("mtls.cert", "")
 	v.SetDefault("mtls.key", "")
-	v.SetDefault("mtls.agent-ca-cert", "")
+	v.SetDefault("mtls.node-ca-cert", "")
 
 	v.SetDefault("api.enabled", true)
 	v.SetDefault("api.address", DefaultAPIAddress)

@@ -9,13 +9,13 @@ import (
 
 // GetMTLSCertificate returns the TLS configuration using the provided certificates for mTLS.
 //
-// Agent configuration:
+// Node configuration:
 //
-//	GetMTLSCertificate("./tls-example/agent_cert.pem", "./tls-example/agent_key.pem", "./tls-example/manager_ca_cert.pem")
+//	GetMTLSCertificate("./tls-example/node_cert.pem", "./tls-example/node_key.pem", "./tls-example/manager_ca_cert.pem")
 //
 // Manager Configuration:
 //
-//	GetMTLSCertificate("./tls-example/manager_cert.pem", "./tls-example/manager_key.pem", "./tls-example/agent_ca_cert.pem")
+//	GetMTLSCertificate("./tls-example/manager_cert.pem", "./tls-example/manager_key.pem", "./tls-example/node_ca_cert.pem")
 func GetMTLSCertificate(localCert, localKey, peerCA string) ([]tls.Certificate, *x509.CertPool, error) {
 	cert, err := tls.LoadX509KeyPair(localCert, localKey)
 	if err != nil {

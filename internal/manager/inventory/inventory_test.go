@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/jackadi-io/jackadi/internal/agent"
+	"github.com/jackadi-io/jackadi/internal/node"
 )
 
 // TODO:
@@ -19,54 +19,54 @@ import (
 func TestAddCandidate(t *testing.T) {
 	tests := []struct {
 		name          string
-		agent         AgentIdentity
-		inventory     []AgentIdentity
-		want          []AgentIdentity
+		nd            NodeIdentity
+		inventory     []NodeIdentity
+		want          []NodeIdentity
 		expectedError error
 	}{
 		{
 			name:      "empty list",
-			agent:     AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			inventory: []AgentIdentity{},
-			want: []AgentIdentity{
-				{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			nd:        NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			inventory: []NodeIdentity{},
+			want: []NodeIdentity{
+				{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
 			},
 			expectedError: nil,
 		},
 		{
-			name:  "agent is not known",
-			agent: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			inventory: []AgentIdentity{
-				{ID: agent.ID("agent2"), Address: "127.0.0.2", Certificate: "certificate2"},
+			name: "node is not known",
+			nd:   NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			inventory: []NodeIdentity{
+				{ID: node.ID("node2"), Address: "127.0.0.2", Certificate: "certificate2"},
 			},
-			want: []AgentIdentity{
-				{ID: agent.ID("agent2"), Address: "127.0.0.2", Certificate: "certificate2"},
-				{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			want: []NodeIdentity{
+				{ID: node.ID("node2"), Address: "127.0.0.2", Certificate: "certificate2"},
+				{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
 			},
 		},
 		{
-			name:  "agent is already known",
-			agent: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			inventory: []AgentIdentity{
-				{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-				{ID: agent.ID("agent2"), Address: "127.0.0.2", Certificate: "certificate1"},
+			name: "node is already known",
+			nd:   NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			inventory: []NodeIdentity{
+				{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+				{ID: node.ID("node2"), Address: "127.0.0.2", Certificate: "certificate1"},
 			},
-			want: []AgentIdentity{
-				{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-				{ID: agent.ID("agent2"), Address: "127.0.0.2", Certificate: "certificate1"},
+			want: []NodeIdentity{
+				{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+				{ID: node.ID("node2"), Address: "127.0.0.2", Certificate: "certificate1"},
 			},
-			expectedError: ErrAgentAlreadyCandidate,
+			expectedError: ErrNodeAlreadyCandidate,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			agents := New()
-			agents.DisableRegistryFile()
-			agents.registry.candidates = test.inventory
-			err := agents.AddCandidate(test.agent)
+			nodes := New()
+			nodes.DisableRegistryFile()
+			nodes.registry.candidates = test.inventory
+			err := nodes.AddCandidate(test.nd)
 
-			if diff := cmp.Diff(agents.registry.candidates, test.want); diff != "" {
+			if diff := cmp.Diff(nodes.registry.candidates, test.want); diff != "" {
 				t.Errorf("Mismatch for '%s' test:\n%s", test.name, diff)
 			}
 			if !errors.Is(err, test.expectedError) {
@@ -79,81 +79,81 @@ func TestAddCandidate(t *testing.T) {
 func TestRemoveCandidates(t *testing.T) {
 	tests := []struct {
 		name          string
-		agent         AgentIdentity
-		inventory     []AgentIdentity
-		want          []AgentIdentity
+		nd            NodeIdentity
+		inventory     []NodeIdentity
+		want          []NodeIdentity
 		expectedError error
 	}{
 		{
 			name:          "empty list",
-			agent:         AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			inventory:     []AgentIdentity{},
-			want:          []AgentIdentity{},
-			expectedError: ErrAgentNotFound,
+			nd:            NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			inventory:     []NodeIdentity{},
+			want:          []NodeIdentity{},
+			expectedError: ErrNodeNotFound,
 		},
 		{
-			name:  "list with only one agent - matching",
-			agent: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			inventory: []AgentIdentity{
-				{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			name: "list with only one node - matching",
+			nd:   NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			inventory: []NodeIdentity{
+				{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
 			},
-			want:          []AgentIdentity{},
+			want:          []NodeIdentity{},
 			expectedError: nil,
 		},
 		{
-			name:  "list with only one agent - not matching",
-			agent: AgentIdentity{ID: agent.ID("agent2"), Address: "127.0.0.1", Certificate: "certificate1"},
-			inventory: []AgentIdentity{
-				{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			name: "list with only one node - not matching",
+			nd:   NodeIdentity{ID: node.ID("node2"), Address: "127.0.0.1", Certificate: "certificate1"},
+			inventory: []NodeIdentity{
+				{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
 			},
-			want: []AgentIdentity{
-				{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			want: []NodeIdentity{
+				{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
 			},
-			expectedError: ErrAgentNotFound,
+			expectedError: ErrNodeNotFound,
 		},
 		{
-			name:  "list with multiple one agent - matching",
-			agent: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			inventory: []AgentIdentity{
-				{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-				{ID: agent.ID("agent1"), Address: "127.0.0.2", Certificate: "certificate1"},
-				{ID: agent.ID("agent3"), Address: "127.0.0.3", Certificate: "certificate1"},
-				{ID: agent.ID("agent4"), Address: "127.0.0.4", Certificate: "certificate1"},
+			name: "list with multiple nodes - matching",
+			nd:   NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			inventory: []NodeIdentity{
+				{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+				{ID: node.ID("node1"), Address: "127.0.0.2", Certificate: "certificate1"},
+				{ID: node.ID("node3"), Address: "127.0.0.3", Certificate: "certificate1"},
+				{ID: node.ID("node4"), Address: "127.0.0.4", Certificate: "certificate1"},
 			},
-			want: []AgentIdentity{
-				{ID: agent.ID("agent1"), Address: "127.0.0.2", Certificate: "certificate1"},
-				{ID: agent.ID("agent3"), Address: "127.0.0.3", Certificate: "certificate1"},
-				{ID: agent.ID("agent4"), Address: "127.0.0.4", Certificate: "certificate1"},
+			want: []NodeIdentity{
+				{ID: node.ID("node1"), Address: "127.0.0.2", Certificate: "certificate1"},
+				{ID: node.ID("node3"), Address: "127.0.0.3", Certificate: "certificate1"},
+				{ID: node.ID("node4"), Address: "127.0.0.4", Certificate: "certificate1"},
 			},
 			expectedError: nil,
 		},
 		{
-			name:  "list with multiple one agent - not matching",
-			agent: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.3", Certificate: "certificate1"},
-			inventory: []AgentIdentity{
-				{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-				{ID: agent.ID("agent1"), Address: "127.0.0.2", Certificate: "certificate1"},
-				{ID: agent.ID("agent3"), Address: "127.0.0.3", Certificate: "certificate1"},
-				{ID: agent.ID("agent4"), Address: "127.0.0.4", Certificate: "certificate1"},
+			name: "list with multiple nodes - not matching",
+			nd:   NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.3", Certificate: "certificate1"},
+			inventory: []NodeIdentity{
+				{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+				{ID: node.ID("node1"), Address: "127.0.0.2", Certificate: "certificate1"},
+				{ID: node.ID("node3"), Address: "127.0.0.3", Certificate: "certificate1"},
+				{ID: node.ID("node4"), Address: "127.0.0.4", Certificate: "certificate1"},
 			},
-			want: []AgentIdentity{
-				{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-				{ID: agent.ID("agent1"), Address: "127.0.0.2", Certificate: "certificate1"},
-				{ID: agent.ID("agent3"), Address: "127.0.0.3", Certificate: "certificate1"},
-				{ID: agent.ID("agent4"), Address: "127.0.0.4", Certificate: "certificate1"},
+			want: []NodeIdentity{
+				{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+				{ID: node.ID("node1"), Address: "127.0.0.2", Certificate: "certificate1"},
+				{ID: node.ID("node3"), Address: "127.0.0.3", Certificate: "certificate1"},
+				{ID: node.ID("node4"), Address: "127.0.0.4", Certificate: "certificate1"},
 			},
-			expectedError: ErrAgentNotFound,
+			expectedError: ErrNodeNotFound,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			agents := New()
-			agents.DisableRegistryFile()
-			agents.registry.candidates = test.inventory
-			err := agents.RemoveCandidate(test.agent)
+			nodes := New()
+			nodes.DisableRegistryFile()
+			nodes.registry.candidates = test.inventory
+			err := nodes.RemoveCandidate(test.nd)
 
-			if diff := cmp.Diff(agents.registry.candidates, test.want); diff != "" {
+			if diff := cmp.Diff(nodes.registry.candidates, test.want); diff != "" {
 				t.Errorf("Mismatch for '%s' test:\n%s", test.name, diff)
 			}
 			if !errors.Is(err, test.expectedError) {
@@ -165,47 +165,47 @@ func TestRemoveCandidates(t *testing.T) {
 
 func TestCompare(t *testing.T) {
 	tests := []struct {
-		name   string
-		agent1 AgentIdentity
-		agent2 AgentIdentity
-		want   []diff
+		name  string
+		node1 NodeIdentity
+		node2 NodeIdentity
+		want  []diff
 	}{
 		{
-			name:   "same agent",
-			agent1: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			agent2: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			want:   []diff{},
+			name:  "same node",
+			node1: NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			node2: NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			want:  []diff{},
 		},
 		{
-			name:   "different ID",
-			agent1: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			agent2: AgentIdentity{ID: agent.ID("agent2"), Address: "127.0.0.1", Certificate: "certificate1"},
+			name:  "different ID",
+			node1: NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			node2: NodeIdentity{ID: node.ID("node2"), Address: "127.0.0.1", Certificate: "certificate1"},
 			want: []diff{
-				{"ID", agent.ID("agent1"), agent.ID("agent2")},
+				{"ID", node.ID("node1"), node.ID("node2")},
 			},
 		},
 		{
-			name:   "different address",
-			agent1: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			agent2: AgentIdentity{ID: agent.ID("agent1"), Address: "::1", Certificate: "certificate1"},
+			name:  "different address",
+			node1: NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			node2: NodeIdentity{ID: node.ID("node1"), Address: "::1", Certificate: "certificate1"},
 			want: []diff{
 				{"address", "127.0.0.1", "::1"},
 			},
 		},
 		{
-			name:   "different certificate",
-			agent1: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			agent2: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate2"},
+			name:  "different certificate",
+			node1: NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			node2: NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate2"},
 			want: []diff{
 				{"certificate", "hidden", "hidden"},
 			},
 		},
 		{
-			name:   "completely different",
-			agent1: AgentIdentity{ID: agent.ID("agent1"), Address: "127.0.0.1", Certificate: "certificate1"},
-			agent2: AgentIdentity{ID: agent.ID("agent2"), Address: "::1", Certificate: "certificate2"},
+			name:  "completely different",
+			node1: NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1", Certificate: "certificate1"},
+			node2: NodeIdentity{ID: node.ID("node2"), Address: "::1", Certificate: "certificate2"},
 			want: []diff{
-				{"ID", agent.ID("agent1"), agent.ID("agent2")},
+				{"ID", node.ID("node1"), node.ID("node2")},
 				{"address", "127.0.0.1", "::1"},
 				{"certificate", "hidden", "hidden"},
 			},
@@ -214,7 +214,7 @@ func TestCompare(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			diffs := Compare(test.agent1, test.agent2)
+			diffs := Compare(test.node1, test.node2)
 
 			if diff := cmp.Diff(diffs, test.want); diff != "" {
 				t.Errorf("Mismatch for '%s' test:\n%s", test.name, diff)

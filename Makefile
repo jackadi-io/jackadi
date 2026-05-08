@@ -9,9 +9,9 @@ help: ## Show this help message
 ###
 # BUILD
 ##
-build: ## Build manager, agent, and CLI binaries
+build: ## Build manager, node, and CLI binaries
 	goreleaser build --clean --snapshot --single-target --id manager -o ./manager
-	goreleaser build --clean --snapshot --single-target --id agent -o ./agent
+	goreleaser build --clean --snapshot --single-target --id node -o ./node
 	goreleaser build --clean --snapshot --single-target --id cli -o ./jack
 
 proto: ## Generate protobuf files
@@ -24,7 +24,7 @@ ci: ## Run CI checks (tests, linting, nilaway)
 
 clean: ## Clean build artifacts
 	rm -rf dist/
-	rm -f manager agent jack
+	rm -f manager node jack
 
 ###
 # DEV
@@ -48,28 +48,28 @@ ifeq ($(OPTI),1)
 	fi
 endif
 
-dev: build-examples stop ## Start development environment in tmux with manager and 2 agents
+dev: build-examples stop ## Start development environment in tmux with manager and 2 nodes
 	$(MAKE) generate-tls
-	tmux new-session -d -s manager 'go run -race ./cmd/manager --mtls-cert "./sandbox/tls/manager_cert.pem" --mtls-key "./sandbox/tls/manager_key.pem" --mtls-agent-ca-cert "./sandbox/tls/agent_ca_cert.pem"'
-	tmux new-session -d -s agent1 'go run -race ./cmd/agent --id agent1 --plugin-dir="./plugins" --mtls-cert "./sandbox/tls/agent_cert.pem" --mtls-key "./sandbox/tls/agent_key.pem" --mtls-manager-ca-cert "./sandbox/tls/manager_ca_cert.pem"'
-	tmux new-session -d -s agent2 'go run -race ./cmd/agent --id agent2 --plugin-dir="./plugins" --mtls-cert "./sandbox/tls/agent_cert.pem" --mtls-key "./sandbox/tls/agent_key.pem" --mtls-manager-ca-cert "./sandbox/tls/manager_ca_cert.pem"'
+	tmux new-session -d -s manager 'go run -race ./cmd/manager --mtls-cert "./sandbox/tls/manager_cert.pem" --mtls-key "./sandbox/tls/manager_key.pem" --mtls-node-ca-cert "./sandbox/tls/node_ca_cert.pem"'
+	tmux new-session -d -s node1 'go run -race ./cmd/node --id node1 --plugin-dir="./plugins" --mtls-cert "./sandbox/tls/node_cert.pem" --mtls-key "./sandbox/tls/node_key.pem" --mtls-manager-ca-cert "./sandbox/tls/manager_ca_cert.pem"'
+	tmux new-session -d -s node2 'go run -race ./cmd/node --id node2 --plugin-dir="./plugins" --mtls-cert "./sandbox/tls/node_cert.pem" --mtls-key "./sandbox/tls/node_key.pem" --mtls-manager-ca-cert "./sandbox/tls/manager_ca_cert.pem"'
 
 stop: ## Stop all development tmux sessions
 	tmux kill-session -t manager || true
-	tmux kill-session -t agent1 || true
-	tmux kill-session -t agent2 || true
+	tmux kill-session -t node1 || true
+	tmux kill-session -t node2 || true
 
 ###
 # SANDBOX
 ##
 sandbox-start: build build-examples ## Start sandbox environment with Docker
 	$(MAKE) generate-tls
-	cp -f jack agent manager sandbox/
+	cp -f jack node manager sandbox/
 	cp -rf plugins sandbox/
 	docker compose --project-directory ./sandbox up -d --force-recreate
 
 sandbox-update: build build-examples ## Update sandbox binaries without restarting
-	cp -f jack agent manager sandbox/
+	cp -f jack node manager sandbox/
 	cp -rf plugins sandbox/
 
 sandbox-stop: ## Stop sandbox environment

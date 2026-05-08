@@ -210,11 +210,11 @@ func download(name, url, tmpDir string) error {
 }
 
 // DownloadPlugins downloads plugins from the manager, excluding already up to date plugins (same checksum).
-func (l *Loader) DownloadPlugins(agentPlugins map[string]string, managerHost, pluginDir, tmpDir string) ([]string, error) {
-	slog.Debug("sync", "values", agentPlugins)
+func (l *Loader) DownloadPlugins(nodePlugins map[string]string, managerHost, pluginDir, tmpDir string) ([]string, error) {
+	slog.Debug("sync", "values", nodePlugins)
 	upToDate := []string{}
 	var errs error
-	for file, checksum := range agentPlugins {
+	for file, checksum := range nodePlugins {
 		path := filepath.Join(pluginDir, file)
 		if p, ok := l.plugins[path]; ok && p.version == checksum {
 			slog.Debug("plugin not downloaded", "reason", "already up to date", "plugin_file", file)

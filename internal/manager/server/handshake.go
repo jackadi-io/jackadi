@@ -9,8 +9,8 @@ import (
 	"log/slog"
 	"net"
 
-	"github.com/jackadi-io/jackadi/internal/agent"
 	"github.com/jackadi-io/jackadi/internal/manager/inventory"
+	"github.com/jackadi-io/jackadi/internal/node"
 	"github.com/jackadi-io/jackadi/internal/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -20,22 +20,22 @@ import (
 
 // signatureFromContext extracts metadata from gRPC context.
 //
-// The main information is the agent ID.
-func signatureFromContext(ctx context.Context, mTLSEnabled bool) (inventory.AgentIdentity, error) {
-	signature := inventory.AgentIdentity{}
+// The main information is the node ID.
+func signatureFromContext(ctx context.Context, mTLSEnabled bool) (inventory.NodeIdentity, error) {
+	signature := inventory.NodeIdentity{}
 
-	agentID, err := GetMetadataUniqueKey(ctx, "agent_id")
-	signature.ID = agent.ID(agentID)
+	nodeID, err := GetMetadataUniqueKey(ctx, "node_id")
+	signature.ID = node.ID(nodeID)
 	if err != nil {
-		return signature, errors.New("unspecified agent_id")
+		return signature, errors.New("unspecified node_id")
 	}
 
-	peer, ok := peer.FromContext(ctx)
+	p, ok := peer.FromContext(ctx)
 	if !ok {
-		return signature, fmt.Errorf("failed to get agent info")
+		return signature, fmt.Errorf("failed to get node info")
 	}
 
-	switch addr := peer.Addr.(type) {
+	switch addr := p.Addr.(type) {
 	case *net.TCPAddr:
 		signature.Address = addr.IP.String()
 	case *net.UDPAddr:
@@ -43,12 +43,12 @@ func signatureFromContext(ctx context.Context, mTLSEnabled bool) (inventory.Agen
 	}
 
 	if mTLSEnabled {
-		tlsInfo, ok := peer.AuthInfo.(credentials.TLSInfo)
+		tlsInfo, ok := p.AuthInfo.(credentials.TLSInfo)
 		if !ok {
-			return signature, fmt.Errorf("unexpected agent credentials")
+			return signature, fmt.Errorf("unexpected node credentials")
 		}
 		if len(tlsInfo.State.PeerCertificates) < 1 {
-			return signature, fmt.Errorf("no agent certificate found")
+			return signature, fmt.Errorf("no node certificate found")
 		}
 
 		data, err := x509.MarshalPKIXPublicKey(tlsInfo.State.PeerCertificates[0].PublicKey)
@@ -61,36 +61,35 @@ func signatureFromContext(ctx context.Context, mTLSEnabled bool) (inventory.Agen
 	return signature, nil
 }
 
-// Handshake handle agent registration.
+// Handshake handles node registration.
 //
-// It checks if the agent changed to detect potential rogue.
+// It checks if the node changed to detect potential rogue.
 func (s *Server) Handshake(ctx context.Context, req *proto.HandshakeRequest) (*proto.HandshakeResponse, error) {
 	resp := &proto.HandshakeResponse{Id: req.GetId()}
-	agent, err := signatureFromContext(ctx, s.config.MTLSEnabled)
+	nd, err := signatureFromContext(ctx, s.config.MTLSEnabled)
 	if err != nil {
 		return resp, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if s.Inventory.IsRegistered(agent) {
+	if s.Inventory.IsRegistered(nd) {
 		return resp, nil
 	}
 
-	err = s.Inventory.AddCandidate(agent)
+	err = s.Inventory.AddCandidate(nd)
 	if err != nil {
-		slog.Debug("agent not added to candidates", "error", err, "agent", agent.ID, "address", agent.Address)
+		slog.Debug("node not added to candidates", "error", err, "node", nd.ID, "address", nd.Address)
 	} else {
-		slog.Debug("new agent discovered", "agent", agent.ID, "address", agent.Address)
+		slog.Debug("new node discovered", "node", nd.ID, "address", nd.Address)
 	}
 
 	if !s.config.AutoAccept {
-		return resp, status.Error(codes.PermissionDenied, "agent not registered")
+		return resp, status.Error(codes.PermissionDenied, "node not registered")
 	}
 
-	if err := s.Inventory.Register(agent, false); err != nil {
-		slog.Debug("agent not auto-registered", "error", err)
-		return resp, status.Error(codes.Unknown, fmt.Sprintf("failed to auto-register agent: %s", err))
+	if err := s.Inventory.Register(nd, false); err != nil {
+		slog.Debug("node not auto-registered", "error", err)
+		return resp, status.Error(codes.Unknown, fmt.Sprintf("failed to auto-register node: %s", err))
 	}
 
-	// original code:
 	return resp, err
 }

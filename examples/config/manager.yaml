@@ -13,15 +13,15 @@ plugin-server-port: "40081"
 config-dir: "/etc/jackadi"
 plugin-dir: "/opt/jackadi/plugins"
 
-# Agent management
-auto-accept-agent: false  # Set to true to automatically accept new agents
+# node management
+auto-accept-node: false  # Set to true to automatically accept new nodes
 
-# Security settings (mTLS for agent connections)
+# Security settings (mTLS for node connections)
 mtls:
   enabled: true
   key: "/etc/jackadi/certs/manager.key"
   cert: "/etc/jackadi/certs/manager.crt"
-  agent-ca-cert: "/etc/jackadi/certs/ca.crt"
+  node-ca-cert: "/etc/jackadi/certs/ca.crt"
 
 # HTTP REST API configuration
 api:
@@ -36,7 +36,7 @@ api:
 # Alternative minimal configuration example:
 # manager-id: "simple-manager"
 # address: "127.0.0.1"
-# auto-accept-agent: true
+# auto-accept-node: true
 # mtls:
 #   enabled: false
 # api:

@@ -1,0 +1,30 @@
+# Jackadi Node Configuration for SONiC
+# Default configuration file - modify as needed for your environment
+
+# Node identification - MUST be unique per device
+# If not set, will use hostname
+# node-id: ""
+
+# Manager connection settings
+# Update manager-address to point to your Jackadi manager
+manager-address: "127.0.0.1"
+manager-port: "40080"
+reconnect-delay: 10
+
+# Plugin configuration
+plugin-dir: "/var/lib/jackadi/plugins"
+plugin-server-port: "40081"
+
+# Custom DNS resolvers (optional)
+# custom-resolvers:
+#   - "8.8.8.8:53"
+#   - "1.1.1.1:53"
+
+# Security settings (mTLS)
+# Set enabled to true and configure certificates for production
+mtls:
+  enabled: false
+  # TLS configuration (required when enabled: true)
+  # key: "/etc/sonic/jackadi/certs/node.key"
+  # cert: "/etc/sonic/jackadi/certs/node.crt"
+  # manager-ca-cert: "/etc/sonic/jackadi/certs/ca.crt"

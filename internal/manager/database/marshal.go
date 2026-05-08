@@ -3,13 +3,13 @@ package database
 import (
 	"encoding/json"
 
-	"github.com/jackadi-io/jackadi/internal/agent"
+	"github.com/jackadi-io/jackadi/internal/node"
 	"github.com/jackadi-io/jackadi/internal/proto"
 )
 
-// MarshalTask serializes a task with its agent and result for database storage.
-func MarshalTask(agentID agent.ID, result *proto.TaskResponse) ([]byte, error) {
-	task := Task{Agent: agentID, Result: result}
+// MarshalTask serializes a task with its node and result for database storage.
+func MarshalTask(nodeID node.ID, result *proto.TaskResponse) ([]byte, error) {
+	task := Task{Node: nodeID, Result: result}
 	return json.Marshal(task)
 }
 

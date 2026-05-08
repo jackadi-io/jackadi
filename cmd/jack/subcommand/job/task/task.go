@@ -14,7 +14,7 @@ import (
 	"github.com/jackadi-io/jackadi/cmd/jack/connection"
 	"github.com/jackadi-io/jackadi/cmd/jack/option"
 	"github.com/jackadi-io/jackadi/cmd/jack/style"
-	"github.com/jackadi-io/jackadi/cmd/jack/subcommand/agent"
+	"github.com/jackadi-io/jackadi/cmd/jack/subcommand/node"
 	"github.com/jackadi-io/jackadi/internal/config"
 	"github.com/jackadi-io/jackadi/internal/helper"
 	"github.com/jackadi-io/jackadi/internal/parser"
@@ -53,7 +53,7 @@ func RunCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "run [ -t | -l | -g | -e | -f ] TARGET PLUGIN:TASK -- ARGS...",
-		Short: "Run a task on one or multiple agents",
+		Short: "Run a task on one or multiple nodes",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
 				err := fmt.Errorf("requires at least %d arg(s), only received %d", 2, len(args))
@@ -72,8 +72,8 @@ func RunCommand() *cobra.Command {
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			switch len(args) {
 			case 0:
-				// agent name completion
-				return agent.ListAgent(), cobra.ShellCompDirectiveNoFileComp
+				// node name completion
+				return node.ListNode(), cobra.ShellCompDirectiveNoFileComp
 			case 1:
 				// plugin:task completion using plugin in plugin directory + built-ins
 				return autocompletion.GetTaskCompletions(toComplete)
@@ -103,12 +103,12 @@ func RunCommand() *cobra.Command {
 			if option.GetJSONFormat() {
 				decodedResponses := make(map[string]*proxyResponse)
 
-				for agentName, response := range out.GetResponses() {
+				for nodeName, response := range out.GetResponses() {
 					decodedResponse := proxyResponse{
 						TaskResponse: response,
 						Output:       string(response.Output), // Decode bytes to string
 					}
-					decodedResponses[agentName] = &decodedResponse
+					decodedResponses[nodeName] = &decodedResponse
 				}
 
 				result, err := serializer.JSON.MarshalIndent(decodedResponses, "", "  ")
@@ -124,12 +124,12 @@ func RunCommand() *cobra.Command {
 		GroupID: "operations",
 	}
 
-	cmd.Flags().BoolVarP(&target.Exact, "target", "t", false, "target a specific agent")
-	cmd.Flags().BoolVarP(&target.List, "list", "l", false, "target a list of agents, separator: ','")
-	cmd.Flags().BoolVarP(&target.File, "file", "f", false, "target a list of agents from a file (one agent per line)")
-	cmd.Flags().BoolVarP(&target.Glob, "glob", "g", false, "target agents matching the Glob pattern")
-	cmd.Flags().BoolVarP(&target.Regexp, "regexp", "e", false, "target agents matching the regular expression")
-	cmd.Flags().BoolVarP(&target.Query, "query", "q", false, "target agents using a query")
+	cmd.Flags().BoolVarP(&target.Exact, "target", "t", false, "target a specific node")
+	cmd.Flags().BoolVarP(&target.List, "list", "l", false, "target a list of nodes, separator: ','")
+	cmd.Flags().BoolVarP(&target.File, "file", "f", false, "target a list of nodes from a file (one node per line)")
+	cmd.Flags().BoolVarP(&target.Glob, "glob", "g", false, "target nodes matching the Glob pattern")
+	cmd.Flags().BoolVarP(&target.Regexp, "regexp", "e", false, "target nodes matching the regular expression")
+	cmd.Flags().BoolVarP(&target.Query, "query", "q", false, "target nodes using a query")
 	cmd.MarkFlagsMutuallyExclusive("target", "list", "glob", "regexp", "query", "file")
 
 	cmd.Flags().IntVar(&timeout, "timeout", 30, "task timeout in second")
@@ -155,20 +155,20 @@ func targetsFromFile(file string) (string, error) {
 	}
 
 	scanner := bufio.NewScanner(fd)
-	agents := []string{}
+	nodes := []string{}
 	for scanner.Scan() {
-		agent := scanner.Text()
-		if slices.Contains(agents, agent) {
+		nd := scanner.Text()
+		if slices.Contains(nodes, nd) {
 			continue
 		}
-		agents = append(agents, agent)
+		nodes = append(nodes, nd)
 	}
 
 	if err := scanner.Err(); err != nil {
 		return "", err
 	}
 
-	return strings.Join(agents, ","), nil
+	return strings.Join(nodes, ","), nil
 }
 
 func sendTask(target string, targetMode proto.TargetMode, lockMode proto.LockMode, timeout int, task string, args ...string) (*proto.FwdResponse, error) {
@@ -180,7 +180,7 @@ func sendTask(target string, targetMode proto.TargetMode, lockMode proto.LockMod
 
 	client := proto.NewForwarderClient(conn)
 
-	// ctxReq timeout is 1 second more than expected timeout to give time to the manager or agent to
+	// ctxReq timeout is 1 second more than expected timeout to give time to the manager or node to
 	// send a timeout response with the IDs of the task.
 	ctxReq, cancel := context.WithTimeout(context.Background(), time.Duration(timeout+1)*time.Second)
 	defer cancel()

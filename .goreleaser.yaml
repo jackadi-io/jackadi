@@ -21,9 +21,9 @@ builds:
       - -X main.commit={{.Commit}}
       - -X main.date={{.Date}}
 
-  - id: agent
-    binary: jackadi-agent
-    main: ./cmd/agent
+  - id: node
+    binary: jackadi-node
+    main: ./cmd/node
     env:
       - CGO_ENABLED=0
     goos:
@@ -180,13 +180,13 @@ nfpms:
       postremove: ./scripts/postremove-server.sh
 
   ###
-  # Linux packages for agent.
+  # Linux packages for node.
   ##
-  - id: jackadi-agent
-    package_name: jackadi-agent
+  - id: jackadi-node
+    package_name: jackadi-node
     file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Arch }}"
     ids:
-      - agent
+      - node
     vendor: Jackadi
     homepage: https://jackadi.io/
     maintainer: Kevin Petremann <k@kpmail.fr>
@@ -195,7 +195,7 @@ nfpms:
     priority: optional
 
     description: |-
-      Jackadi's agent.
+      Jackadi's node.
       Developer-first automation and configuration management.
 
     formats:
@@ -219,24 +219,24 @@ nfpms:
           owner: root
           group: root
 
-      - src: ./scripts/jackadi-agent.service
-        dst: /etc/systemd/system/jackadi-agent.service
+      - src: ./scripts/jackadi-node.service
+        dst: /etc/systemd/system/jackadi-node.service
         type: config
         file_info:
           mode: 0644
 
     scripts:
-      postinstall: ./scripts/postinstall-agent.sh
-      preremove: ./scripts/preremove-agent.sh
+      postinstall: ./scripts/postinstall-node.sh
+      preremove: ./scripts/preremove-node.sh
 
   ###
-  # .deb for agent for SONiC
+  # .deb for node for SONiC
   ##
-  - id: jackadi-agent-sonic
-    package_name: jackadi-agent-sonic
+  - id: jackadi-node-sonic
+    package_name: jackadi-node-sonic
     file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Arch }}"
     ids:
-      - agent
+      - node
     vendor: Jackadi
     homepage: https://jackadi.io/
     maintainer: Kevin Petremann <k@kpmail.fr>
@@ -245,7 +245,7 @@ nfpms:
     priority: optional
 
     description: |-
-      Jackadi's agent.
+      Jackadi's node.
       Developer-first automation and configuration management.
 
     formats:
@@ -268,23 +268,23 @@ nfpms:
           owner: root
           group: root
 
-      - src: ./configs/agent-sonic.yaml
-        dst: /etc/sonic/jackadi/agent.yaml
+      - src: ./configs/node-sonic.yaml
+        dst: /etc/sonic/jackadi/node.yaml
         type: config
         file_info:
           mode: 0644
           owner: root
           group: root
 
-      - src: ./scripts/jackadi-agent-sonic.service
-        dst: /etc/systemd/system/jackadi-agent.service
+      - src: ./scripts/jackadi-node-sonic.service
+        dst: /etc/systemd/system/jackadi-node.service
         type: config
         file_info:
           mode: 0644
 
     scripts:
-      postinstall: ./scripts/postinstall-agent.sh
-      preremove: ./scripts/preremove-agent.sh
+      postinstall: ./scripts/postinstall-node.sh
+      preremove: ./scripts/preremove-node.sh
 
 
 release:

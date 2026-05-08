@@ -4,41 +4,41 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/jackadi-io/jackadi/internal/agent"
 	"github.com/jackadi-io/jackadi/internal/manager/inventory"
+	"github.com/jackadi-io/jackadi/internal/node"
 	"github.com/jackadi-io/jackadi/internal/proto"
 )
 
-func TestTargetedAgentsList(t *testing.T) {
-	inv := &inventory.Agents{}
+func TestTargetedNodesList(t *testing.T) {
+	inv := &inventory.Nodes{}
 	dispatcher := NewDispatcher[string, string](inv)
 
-	agents := []agent.ID{agent.ID("agent1"), agent.ID("agent2"), agent.ID("agent3")}
-	for _, agentID := range agents {
-		_ = dispatcher.RegisterAgent(agentID)
+	nodes := []node.ID{node.ID("node1"), node.ID("node2"), node.ID("node3")}
+	for _, nodeID := range nodes {
+		_ = dispatcher.RegisterNode(nodeID)
 	}
 
-	result, err := dispatcher.TargetedAgents("agent1,agent2", proto.TargetMode_LIST)
+	result, err := dispatcher.TargetedNodes("node1,node2", proto.TargetMode_LIST)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
 	expected := map[string]bool{
-		"agent1": true,
-		"agent2": true,
+		"node1": true,
+		"node2": true,
 	}
 	if diff := cmp.Diff(result, expected); diff != "" {
 		t.Errorf("Mismatch (-got +want):\n%s", diff)
 	}
 }
 
-func TestTargetedAgentsGlob(t *testing.T) {
-	inv := &inventory.Agents{}
+func TestTargetedNodesGlob(t *testing.T) {
+	inv := &inventory.Nodes{}
 	dispatcher := NewDispatcher[string, string](inv)
 
-	agents := []agent.ID{agent.ID("web-1"), agent.ID("web-2"), agent.ID("db-1"), agent.ID("cache-1")}
-	for _, agentID := range agents {
-		_ = dispatcher.RegisterAgent(agentID)
+	nodes := []node.ID{node.ID("web-1"), node.ID("web-2"), node.ID("db-1"), node.ID("cache-1")}
+	for _, nodeID := range nodes {
+		_ = dispatcher.RegisterNode(nodeID)
 	}
 
 	tests := []struct {
@@ -70,7 +70,7 @@ func TestTargetedAgentsGlob(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.pattern, func(t *testing.T) {
-			result, err := dispatcher.TargetedAgents(tt.pattern, proto.TargetMode_GLOB)
+			result, err := dispatcher.TargetedNodes(tt.pattern, proto.TargetMode_GLOB)
 			if err != nil {
 				t.Errorf("Unexpected error: %v", err)
 			}
@@ -82,13 +82,13 @@ func TestTargetedAgentsGlob(t *testing.T) {
 	}
 }
 
-func TestTargetedAgentsRegex(t *testing.T) {
-	inv := &inventory.Agents{}
+func TestTargetedNodesRegex(t *testing.T) {
+	inv := &inventory.Nodes{}
 	dispatcher := NewDispatcher[string, string](inv)
 
-	agents := []agent.ID{agent.ID("web-01"), agent.ID("web-02"), agent.ID("db-01"), agent.ID("cache-01")}
-	for _, agentID := range agents {
-		_ = dispatcher.RegisterAgent(agentID)
+	nodes := []node.ID{node.ID("web-01"), node.ID("web-02"), node.ID("db-01"), node.ID("cache-01")}
+	for _, nodeID := range nodes {
+		_ = dispatcher.RegisterNode(nodeID)
 	}
 
 	tests := []struct {
@@ -125,7 +125,7 @@ func TestTargetedAgentsRegex(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.pattern, func(t *testing.T) {
-			result, err := dispatcher.TargetedAgents(tt.pattern, proto.TargetMode_REGEX)
+			result, err := dispatcher.TargetedNodes(tt.pattern, proto.TargetMode_REGEX)
 
 			if tt.expectError {
 				if err == nil {
@@ -145,22 +145,22 @@ func TestTargetedAgentsRegex(t *testing.T) {
 	}
 }
 
-func TestTargetedAgentsQuery(t *testing.T) {
+func TestTargetedNodesQuery(t *testing.T) {
 	inv := inventory.New()
 	inv.DisableRegistryFile()
 	dispatcher := NewDispatcher[string, string](&inv)
 
-	agents := []agent.ID{agent.ID("web-1"), agent.ID("web-2"), agent.ID("db-1")}
-	for _, agentID := range agents {
-		_ = dispatcher.RegisterAgent(agentID)
+	nodes := []node.ID{node.ID("web-1"), node.ID("web-2"), node.ID("db-1")}
+	for _, nodeID := range nodes {
+		_ = dispatcher.RegisterNode(nodeID)
 	}
 
-	// Set up agent states with specs in the inventory
-	for _, agentID := range agents {
-		inv.MarkAgentStateChange(agentID, true)
+	// Set up node states with specs in the inventory
+	for _, nodeID := range nodes {
+		inv.MarkNodeStateChange(nodeID, true)
 	}
 
-	// Set specs for each agent
+	// Set specs for each node
 	specs1 := map[string]any{
 		"os":   "linux",
 		"role": "webserver",
@@ -186,9 +186,9 @@ func TestTargetedAgentsQuery(t *testing.T) {
 		},
 	}
 
-	_ = inv.SetSpec(agent.ID("web-1"), specs1)
-	_ = inv.SetSpec(agent.ID("web-2"), specs2)
-	_ = inv.SetSpec(agent.ID("db-1"), specs3)
+	_ = inv.SetSpec(node.ID("web-1"), specs1)
+	_ = inv.SetSpec(node.ID("web-2"), specs2)
+	_ = inv.SetSpec(node.ID("db-1"), specs3)
 
 	tests := []struct {
 		name        string
@@ -257,7 +257,7 @@ func TestTargetedAgentsQuery(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := dispatcher.TargetedAgents(tt.query, proto.TargetMode_QUERY)
+			result, err := dispatcher.TargetedNodes(tt.query, proto.TargetMode_QUERY)
 
 			if tt.expectError {
 				if err == nil {
@@ -278,11 +278,11 @@ func TestTargetedAgentsQuery(t *testing.T) {
 	}
 }
 
-func TestTargetedAgentsUnknownMode(t *testing.T) {
-	inv := &inventory.Agents{}
+func TestTargetedNodesUnknownMode(t *testing.T) {
+	inv := &inventory.Nodes{}
 	dispatcher := NewDispatcher[string, string](inv)
 
-	_, err := dispatcher.TargetedAgents("test", proto.TargetMode_UNKNOWN)
+	_, err := dispatcher.TargetedNodes("test", proto.TargetMode_UNKNOWN)
 	if err == nil {
 		t.Error("Expected error for unknown target mode")
 	}

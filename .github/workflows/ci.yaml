@@ -26,8 +26,8 @@ jobs:
       - name: Build manager
         run: go build -o manager ./cmd/manager
 
-      - name: Build agent
-        run: go build -o agent ./cmd/agent
+      - name: Build node
+        run: go build -o node ./cmd/node
 
       - name: Build jack
         run: go build -o jack ./cmd/jack

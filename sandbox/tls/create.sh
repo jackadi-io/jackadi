@@ -14,14 +14,14 @@ openssl req -x509                                     \
   -extensions test_ca                                 \
   -sha256
 
-# Create the agent agent_CA certs.
+# Create the node node_CA certs.
 openssl req -x509                                     \
   -newkey rsa:4096                                    \
   -nodes                                              \
   -days 3650                                          \
-  -keyout agent_ca_key.pem                           \
-  -out agent_ca_cert.pem                             \
-  -subj /C=FR/O=gRPC/CN=test-agent_ca/   \
+  -keyout node_ca_key.pem                           \
+  -out node_ca_cert.pem                             \
+  -subj /C=FR/O=gRPC/CN=test-node_ca/   \
   -config ./openssl.cnf                               \
   -extensions test_ca                                 \
   -sha256
@@ -47,27 +47,27 @@ openssl x509 -req           \
   -sha256
 openssl verify -verbose -CAfile manager_ca_cert.pem  manager_cert.pem
 
-# Generate a agent certs.
+# Generate a node certs.
 for i in 1 2
 do
-    openssl genrsa -out agent${i}_key.pem 4096
+    openssl genrsa -out node${i}_key.pem 4096
     openssl req -new                                    \
-      -key agent${i}_key.pem                               \
+      -key node${i}_key.pem                               \
       -days 3650                                        \
-      -out agent${i}_csr.pem                               \
-      -subj /C=FR/O=gRPC/CN=test-agent1/   \
+      -out node${i}_csr.pem                               \
+      -subj /C=FR/O=gRPC/CN=test-node1/   \
       -config ./openssl.cnf                             \
-      -reqexts test_agent
+      -reqexts test_node
     openssl x509 -req           \
-      -in agent${i}_csr.pem        \
-      -CAkey agent_ca_key.pem  \
-      -CA agent_ca_cert.pem    \
+      -in node${i}_csr.pem        \
+      -CAkey node_ca_key.pem  \
+      -CA node_ca_cert.pem    \
       -days 3650                \
       -set_serial 1000          \
-      -out agent${i}_cert.pem      \
+      -out node${i}_cert.pem      \
       -extfile ./openssl.cnf    \
-      -extensions test_agent   \
+      -extensions test_node   \
       -sha256
-    openssl verify -verbose -CAfile agent_ca_cert.pem  agent${i}_cert.pem
+    openssl verify -verbose -CAfile node_ca_cert.pem  node${i}_cert.pem
 done
 rm *_csr.pem

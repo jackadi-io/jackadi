@@ -118,7 +118,7 @@ func responseEnvelope(_ context.Context, response protobuf.Message) (any, error)
 	if out, ok := response.(*proto.FwdResponse); ok {
 		decodedResponses := make(map[string]*proxyResponse, len(out.GetResponses()))
 
-		for agentName, response := range out.GetResponses() {
+		for nodeName, response := range out.GetResponses() {
 			decodedResponse := proxyResponse{
 				Id:            response.GetId(),
 				GroupID:       response.GroupID,
@@ -127,7 +127,7 @@ func responseEnvelope(_ context.Context, response protobuf.Message) (any, error)
 				InternalError: response.GetInternalError().String(),
 				ModuleError:   response.GetModuleError(),
 			}
-			decodedResponses[agentName] = &decodedResponse
+			decodedResponses[nodeName] = &decodedResponse
 		}
 		return decodedResponses, nil
 	}

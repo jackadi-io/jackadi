@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/dgraph-io/badger/v4"
-	"github.com/jackadi-io/jackadi/internal/agent"
 	"github.com/jackadi-io/jackadi/internal/config"
 	"github.com/jackadi-io/jackadi/internal/manager/database"
+	"github.com/jackadi-io/jackadi/internal/node"
 	"github.com/jackadi-io/jackadi/internal/proto"
 	"github.com/jackadi-io/jackadi/internal/serializer"
 )
@@ -71,7 +71,7 @@ func (a *apiServer) GetResults(ctx context.Context, req *proto.ResultsRequest) (
 // Supports:
 // - Pagination through offset and limit parameters.
 // - Date range filtering through from_date and to_date parameters.
-// - Agent filtering through targets parameter.
+// - Node filtering through targets parameter.
 func (a *apiServer) ListResults(ctx context.Context, req *proto.ListResultsRequest) (*proto.ListResultsResponse, error) {
 	resultEntries := []*proto.ResultEntry{}
 
@@ -157,8 +157,8 @@ func (a *apiServer) ListResults(ctx context.Context, req *proto.ListResultsReque
 
 			// filter by target
 			if len(req.Targets) > 0 {
-				var dbTask struct{ Agent agent.ID } // partial deserialisation
-				if err := serializer.JSON.Unmarshal(val, &dbTask); err != nil || !targetMap[string(dbTask.Agent)] {
+				var dbTask struct{ Node node.ID } // partial deserialisation
+				if err := serializer.JSON.Unmarshal(val, &dbTask); err != nil || !targetMap[string(dbTask.Node)] {
 					continue
 				}
 			}
@@ -175,7 +175,7 @@ func (a *apiServer) ListResults(ctx context.Context, req *proto.ListResultsReque
 			if len(val) > 8 && string(val[:8]) == "grouped:" {
 				resultEntry = &proto.ResultEntry{
 					Id:     id,
-					Agent:  string(val),
+					Node:   string(val),
 					Status: "success",
 				}
 				resultEntries = append(resultEntries, resultEntry)
@@ -214,7 +214,7 @@ func (a *apiServer) ListResults(ctx context.Context, req *proto.ListResultsReque
 
 			resultEntry = &proto.ResultEntry{
 				Id:            id,
-				Agent:         string(dbTask.Agent),
+				Node:          string(dbTask.Node),
 				Status:        status,
 				InternalError: internalError,
 				Error:         errorMsg,

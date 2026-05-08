@@ -42,7 +42,7 @@ func getCommand() *cobra.Command {
 			style.PrettyPrint(out + "\n" + res)
 		},
 	}
-	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "show agent details")
+	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "show node details")
 
 	return cmd
 }

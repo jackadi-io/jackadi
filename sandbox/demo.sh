@@ -13,7 +13,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-AGENT_ID="agent1"
+NODE_ID="node1"
 PLUGIN="demo"
 JACK_CMD="/usr/bin/jack"
 
@@ -44,7 +44,7 @@ run_task() {
         shift 1
     else
         shift 2
-        local cmd_display="$JACK_CMD run $AGENT_ID $PLUGIN:$task_name"
+        local cmd_display="$JACK_CMD run $NODE_ID $PLUGIN:$task_name"
         for arg in "$@"; do
             cmd_display="$cmd_display $arg"
         done
@@ -54,7 +54,7 @@ run_task() {
     echo -e "${GREEN}Command: $cmd_display${NC}"
     echo
 
-    if $JACK_CMD run $AGENT_ID $PLUGIN:$task_name "$@"; then
+    if $JACK_CMD run $NODE_ID $PLUGIN:$task_name "$@"; then
         echo -e "${GREEN}✓ Task completed successfully${NC}"
     else
         echo -e "${RED}✗ Task failed${NC}"
@@ -72,10 +72,10 @@ run_spec() {
     local description="$2"
 
     echo -e "${YELLOW}Spec Collector: $description${NC}"
-    echo -e "${GREEN}Command: $JACK_CMD run $AGENT_ID specs:get $PLUGIN.$spec_name${NC}"
+    echo -e "${GREEN}Command: $JACK_CMD run $NODE_ID specs:get $PLUGIN.$spec_name${NC}"
     echo
 
-    if $JACK_CMD run $AGENT_ID specs:get $PLUGIN.$spec_name; then
+    if $JACK_CMD run $NODE_ID specs:get $PLUGIN.$spec_name; then
         echo -e "${GREEN}✓ Spec retrieved successfully${NC}"
     else
         echo -e "${RED}✗ Spec retrieval failed${NC}"
@@ -90,7 +90,7 @@ run_spec() {
 print_header "JACKADI DEMO - TASK EXECUTION SHOWCASE"
 
 echo "This demo showcases Jackadi's distributed task execution capabilities."
-echo "All tasks will be executed on agent: $AGENT_ID"
+echo "All tasks will be executed on node: $NODE_ID"
 echo "Plugin: $PLUGIN"
 echo
 
@@ -99,7 +99,7 @@ echo -e "${YELLOW}Press Enter to start the demo, or Ctrl+C to cancel...${NC}"
 read
 
 echo "Syncing plugins"
-$JACK_CMD run $AGENT_ID plugins:sync
+$JACK_CMD run $NODE_ID plugins:sync
 
 # ============================================================================
 # BASIC TASKS
@@ -121,7 +121,7 @@ run_task "monitor_health" "System health monitoring (context-aware)"
 print_header "2. COMPLEX INPUT TYPES"
 
 run_task "create_user" "Create user with multiple argument types" --display \
-    "$JACK_CMD run $AGENT_ID $PLUGIN:create_user 12345 johndoe john@jackadi.io true '[\"read\",\"write\",\"admin\"]' '{\"department\":\"engineering\",\"team\":\"backend\"}' '{\"hostname\":\"web-01\",\"cpu_cores\":8,\"memory_gb\":16,\"is_production\":true}' '[100,200,300]'" \
+    "$JACK_CMD run $NODE_ID $PLUGIN:create_user 12345 johndoe john@jackadi.io true '[\"read\",\"write\",\"admin\"]' '{\"department\":\"engineering\",\"team\":\"backend\"}' '{\"hostname\":\"web-01\",\"cpu_cores\":8,\"memory_gb\":16,\"is_production\":true}' '[100,200,300]'" \
     12345 johndoe john@jackadi.io true \
     '["read","write","admin"]' \
     '{"department":"engineering","team":"backend"}' \
@@ -172,7 +172,7 @@ run_task "upgrade_system" "OS upgrade (dry run)" \
     DryRun=true SecurityOnly=true BackupBefore=true
 
 run_task "upgrade_system" "OS upgrade (exclude packages)" --display \
-    "$JACK_CMD run $AGENT_ID $PLUGIN:upgrade_system ExcludePackages='[\"kernel-default\",\"systemd\"]' RebootRequired=true" \
+    "$JACK_CMD run $NODE_ID $PLUGIN:upgrade_system ExcludePackages='[\"kernel-default\",\"systemd\"]' RebootRequired=true" \
     ExcludePackages='["kernel-default","systemd"]' RebootRequired=true
 
 # ============================================================================
@@ -181,7 +181,7 @@ run_task "upgrade_system" "OS upgrade (exclude packages)" --display \
 
 print_header "5. SPEC COLLECTORS (SYSTEM INVENTORY)"
 
-echo "Spec collectors gather system information automatically when agents connect."
+echo "Spec collectors gather system information automatically when nodes connect."
 echo "They enable intelligent task targeting and system inventory management."
 echo "The demo plugin includes the following spec collectors:"
 echo
@@ -192,11 +192,11 @@ run_spec "hardware.CPUCores" "CPUCores in hardware specifications struct"
 
 print_header "ALL SPECS SUMMARY"
 
-echo -e "${YELLOW}Retrieving all specs for agent: $AGENT_ID${NC}"
-echo -e "${GREEN}Command: $JACK_CMD run $AGENT_ID specs:all${NC}"
+echo -e "${YELLOW}Retrieving all specs for node: $NODE_ID${NC}"
+echo -e "${GREEN}Command: $JACK_CMD run $NODE_ID specs:all${NC}"
 echo
 
-if $JACK_CMD spec:all $AGENT_ID; then
+if $JACK_CMD spec:all $NODE_ID; then
     echo -e "${GREEN}✓ All specs retrieved successfully${NC}"
 else
     echo -e "${RED}✗ Failed to retrieve all specs${NC}"

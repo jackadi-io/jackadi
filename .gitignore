@@ -29,11 +29,11 @@ coverage.html
 # Artifacts
 /dist/
 /jack
-/agent
+/node
 /manager
 /plugins/
 /sandbox/jack
-/sandbox/agent
+/sandbox/node
 /sandbox/manager
 /sandbox/plugins/
 

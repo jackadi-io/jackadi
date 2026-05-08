@@ -54,11 +54,11 @@ func createTestManagerConfigFile(t *testing.T, content string) string {
 	return filepath.Join(testDir, "manager")
 }
 
-func setupAgentTest(t *testing.T, flags map[string]string, envVars map[string]string) {
+func setupNodeTest(t *testing.T, flags map[string]string, envVars map[string]string) {
 	t.Helper()
 
 	pflag.CommandLine = pflag.NewFlagSet(getProgramName(), pflag.ExitOnError)
-	SetupAgentFlags()
+	SetupNodeFlags()
 
 	for flag, value := range flags {
 		if err := pflag.Set(flag, value); err != nil {
@@ -88,22 +88,22 @@ func setupManagerTest(t *testing.T, flags map[string]string, envVars map[string]
 	}
 }
 
-func TestLoadAgentConfig_Default(t *testing.T) {
+func TestLoadNodeConfig_Default(t *testing.T) {
 	// Create a temporary directory for the plugin directory to avoid permission issues
 	tempPluginDir := filepath.Join(t.TempDir(), "plugins")
 
-	setupAgentTest(t, map[string]string{
+	setupNodeTest(t, map[string]string{
 		"plugin-dir": tempPluginDir,
 	}, nil)
 
-	got, err := LoadAgentConfig("")
+	got, err := LoadNodeConfig("")
 	if err != nil {
-		t.Fatalf("LoadAgentConfig() error = %v", err)
+		t.Fatalf("LoadNodeConfig() error = %v", err)
 	}
 
 	hostname, _ := os.Hostname()
-	expected := &AgentConfig{
-		AgentID:            hostname,
+	expected := &NodeConfig{
+		NodeID:             hostname,
 		ManagerAddress:     DefaultManagerAddress,
 		ManagerPort:        DefaultManagerPort,
 		ReconnectDelay:     int(DefaultReconnectDelay.Seconds()),
@@ -129,46 +129,46 @@ func TestLoadAgentConfig_Default(t *testing.T) {
 	}
 }
 
-func TestLoadAgentConfig_Full(t *testing.T) {
+func TestLoadNodeConfig_Full(t *testing.T) {
 	content := `
-agent-id: "full-agent"
+node-id: "full-node"
 manager-address: "192.168.1.1"
 manager-port: "8080"
 reconnect-delay: 15
-plugin-dir: "/tmp/agent-plugins"
+plugin-dir: "/tmp/node-plugins"
 plugin-server-port: "8081"
 custom-resolvers:
   - "8.8.8.8"
   - "1.1.1.1"
 mtls:
   enabled: true
-  key: "/path/to/agent.key"
-  cert: "/path/to/agent.cert"
+  key: "/path/to/node.key"
+  cert: "/path/to/node.cert"
   manager-ca-cert: "/path/to/manager-ca.cert"
 `
 
-	configFile := createTestConfigFile(t, "agent-full", content)
-	setupAgentTest(t, nil, nil)
+	configFile := createTestConfigFile(t, "node-full", content)
+	setupNodeTest(t, nil, nil)
 
-	got, err := LoadAgentConfig(configFile)
+	got, err := LoadNodeConfig(configFile)
 	if err != nil {
-		t.Fatalf("LoadAgentConfig() error = %v", err)
+		t.Fatalf("LoadNodeConfig() error = %v", err)
 	}
 
-	expected := &AgentConfig{
-		AgentID:            "full-agent",
+	expected := &NodeConfig{
+		NodeID:             "full-node",
 		ManagerAddress:     "192.168.1.1",
 		ManagerPort:        "8080",
 		ReconnectDelay:     15,
-		PluginDir:          "/tmp/agent-plugins",
+		PluginDir:          "/tmp/node-plugins",
 		PluginServerPort:   "8081",
 		CustomResolvers:    []string{"8.8.8.8", "1.1.1.1"},
 		MaxConcurrentTasks: DefaultMaxConcurrentTasks,
 		MaxWaitingRequests: DefaultMaxWaitingRequests,
 		MTLS: MTLSConfig{
 			Enabled:   true,
-			Key:       "/path/to/agent.key",
-			Cert:      "/path/to/agent.cert",
+			Key:       "/path/to/node.key",
+			Cert:      "/path/to/node.cert",
 			ManagerCA: "/path/to/manager-ca.cert",
 		},
 	}
@@ -193,12 +193,12 @@ func TestLoadManagerConfig_Default(t *testing.T) {
 		ListenPort:       DefaultManagerPort,
 		PluginDir:        DefaultPluginDir,
 		PluginServerPort: DefaultPluginServerPort,
-		AutoAcceptAgent:  false,
+		AutoAcceptNode:   false,
 		MTLS: ManagerMTLSConfig{
 			Enabled: true,
 			Key:     "",
 			Cert:    "",
-			AgentCA: "",
+			NodeCA:  "",
 		},
 		API: APIConfig{
 			Enabled: true,
@@ -225,12 +225,12 @@ address: "0.0.0.0"
 port: "9090"
 plugin-dir: "/opt/full-plugins"
 plugin-server-port: "9091"
-auto-accept-agent: true
+auto-accept-node: true
 mtls:
   enabled: true
   key: "/path/to/manager.key"
   cert: "/path/to/manager.cert"
-  agent-ca-cert: "/path/to/agent-ca.cert"
+  node-ca-cert: "/path/to/node-ca.cert"
 api:
   enabled: true
   address: "127.0.0.1"
@@ -256,12 +256,12 @@ api:
 		ListenPort:       "9090",
 		PluginDir:        "/opt/full-plugins",
 		PluginServerPort: "9091",
-		AutoAcceptAgent:  true,
+		AutoAcceptNode:   true,
 		MTLS: ManagerMTLSConfig{
 			Enabled: true,
 			Key:     "/path/to/manager.key",
 			Cert:    "/path/to/manager.cert",
-			AgentCA: "/path/to/agent-ca.cert",
+			NodeCA:  "/path/to/node-ca.cert",
 		},
 		API: APIConfig{
 			Enabled: true,
@@ -280,9 +280,9 @@ api:
 	}
 }
 
-func TestSetupAgentFlags(t *testing.T) {
+func TestSetupNodeFlags(t *testing.T) {
 	pflag.CommandLine = pflag.NewFlagSet(getProgramName(), pflag.ExitOnError)
-	SetupAgentFlags()
+	SetupNodeFlags()
 
 	expectedFlags := []string{
 		"id", "manager-address", "manager-port", "reconnect-delay",
@@ -304,8 +304,8 @@ func TestSetupManagerFlags(t *testing.T) {
 
 	expectedFlags := []string{
 		"id", "config-dir", "address", "port", "plugin-dir", "plugin-server-port",
-		"auto-accept-agent", "mtls.enabled", "mtls.key", "mtls.cert",
-		"mtls.agent-ca-cert", "api.enabled", "api.address", "api.port",
+		"auto-accept-node", "mtls.enabled", "mtls.key", "mtls.cert",
+		"mtls.node-ca-cert", "api.enabled", "api.address", "api.port",
 		"api.tls.enabled", "api.tls.cert", "api.tls.key", "config",
 	}
 

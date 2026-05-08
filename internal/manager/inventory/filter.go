@@ -1,14 +1,14 @@
 package inventory
 
-import "github.com/jackadi-io/jackadi/internal/agent"
+import "github.com/jackadi-io/jackadi/internal/node"
 
-func (a *Agents) GetMatchingAccepted(agentID agent.ID, address, certificate *string) []AgentIdentity {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
+func (n *Nodes) GetMatchingAccepted(id node.ID, address, certificate *string) []NodeIdentity {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
 
-	accepted := []AgentIdentity{}
-	for _, candidate := range a.registry.Accepted {
-		if candidate.ID != agentID {
+	accepted := []NodeIdentity{}
+	for _, candidate := range n.registry.Accepted {
+		if candidate.ID != id {
 			continue
 		}
 		if address != nil && candidate.Address != *address {
@@ -22,13 +22,14 @@ func (a *Agents) GetMatchingAccepted(agentID agent.ID, address, certificate *str
 
 	return accepted
 }
-func (a *Agents) GetMatchingCandidates(agentID agent.ID, address, certificate *string) []AgentIdentity {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
 
-	candidates := []AgentIdentity{}
-	for _, candidate := range a.registry.candidates {
-		if candidate.ID != agentID {
+func (n *Nodes) GetMatchingCandidates(id node.ID, address, certificate *string) []NodeIdentity {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
+
+	candidates := []NodeIdentity{}
+	for _, candidate := range n.registry.candidates {
+		if candidate.ID != id {
 			continue
 		}
 		if address != nil && candidate.Address != *address {
@@ -43,13 +44,13 @@ func (a *Agents) GetMatchingCandidates(agentID agent.ID, address, certificate *s
 	return candidates
 }
 
-func (a *Agents) GetMatchingRejected(agentID agent.ID, address, certificate *string) []AgentIdentity {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
+func (n *Nodes) GetMatchingRejected(id node.ID, address, certificate *string) []NodeIdentity {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
 
-	rejected := []AgentIdentity{}
-	for _, candidate := range a.registry.Rejected {
-		if candidate.ID != agentID {
+	rejected := []NodeIdentity{}
+	for _, candidate := range n.registry.Rejected {
+		if candidate.ID != id {
 			continue
 		}
 		if address != nil && candidate.Address != *address {

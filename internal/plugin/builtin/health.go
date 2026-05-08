@@ -16,7 +16,7 @@ func ping() (bool, error) {
 func MustLoadHealth() {
 	cmd := sdk.New("health")
 
-	// health:instant-ping is routed earlier in the agent listener.
+	// health:instant-ping is routed earlier in the node listener.
 	cmd.MustRegisterTask(config.InstantPingName, ping).
 		WithSummary("Execute immediate ping.").
 		WithDescription("This healthcheck bypasses any tasks queue and lock. The goal is to check gRPC connectivity only.")

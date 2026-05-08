@@ -10,353 +10,351 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jackadi-io/jackadi/internal/agent"
 	"github.com/jackadi-io/jackadi/internal/config"
+	"github.com/jackadi-io/jackadi/internal/node"
 	"github.com/jackadi-io/jackadi/internal/serializer"
 )
 
-var ErrAgentAlreadyRegistered = errors.New("agent already registered")
-var ErrAgentAlreadyCandidate = errors.New("agent already known but not yet accepted")
-var ErrAgentNotFound = errors.New("unknown agent")
-var ErrAggentRejected = errors.New("rejected agent")
+var ErrNodeAlreadyRegistered = errors.New("node already registered")
+var ErrNodeAlreadyCandidate = errors.New("node already known but not yet accepted")
+var ErrNodeNotFound = errors.New("unknown node")
+var ErrNodeRejected = errors.New("rejected node")
 
-type RogueAgentError struct {
+type RogueNodeError struct {
 	diffs []diff
 }
 
-func (e *RogueAgentError) Error() string {
-	return fmt.Sprintf("potential rogue agent detected: diff between rogue and existing agent: %+v", e.diffs)
+func (e *RogueNodeError) Error() string {
+	return fmt.Sprintf("potential rogue node detected: diff between rogue and existing node: %+v", e.diffs)
 }
 
-type AgentState struct {
+type NodeState struct {
 	Connected bool
 	Since     time.Time
 	LastMsg   time.Time
 	specs     map[string]any
 }
 
-func NewAgentState() AgentState {
-	return AgentState{
+func NewNodeState() NodeState {
+	return NodeState{
 		specs: make(map[string]any),
 	}
 }
 
-type AgentIdentity struct {
-	ID          agent.ID
+type NodeIdentity struct {
+	ID          node.ID
 	Address     string
 	Certificate string
 }
 
 type registry struct {
-	Accepted map[agent.ID]AgentIdentity
-	States   map[agent.ID]AgentState
+	Accepted map[node.ID]NodeIdentity
+	States   map[node.ID]NodeState
 
-	// Agents which have been rejected manually
-	Rejected []AgentIdentity
+	// Nodes which have been rejected manually
+	Rejected []NodeIdentity
 
-	// candidates are agents which has not been registered yet.
-	candidates []AgentIdentity
+	// candidates are nodes which have not been registered yet.
+	candidates []NodeIdentity
 }
 
-type Agents struct {
+type Nodes struct {
 	mutex                *sync.Mutex
 	registry             registry
 	registryPath         string
 	registryFileDisabled bool
 }
 
-func New() Agents {
-	return Agents{
+func New() Nodes {
+	return Nodes{
 		mutex:                &sync.Mutex{},
 		registryPath:         config.RegistryFileName,
 		registryFileDisabled: false,
 		registry: registry{
-			Accepted: make(map[agent.ID]AgentIdentity),
-			States:   make(map[agent.ID]AgentState),
+			Accepted: make(map[node.ID]NodeIdentity),
+			States:   make(map[node.ID]NodeState),
 		},
 	}
 }
 
 // LoadRegistry loads the registry file from disk if it exists.
-func (a *Agents) LoadRegistry() error {
-	if a.registryFileDisabled {
+func (n *Nodes) LoadRegistry() error {
+	if n.registryFileDisabled {
 		return nil
 	}
-	return a.loadRegistryFile()
+	return n.loadRegistryFile()
 }
 
 // DisableRegistryFile disables registry file persistence for testing purposes.
-func (a *Agents) DisableRegistryFile() {
-	a.registryFileDisabled = true
+func (n *Nodes) DisableRegistryFile() {
+	n.registryFileDisabled = true
 }
 
-func (a *Agents) loadRegistryFile() error {
-	data, err := os.ReadFile(a.registryPath)
+func (n *Nodes) loadRegistryFile() error {
+	data, err := os.ReadFile(n.registryPath)
 	if err != nil {
 		return err
 	}
-	return serializer.JSON.Unmarshal(data, &a.registry)
+	return serializer.JSON.Unmarshal(data, &n.registry)
 }
 
-func (a *Agents) saveRegistryFile() error {
-	if a.registryFileDisabled {
+func (n *Nodes) saveRegistryFile() error {
+	if n.registryFileDisabled {
 		return nil
 	}
 
-	data, err := serializer.JSON.Marshal(a.registry)
+	data, err := serializer.JSON.Marshal(n.registry)
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(a.registryPath, data, 0600)
+	return os.WriteFile(n.registryPath, data, 0600)
 }
 
-func (a *Agents) List() ([]AgentIdentity, []AgentIdentity, []AgentIdentity, map[agent.ID]AgentState) {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
+func (n *Nodes) List() ([]NodeIdentity, []NodeIdentity, []NodeIdentity, map[node.ID]NodeState) {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
 
-	accepted := make([]AgentIdentity, 0, len(a.registry.Accepted))
-
-	for _, agent := range a.registry.Accepted {
-		accepted = append(accepted, agent)
+	accepted := make([]NodeIdentity, 0, len(n.registry.Accepted))
+	for _, nd := range n.registry.Accepted {
+		accepted = append(accepted, nd)
 	}
-	candidates := slices.Clone(a.registry.candidates)
-	rejected := slices.Clone(a.registry.Rejected)
-
-	states := maps.Clone(a.registry.States)
+	candidates := slices.Clone(n.registry.candidates)
+	rejected := slices.Clone(n.registry.Rejected)
+	states := maps.Clone(n.registry.States)
 
 	return accepted, candidates, rejected, states
 }
 
-func (a *Agents) AddCandidate(agent AgentIdentity) error {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
+func (n *Nodes) AddCandidate(nd NodeIdentity) error {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
 
-	if slices.Contains(a.registry.candidates, agent) {
-		return ErrAgentAlreadyCandidate
+	if slices.Contains(n.registry.candidates, nd) {
+		return ErrNodeAlreadyCandidate
 	}
 
-	if _, rejected := a.isRejected(agent); rejected {
-		return ErrAggentRejected
+	if _, rejected := n.isRejected(nd); rejected {
+		return ErrNodeRejected
 	}
-	a.registry.candidates = append(a.registry.candidates, agent)
+	n.registry.candidates = append(n.registry.candidates, nd)
 	return nil
 }
 
-func (a *Agents) removeCandidate(agent AgentIdentity) error {
-	for i, c := range a.registry.candidates {
-		if c == agent {
-			a.registry.candidates = slices.Delete(a.registry.candidates, i, i+1)
+func (n *Nodes) removeCandidate(nd NodeIdentity) error {
+	for i, c := range n.registry.candidates {
+		if c == nd {
+			n.registry.candidates = slices.Delete(n.registry.candidates, i, i+1)
 			return nil
 		}
 	}
-	return ErrAgentNotFound
+	return ErrNodeNotFound
 }
 
 // TODO: is it still needed?
-func (a *Agents) RemoveCandidate(agent AgentIdentity) error {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
-	return a.removeCandidate(agent)
+func (n *Nodes) RemoveCandidate(nd NodeIdentity) error {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
+	return n.removeCandidate(nd)
 }
 
-func (a *Agents) Register(agent AgentIdentity, allowRejected bool) error {
-	slog.Debug("registering agent", "agent", agent.ID)
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
+func (n *Nodes) Register(nd NodeIdentity, allowRejected bool) error {
+	slog.Debug("registering node", "node", nd.ID)
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
 
-	existing, ok := a.registry.Accepted[agent.ID]
+	existing, ok := n.registry.Accepted[nd.ID]
 	if ok {
-		diffs := Compare(existing, agent)
+		diffs := Compare(existing, nd)
 		if len(diffs) == 0 {
-			return ErrAgentAlreadyRegistered
+			return ErrNodeAlreadyRegistered
 		}
-		return &RogueAgentError{diffs}
+		return &RogueNodeError{diffs}
 	}
 
-	candidateIndex, candidate := a.isCandidate(agent)
-	rejectedIndex, rejected := a.isRejected(agent)
+	candidateIndex, isCandidate := n.isCandidate(nd)
+	rejectedIndex, isRejected := n.isRejected(nd)
 
-	if !candidate && !rejected {
-		return ErrAgentNotFound
+	if !isCandidate && !isRejected {
+		return ErrNodeNotFound
 	}
 
-	if candidate && rejected {
+	if isCandidate && isRejected {
 		// in theory it should not happen
-		return errors.New("agent is both candidate and rejected")
+		return errors.New("node is both candidate and rejected")
 	}
 
-	if candidate {
-		a.registry.candidates = slices.Delete(a.registry.candidates, candidateIndex, candidateIndex+1)
+	if isCandidate {
+		n.registry.candidates = slices.Delete(n.registry.candidates, candidateIndex, candidateIndex+1)
 	}
 
-	if rejected {
+	if isRejected {
 		if !allowRejected {
-			return errors.New("cannot register: agent is rejected")
+			return errors.New("cannot register: node is rejected")
 		}
-		a.registry.Rejected = slices.Delete(a.registry.Rejected, rejectedIndex, rejectedIndex+1)
+		n.registry.Rejected = slices.Delete(n.registry.Rejected, rejectedIndex, rejectedIndex+1)
 	}
 
-	a.registry.Accepted[agent.ID] = agent
-	if err := a.saveRegistryFile(); err != nil {
-		slog.Error("unable to permanently register agent", "error", err)
+	n.registry.Accepted[nd.ID] = nd
+	if err := n.saveRegistryFile(); err != nil {
+		slog.Error("unable to permanently register node", "error", err)
 	}
 
 	return nil
 }
 
-func (a *Agents) unregister(agent AgentIdentity) error {
-	for name, registered := range a.registry.Accepted {
-		if registered == agent {
-			delete(a.registry.Accepted, name)
-			if err := a.saveRegistryFile(); err != nil {
-				return fmt.Errorf("unable to permanently remove agent: %w", err)
+func (n *Nodes) unregister(nd NodeIdentity) error {
+	for name, registered := range n.registry.Accepted {
+		if registered == nd {
+			delete(n.registry.Accepted, name)
+			if err := n.saveRegistryFile(); err != nil {
+				return fmt.Errorf("unable to permanently remove node: %w", err)
 			}
 			return nil
 		}
 	}
 
-	for name := range a.registry.States {
-		if name == agent.ID {
-			delete(a.registry.States, name)
+	for name := range n.registry.States {
+		if name == nd.ID {
+			delete(n.registry.States, name)
 			return nil
 		}
 	}
-	return ErrAgentNotFound
+	return ErrNodeNotFound
 }
 
-func (a *Agents) removeStats(agent agent.ID) {
-	for name := range a.registry.States {
-		if name == agent {
-			delete(a.registry.States, name)
+func (n *Nodes) removeStats(id node.ID) {
+	for name := range n.registry.States {
+		if name == id {
+			delete(n.registry.States, name)
 			return
 		}
 	}
 }
 
-func (a *Agents) Unregister(agent AgentIdentity) error {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
-	return a.unregister(agent)
+func (n *Nodes) Unregister(nd NodeIdentity) error {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
+	return n.unregister(nd)
 }
 
-func (a *Agents) Reject(agent AgentIdentity) error {
-	slog.Debug("reject request received", "agent", agent.ID)
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
+func (n *Nodes) Reject(nd NodeIdentity) error {
+	slog.Debug("reject request received", "node", nd.ID)
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
 
-	if ok := a.isRegistered(agent); ok {
-		if err := a.unregister(agent); err != nil {
-			return fmt.Errorf("reject did not unregistered: %w", err)
+	if ok := n.isRegistered(nd); ok {
+		if err := n.unregister(nd); err != nil {
+			return fmt.Errorf("reject did not unregister: %w", err)
 		}
 	}
 
-	if indexToDelete, ok := a.isCandidate(agent); ok {
-		a.registry.candidates = slices.Delete(a.registry.candidates, indexToDelete, indexToDelete+1)
+	if indexToDelete, ok := n.isCandidate(nd); ok {
+		n.registry.candidates = slices.Delete(n.registry.candidates, indexToDelete, indexToDelete+1)
 	}
 
-	a.registry.Rejected = append(a.registry.Rejected, agent)
+	n.registry.Rejected = append(n.registry.Rejected, nd)
 
-	slog.Debug("agent rejected", "agent", agent.ID)
-	if err := a.saveRegistryFile(); err != nil {
-		return fmt.Errorf("unable to permanently reject agent: %w", err)
+	slog.Debug("node rejected", "node", nd.ID)
+	if err := n.saveRegistryFile(); err != nil {
+		return fmt.Errorf("unable to permanently reject node: %w", err)
 	}
 	return nil
 }
 
-func (a *Agents) Remove(agent AgentIdentity) error {
-	slog.Debug("remove request received", "agent", agent.ID)
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
+func (n *Nodes) Remove(nd NodeIdentity) error {
+	slog.Debug("remove request received", "node", nd.ID)
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
 
-	if registered := a.isRegistered(agent); registered {
-		if err := a.unregister(agent); err != nil {
-			return fmt.Errorf("remove did not unregistered: %w", err)
+	if registered := n.isRegistered(nd); registered {
+		if err := n.unregister(nd); err != nil {
+			return fmt.Errorf("remove did not unregister: %w", err)
 		}
 	}
 
-	if candidateIndex, candidate := a.isCandidate(agent); candidate {
-		a.registry.candidates = slices.Delete(a.registry.candidates, candidateIndex, candidateIndex+1)
+	if candidateIndex, isCandidate := n.isCandidate(nd); isCandidate {
+		n.registry.candidates = slices.Delete(n.registry.candidates, candidateIndex, candidateIndex+1)
 	}
 
-	if rejectedIndex, rejected := a.isRejected(agent); rejected {
-		a.registry.Rejected = slices.Delete(a.registry.Rejected, rejectedIndex, rejectedIndex+1)
+	if rejectedIndex, isRejected := n.isRejected(nd); isRejected {
+		n.registry.Rejected = slices.Delete(n.registry.Rejected, rejectedIndex, rejectedIndex+1)
 	}
 
-	a.removeStats(agent.ID)
+	n.removeStats(nd.ID)
 
-	slog.Debug("agent removed", "agent", agent.ID)
-	if err := a.saveRegistryFile(); err != nil {
-		return fmt.Errorf("unable to permanently remove agent: %w", err)
+	slog.Debug("node removed", "node", nd.ID)
+	if err := n.saveRegistryFile(); err != nil {
+		return fmt.Errorf("unable to permanently remove node: %w", err)
 	}
 	return nil
 }
 
-func (a *Agents) MarkAgentActive(agent agent.ID) {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
+func (n *Nodes) MarkNodeActive(id node.ID) {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
 
-	agt, ok := a.registry.States[agent]
+	state, ok := n.registry.States[id]
 	if !ok {
-		a.registry.States[agent] = NewAgentState()
+		n.registry.States[id] = NewNodeState()
 	}
 
-	agt.LastMsg = time.Now()
-	a.registry.States[agent] = agt
+	state.LastMsg = time.Now()
+	n.registry.States[id] = state
 }
 
-func (a *Agents) MarkAgentStateChange(agent agent.ID, connected bool) {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
+func (n *Nodes) MarkNodeStateChange(id node.ID, connected bool) {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
 
-	agt, ok := a.registry.States[agent]
+	state, ok := n.registry.States[id]
 	if !ok {
-		a.registry.States[agent] = NewAgentState()
+		n.registry.States[id] = NewNodeState()
 	}
 
-	agt.Connected = connected
-	agt.Since = time.Now()
-	a.registry.States[agent] = agt
+	state.Connected = connected
+	state.Since = time.Now()
+	n.registry.States[id] = state
 }
 
-func (a *Agents) GetSpec(agent agent.ID) map[string]any {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
-	agt, ok := a.registry.States[agent]
+func (n *Nodes) GetSpec(id node.ID) map[string]any {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
+	state, ok := n.registry.States[id]
 	if !ok {
 		return nil
 	}
 
-	return agt.specs
+	return state.specs
 }
 
-func (a *Agents) GetAllSpecs() map[agent.ID]map[string]any {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
+func (n *Nodes) GetAllSpecs() map[node.ID]map[string]any {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
 
-	out := make(map[agent.ID]map[string]any, len(a.registry.States))
-	for k, v := range a.registry.States {
+	out := make(map[node.ID]map[string]any, len(n.registry.States))
+	for k, v := range n.registry.States {
 		out[k] = maps.Clone(v.specs)
 	}
 
 	return out
 }
 
-func (a *Agents) SetSpec(agent agent.ID, specs map[string]any) error {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
+func (n *Nodes) SetSpec(id node.ID, specs map[string]any) error {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
 
 	if specs == nil {
 		return nil
 	}
 
-	agt, ok := a.registry.States[agent]
+	state, ok := n.registry.States[id]
 	if !ok {
-		return fmt.Errorf("agent not connected: %s %p", string(agent), a)
+		return fmt.Errorf("node not connected: %s %p", string(id), n)
 	}
 
-	agt.specs = specs
-	a.registry.States[agent] = agt
+	state.specs = specs
+	n.registry.States[id] = state
 
 	return nil
 }

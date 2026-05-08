@@ -10,23 +10,23 @@ import "internal/proto/cluster.proto";
 option go_package = "github.com/jackadi-io/jackadi/internal/proto";
 
 service API {
-  rpc ListAgents(ListAgentsRequest) returns (ListAgentsResponse) {
+  rpc ListNodes(ListNodesRequest) returns (ListNodesResponse) {
     option (google.api.http) = {
-        get: "/v1/agents/list"
+        get: "/v1/nodes/list"
     };
   }
-  rpc AcceptAgent(AgentRequest) returns (AgentResponse) {
+  rpc AcceptNode(NodeRequest) returns (NodeResponse) {
     option (google.api.http) = {
-      post: "/v1/agents/accept"
+      post: "/v1/nodes/accept"
       body: "*"
     };
   }
-  rpc RemoveAgent(AgentRequest) returns (AgentsResponse) {
-    option (google.api.http) = {delete: "/v1/agents/remove"};
+  rpc RemoveNode(NodeRequest) returns (NodesResponse) {
+    option (google.api.http) = {delete: "/v1/nodes/remove"};
   }
-  rpc RejectAgent(AgentRequest) returns (AgentsResponse) {
+  rpc RejectNode(NodeRequest) returns (NodesResponse) {
     option (google.api.http) = {
-      post: "/v1/agents/reject"
+      post: "/v1/nodes/reject"
       body: "*"
     };
   }
@@ -41,7 +41,7 @@ service API {
   }
 }
 
-message ListAgentsRequest {
+message ListNodesRequest {
   Filter filter = 1;
 }
 
@@ -52,13 +52,13 @@ enum Filter {
   ONLY_REJECTED = 3;
 }
 
-message ListAgentsResponse {
-  repeated AgentInfo accepted = 1;
-  repeated AgentInfo candidates = 2;
-  repeated AgentInfo rejected = 3;
+message ListNodesResponse {
+  repeated NodeInfo accepted = 1;
+  repeated NodeInfo candidates = 2;
+  repeated NodeInfo rejected = 3;
 }
 
-message AgentInfo {
+message NodeInfo {
   string id = 1;
   optional string address = 2;
   optional string certificate = 3;
@@ -67,16 +67,16 @@ message AgentInfo {
   optional google.protobuf.Timestamp lastMsg = 7;
 }
 
-message AgentRequest {
-  AgentInfo agent = 1;
+message NodeRequest {
+  NodeInfo node = 1;
 }
 
-message AgentResponse {
-  AgentInfo agent = 1;
+message NodeResponse {
+  NodeInfo node = 1;
 }
 
-message AgentsResponse {
-  repeated AgentInfo agents = 1;
+message NodesResponse {
+  repeated NodeInfo nodes = 1;
 }
 
 message ResultsRequest {
@@ -100,12 +100,12 @@ message ListResultsRequest {
   int32 limit = 2; // Maximum number of results to return, defaults to 100 if not specified
   optional int64 from_date = 3; // Optional Unix timestamp to filter results from this date
   optional int64 to_date = 4; // Optional Unix timestamp to filter results up to this date
-  repeated string targets = 5; // Optional list of agent IDs to filter results by targets
+  repeated string targets = 5; // Optional list of node IDs to filter results by targets
 }
 
 message ResultEntry {
   int64 id = 1;
-  string agent = 2;
+  string node = 2;
   string status = 3; // Status of the task (success, failed, error)
   InternalError internal_error = 4;
   string error = 5;

@@ -1,0 +1,32 @@
+# Jackadi Node Configuration
+# This file shows all available configuration options for the node
+
+# Node identification
+node-id: "my-node-01"
+
+# Manager connection settings
+manager-address: "127.0.0.1"
+manager-port: "40080"
+reconnect-delay: 10  # seconds between reconnection attempts
+
+# Plugin configuration
+plugin-dir: "/var/lib/jackadi/plugins"
+plugin-server-port: "40081"
+
+# Custom DNS resolvers for GRPC connections (optional)
+custom-resolvers:
+  - "8.8.8.8:53"
+  - "1.1.1.1:53"
+
+# Security settings (mTLS)
+mtls:
+  enabled: true
+  key: "/etc/jackadi/certs/node.key"
+  cert: "/etc/jackadi/certs/node.crt"
+  manager-ca-cert: "/etc/jackadi/certs/ca.crt"
+
+# Alternative minimal configuration example:
+# node-id: "simple-node"
+# manager-address: "manager.example.com"
+# mtls:
+#   enabled: false

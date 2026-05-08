@@ -24,7 +24,7 @@ DNS.2 = manager
 IP.1  = 127.0.0.1
 IP.2  = 0.0.0.0
 
-[test_agent]
+[test_node]
 basicConstraints        = critical,CA:FALSE
 subjectKeyIdentifier    = hash
 keyUsage                = critical,nonRepudiation,digitalSignature,keyEncipherment

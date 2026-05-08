@@ -11,7 +11,7 @@ option go_package = "github.com/jackadi-io/jackadi/internal/proto";
 service Cluster {
   rpc Handshake(HandshakeRequest) returns (HandshakeResponse);
   rpc ExecTask(stream TaskResponse) returns (stream TaskRequest);
-  rpc ListAgentPlugins(google.protobuf.Empty) returns (ListAgentPluginsResponse);
+  rpc ListNodePlugins(google.protobuf.Empty) returns (ListNodePluginsResponse);
 }
 
 service Forwarder {
@@ -54,14 +54,14 @@ message TaskResponse {
   string error = 4;
   int32 retcode = 5;  // TODO: remove
   InternalError internalError = 6;  // Could be the global error type ( != OK when the task returned an error)
-  string moduleError = 7;  // TODO: rename SDKError? PluginError? GRPCPluginError (GRPC between HC plugin and agent)?, or InternalErrorMsg. Can it be merged with error?
+  string moduleError = 7;  // TODO: rename SDKError? PluginError? GRPCPluginError (GRPC between HC plugin and node)?, or InternalErrorMsg. Can it be merged with error?
 }
 
 message FwdResponse {
   map<string, TaskResponse> responses = 1;
 }
 
-message ListAgentPluginsResponse {
+message ListNodePluginsResponse {
   map<string, string> plugin = 1; // key=filename, value=checksum
 }
 
@@ -72,7 +72,7 @@ enum InternalError {
   BUSY_QUEUE = 3;
   FULL_QUEUE = 4;
   UNKNOWN_TASK = 5;
-  MODULE_ERROR = 6;  // TODO: rename SDKError? PluginError? GRPCPluginError (GRPC between HC plugin and agent)?
+  MODULE_ERROR = 6;  // TODO: rename SDKError? PluginError? GRPCPluginError (GRPC between HC plugin and node)?
   DISCONNECTING = 7;
   DISCONNECTED = 8;
   UNKNOWN_ERROR = 9;

@@ -1,0 +1,15 @@
+[Unit]
+Description=Jackadi Node
+Documentation=https://jackadi.io/
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/lib/jackadi
+ExecStart=/usr/bin/jackadi-node
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

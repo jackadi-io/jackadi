@@ -46,16 +46,16 @@ func (m *ManagerInstance) Close() {
 	}
 }
 
-func (m *ManagerInstance) CollectAgentsSpecs(ctx context.Context) error {
+func (m *ManagerInstance) CollectNodesSpecs(ctx context.Context) error {
 	if m.ClusterServer == nil {
 		return errors.New("server not initialized properly")
 	}
 
-	m.ClusterServer.CollectAgentsSpecs(ctx)
+	m.ClusterServer.CollectNodesSpecs(ctx)
 	return nil
 }
 
-func newManager(cfg managerConfig, agentsInventory *inventory.Agents, dis forwarder.Dispatcher[*proto.TaskRequest, *proto.TaskResponse], db *badger.DB) (*ManagerInstance, error) {
+func newManager(cfg managerConfig, nodesInventory *inventory.Nodes, dis forwarder.Dispatcher[*proto.TaskRequest, *proto.TaskResponse], db *badger.DB) (*ManagerInstance, error) {
 	target := fmt.Sprint(cfg.listenAddress, ":", cfg.listenPort)
 	lis, err := net.Listen("tcp", target)
 	if err != nil {
@@ -64,7 +64,7 @@ func newManager(cfg managerConfig, agentsInventory *inventory.Agents, dis forwar
 
 	var opts []grpc.ServerOption
 	if cfg.mTLS {
-		certs, ca, err := config.GetMTLSCertificate(cfg.mTLSCert, cfg.mTLSKey, cfg.mTLSAgentCA)
+		certs, ca, err := config.GetMTLSCertificate(cfg.mTLSCert, cfg.mTLSKey, cfg.mTLSNodeCA)
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +76,7 @@ func newManager(cfg managerConfig, agentsInventory *inventory.Agents, dis forwar
 		}
 		opts = append(opts, grpc.Creds(credentials.NewTLS(tlsCfg)))
 	} else {
-		slog.Warn("mTLS is disabled, connections to agents are unsafe")
+		slog.Warn("mTLS is disabled, connections to nodes are unsafe")
 	}
 
 	opts = append(opts,
@@ -93,12 +93,12 @@ func newManager(cfg managerConfig, agentsInventory *inventory.Agents, dis forwar
 	grpcServer := grpc.NewServer(opts...)
 	clusterServer := server.New(
 		server.ServerConfig{
-			AutoAccept:  cfg.autoAcceptAgent,
+			AutoAccept:  cfg.autoAcceptNode,
 			MTLSEnabled: cfg.mTLS,
 			ConfigDir:   cfg.configDir,
 			PluginDir:   cfg.pluginDir,
 		},
-		agentsInventory,
+		nodesInventory,
 		dis,
 		db,
 	)

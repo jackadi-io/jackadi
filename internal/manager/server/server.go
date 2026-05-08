@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
-	"github.com/jackadi-io/jackadi/internal/agent"
 	"github.com/jackadi-io/jackadi/internal/config"
 	"github.com/jackadi-io/jackadi/internal/helper"
 	"github.com/jackadi-io/jackadi/internal/manager/database"
 	"github.com/jackadi-io/jackadi/internal/manager/forwarder"
 	"github.com/jackadi-io/jackadi/internal/manager/inventory"
+	"github.com/jackadi-io/jackadi/internal/node"
 	"github.com/jackadi-io/jackadi/internal/proto"
 	"github.com/jackadi-io/jackadi/internal/serializer"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -32,11 +32,11 @@ type ServerConfig struct {
 type Server struct {
 	proto.UnimplementedClusterServer
 	config          ServerConfig
-	Inventory       *inventory.Agents
+	Inventory       *inventory.Nodes
 	taskDispatcher  forwarder.Dispatcher[*proto.TaskRequest, *proto.TaskResponse]
 	db              *badger.DB
 	dbMutex         *sync.Mutex
-	shutdownRequest map[agent.ID]chan struct{}
+	shutdownRequest map[node.ID]chan struct{}
 	pluginPolicies  pluginPolicies
 }
 
@@ -46,20 +46,20 @@ type pluginPolicies struct {
 	lock       *sync.Mutex
 }
 
-func New(config ServerConfig, agentsInventory *inventory.Agents, taskDispatcher forwarder.Dispatcher[*proto.TaskRequest, *proto.TaskResponse], jobDatabase *badger.DB) Server {
+func New(config ServerConfig, nodesInventory *inventory.Nodes, taskDispatcher forwarder.Dispatcher[*proto.TaskRequest, *proto.TaskResponse], jobDatabase *badger.DB) Server {
 	return Server{
 		config:          config,
-		Inventory:       agentsInventory,
+		Inventory:       nodesInventory,
 		taskDispatcher:  taskDispatcher,
 		db:              jobDatabase,
 		dbMutex:         &sync.Mutex{},
-		shutdownRequest: make(map[agent.ID]chan struct{}),
+		shutdownRequest: make(map[node.ID]chan struct{}),
 		pluginPolicies:  pluginPolicies{lock: &sync.Mutex{}},
 	}
 }
 
-func (s *Server) RequestShutdown(agentID agent.ID) error {
-	ch, ok := s.shutdownRequest[agentID]
+func (s *Server) RequestShutdown(nodeID node.ID) error {
+	ch, ok := s.shutdownRequest[nodeID]
 	if !ok {
 		return errors.New("shutdownRequest channel not found")
 	}
@@ -67,29 +67,29 @@ func (s *Server) RequestShutdown(agentID agent.ID) error {
 		return errors.New("shutdownRequest channel not initialized")
 	}
 
-	close(s.shutdownRequest[agentID])
-	s.shutdownRequest[agentID] = nil
-	if err := s.taskDispatcher.Forget(agentID); err != nil {
-		slog.Error("fail to forget an agent", "error", err)
+	close(s.shutdownRequest[nodeID])
+	s.shutdownRequest[nodeID] = nil
+	if err := s.taskDispatcher.Forget(nodeID); err != nil {
+		slog.Error("fail to forget a node", "error", err)
 	}
 	return nil
 }
 
 // GetInventory returns the server's inventory.
-func (s *Server) GetInventory() *inventory.Agents {
+func (s *Server) GetInventory() *inventory.Nodes {
 	return s.Inventory
 }
 
 // storeResult records task responses in a local KV store. The KV store is an embedded Badger instance.
 //
 // It stores the result itself by task ID. It also stores a mapping between a group ID and task IDs.
-// Group ID are grouping tasks response from a same request, i.e. when the request was targeting multiple agents.
-func (s *Server) storeResult(agentID agent.ID, msg *proto.TaskResponse) {
+// Group ID are grouping tasks response from a same request, i.e. when the request was targeting multiple nodes.
+func (s *Server) storeResult(nodeID node.ID, msg *proto.TaskResponse) {
 	s.dbMutex.Lock()
 	defer s.dbMutex.Unlock()
 
 	dbDerr := s.db.Update(func(txn *badger.Txn) error {
-		data, err := database.MarshalTask(agentID, msg)
+		data, err := database.MarshalTask(nodeID, msg)
 		if err != nil {
 			slog.Error("unable to record result", "error", "marshal error")
 			return err
@@ -147,9 +147,9 @@ func (s *Server) storeResult(agentID agent.ID, msg *proto.TaskResponse) {
 	}
 }
 
-// dispatchRequestsToAgent waits for requests and send them to the linked agent.
-func (s *Server) dispatchRequestsToAgent(agentID agent.ID, stream proto.Cluster_ExecTaskServer, responsesCh map[int64]chan *proto.TaskResponse, responsesChLock *sync.Mutex) error {
-	tasksCh, err := s.taskDispatcher.GetTasksChannel(agentID)
+// dispatchRequestsToNode waits for requests and sends them to the linked node.
+func (s *Server) dispatchRequestsToNode(nodeID node.ID, stream proto.Cluster_ExecTaskServer, responsesCh map[int64]chan *proto.TaskResponse, responsesChLock *sync.Mutex) error {
+	tasksCh, err := s.taskDispatcher.GetTasksChannel(nodeID)
 	if err != nil {
 		return err
 	}
@@ -166,7 +166,7 @@ func (s *Server) dispatchRequestsToAgent(agentID agent.ID, stream proto.Cluster_
 			},
 		)
 		if err != nil {
-			slog.Error("failed to send task", "err", err, "agent", agentID)
+			slog.Error("failed to send task", "err", err, "node", nodeID)
 			return err
 		}
 		responsesChLock.Lock()
@@ -184,21 +184,21 @@ func (s *Server) dispatchRequestsToAgent(agentID agent.ID, stream proto.Cluster_
 	return nil
 }
 
-// dispatchAgentResponse waits for agent's response and send it back to the requester.
+// dispatchNodeResponse waits for a node's response and sends it back to the requester.
 //
-// It stores all received responses to job database.
-func (s *Server) dispatchAgentResponse(stream proto.Cluster_ExecTaskServer, agentID agent.ID, responsesCh map[int64]chan *proto.TaskResponse, responsesChLock *sync.Mutex) error {
+// It stores all received responses to the job database.
+func (s *Server) dispatchNodeResponse(stream proto.Cluster_ExecTaskServer, nodeID node.ID, responsesCh map[int64]chan *proto.TaskResponse, responsesChLock *sync.Mutex) error {
 	ctx := stream.Context()
 
 	for {
 		msg, err := stream.Recv()
 		select {
 		case <-ctx.Done():
-			slog.Debug("stream context cancelled", "agent", agentID, "error", ctx.Err())
+			slog.Debug("stream context cancelled", "node", nodeID, "error", ctx.Err())
 			return ctx.Err()
-		case <-s.shutdownRequest[agentID]:
-			slog.Warn("shutdown request received", "agent", agentID)
-			slog.Debug("ignored response because received after shutdown request", "agent", agentID)
+		case <-s.shutdownRequest[nodeID]:
+			slog.Warn("shutdown request received", "node", nodeID)
+			slog.Debug("ignored response because received after shutdown request", "node", nodeID)
 			return errors.New("shutdown requested")
 		default:
 		}
@@ -207,18 +207,18 @@ func (s *Server) dispatchAgentResponse(stream proto.Cluster_ExecTaskServer, agen
 			if errors.Is(err, io.EOF) {
 				return nil
 			}
-			slog.Error("connection with agent stopped", "agent", agentID, "error", err)
+			slog.Error("connection with node stopped", "node", nodeID, "error", err)
 			return err
 		}
 
-		slog.Debug("received task response", "id", msg.GetId(), "agent", agentID, "group", msg.GetGroupID())
+		slog.Debug("received task response", "id", msg.GetId(), "node", nodeID, "group", msg.GetGroupID())
 		if msg.GetInternalError() != proto.InternalError_STARTED_TIMEOUT {
 			// we don't store the message if the task has started to avoid duplicate entries if the task finishes after the timeout
-			s.storeResult(agentID, msg)
+			s.storeResult(nodeID, msg)
 		}
 
 		if msg.GetInternalError() == proto.InternalError_OK {
-			s.Inventory.MarkAgentActive(agentID)
+			s.Inventory.MarkNodeActive(nodeID)
 		}
 
 		responsesChLock.Lock()
@@ -233,45 +233,45 @@ func (s *Server) dispatchAgentResponse(stream proto.Cluster_ExecTaskServer, agen
 			delete(responsesCh, msg.GetId())
 			responsesChLock.Unlock()
 		} else {
-			slog.Info("response not sent to the caller", "err", "response channel not found", "agent", agentID, "id", msg.GetId())
+			slog.Info("response not sent to the caller", "err", "response channel not found", "node", nodeID, "id", msg.GetId())
 		}
 
 		if msg.GetInternalError() > 0 {
-			slog.Error("the agent rejected the request", "error", msg.GetInternalError(), "message", msg.GetModuleError(), "request_id", msg.GetId(), "agent", agentID)
+			slog.Error("the node rejected the request", "error", msg.GetInternalError(), "message", msg.GetModuleError(), "request_id", msg.GetId(), "node", nodeID)
 		}
 	}
 }
 
-// ExecTask spawn a stream with each agents.
+// ExecTask spawns a stream with each node.
 //
 // It handles the sending of requests and the routing of the response.
-// The responses is routed to the dispatcher (usually the forwarder).
+// The responses are routed to the dispatcher (usually the forwarder).
 func (s *Server) ExecTask(stream proto.Cluster_ExecTaskServer) error {
-	agent, err := signatureFromContext(stream.Context(), s.config.MTLSEnabled)
+	nd, err := signatureFromContext(stream.Context(), s.config.MTLSEnabled)
 	if err != nil {
 		return err
 	}
-	slog.Debug("new 'task' stream with agent", "agent", agent.ID)
-	s.shutdownRequest[agent.ID] = make(chan struct{})
+	slog.Debug("new 'task' stream with node", "node", nd.ID)
+	s.shutdownRequest[nd.ID] = make(chan struct{})
 	defer func() {
-		delete(s.shutdownRequest, agent.ID)
+		delete(s.shutdownRequest, nd.ID)
 	}()
 
-	for !s.Inventory.IsRegistered(agent) {
-		slog.Debug("cannot start 'Task' stream", "error", "agent not registered", "retry_in", fmt.Sprintf("%d", int(config.AgentRetryDelay.Seconds())))
-		time.Sleep(config.AgentRetryDelay)
+	for !s.Inventory.IsRegistered(nd) {
+		slog.Debug("cannot start 'Task' stream", "error", "node not registered", "retry_in", fmt.Sprintf("%d", int(config.NodeRetryDelay.Seconds())))
+		time.Sleep(config.NodeRetryDelay)
 	}
 
-	if err := s.taskDispatcher.RegisterAgent(agent.ID); err != nil {
-		slog.Warn("closing stream", "msg", err, "agent", agent.ID, "peer", agent.Address)
+	if err := s.taskDispatcher.RegisterNode(nd.ID); err != nil {
+		slog.Warn("closing stream", "msg", err, "node", nd.ID, "peer", nd.Address)
 		return err
 	}
-	s.Inventory.MarkAgentStateChange(agent.ID, true)
+	s.Inventory.MarkNodeStateChange(nd.ID, true)
 
 	defer func() {
-		slog.Debug("deleting agent dispatcher", "agent", agent.ID)
-		s.taskDispatcher.UnregisterAgent(agent.ID)
-		s.Inventory.MarkAgentStateChange(agent.ID, false)
+		slog.Debug("deleting node dispatcher", "node", nd.ID)
+		s.taskDispatcher.UnregisterNode(nd.ID)
+		s.Inventory.MarkNodeStateChange(nd.ID, false)
 	}()
 
 	responsesCh := make(map[int64]chan *proto.TaskResponse)
@@ -279,40 +279,40 @@ func (s *Server) ExecTask(stream proto.Cluster_ExecTaskServer) error {
 	errCh := make(chan error)
 
 	go func() {
-		err := s.dispatchAgentResponse(stream, agent.ID, responsesCh, lock)
-		slog.Debug("closing agent dispatcher", "agent", agent.ID)
-		s.taskDispatcher.Close(agent.ID)
-		slog.Debug("agent dispatcher closed", "agent", agent.ID)
+		err := s.dispatchNodeResponse(stream, nd.ID, responsesCh, lock)
+		slog.Debug("closing node dispatcher", "node", nd.ID)
+		s.taskDispatcher.Close(nd.ID)
+		slog.Debug("node dispatcher closed", "node", nd.ID)
 		errCh <- err
 	}()
 
-	err = s.dispatchRequestsToAgent(agent.ID, stream, responsesCh, lock)
+	err = s.dispatchRequestsToNode(nd.ID, stream, responsesCh, lock)
 
 	return errors.Join(err, <-errCh)
 }
 
-func (s *Server) CollectAgentsSpecs(ctx context.Context) {
+func (s *Server) CollectNodesSpecs(ctx context.Context) {
 	timeout := config.TaskTimeout
 	tick := time.NewTicker(config.SpecCollectionInterval)
 	for {
-		agents, _ := s.taskDispatcher.TargetedAgents("*", proto.TargetMode_GLOB)
+		nodes, _ := s.taskDispatcher.TargetedNodes("*", proto.TargetMode_GLOB)
 
 		wg := sync.WaitGroup{}
-		slog.Debug("starting agents specs collector")
-		for agt, connected := range agents {
+		slog.Debug("starting nodes specs collector")
+		for nd, connected := range nodes {
 			select {
 			case <-ctx.Done():
 				return
 			default:
 			}
 			if !connected {
-				slog.Debug("cannot get spec of agent", "agent", agt, "error", "disconnected")
+				slog.Debug("cannot get spec of node", "node", nd, "error", "disconnected")
 				continue
 			}
 
 			wg.Add(1)
 			go func() {
-				slog.Debug("collecting specs", "agent", agt)
+				slog.Debug("collecting specs", "node", nd)
 				defer wg.Done()
 
 				req := &proto.TaskRequest{
@@ -327,30 +327,30 @@ func (s *Server) CollectAgentsSpecs(ctx context.Context) {
 					ResponseCh: resp,
 				}
 				// timeout+time.Second to get last moment response
-				if err := s.taskDispatcher.Send(agent.ID(agt), task, timeout+time.Second); err != nil {
-					slog.Warn("failed to send collect specs request", "agent", agt, "error", err)
+				if err := s.taskDispatcher.Send(node.ID(nd), task, timeout+time.Second); err != nil {
+					slog.Warn("failed to send collect specs request", "node", nd, "error", err)
 					close(resp)
 					return
 				}
 
 				res := <-resp
 				if res.GetError() != "" {
-					slog.Warn("failed to collect specs", "agent", agt, "error", res.GetError())
+					slog.Warn("failed to collect specs", "node", nd, "error", res.GetError())
 					return
 				}
 
 				specs := make(map[string]any)
 				if err := serializer.JSON.Unmarshal(res.GetOutput(), &specs); err != nil {
-					slog.Warn("failed to parse specs", "agent", agt, "error", err)
+					slog.Warn("failed to parse specs", "node", nd, "error", err)
 					return
 				}
 
-				if err := s.Inventory.SetSpec(agent.ID(agt), specs); err != nil {
-					slog.Warn("failed to set specs", "agent", agt, "error", err)
+				if err := s.Inventory.SetSpec(node.ID(nd), specs); err != nil {
+					slog.Warn("failed to set specs", "node", nd, "error", err)
 					return
 				}
 
-				slog.Debug("specs collected", "agent", agt)
+				slog.Debug("specs collected", "node", nd)
 			}()
 		}
 		wg.Wait()

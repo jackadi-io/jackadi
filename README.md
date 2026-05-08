@@ -51,7 +51,7 @@ Full documentation can be found [here](https://jackadi.io/docs/).
 ![architecture](./assets/jackadi-overview.svg)
 
 In a nutshell:
-* Nodes' agents are connected to a manager via persistent bidirectional gRPC.
+* Nodes' nodes are connected to a manager via persistent bidirectional gRPC.
 * Simple plugin system:
   * All tasks and specs collectors are pure Go functions.
   * The plugin system is based on [hashicorp/go-plugin](https://github.com/hashicorp/go-plugin/).
@@ -66,21 +66,21 @@ In a nutshell:
 # Start the manager
 manager --mtls=false
 
-# Start an agent
-agent --id="agent1" --mtls=false
+# Start an node
+node --id="node1" --mtls=false
 
-# Accept the agent connection (if not using auto-accept)
-jack agents list
-jack agents accept agent1
+# Accept the node connection (if not using auto-accept)
+jack nodes list
+jack nodes accept node1
 
-# The agent should be now in "accepted" list
-jack agents list
+# The node should be now in "accepted" list
+jack nodes list
 
-# Check agents health
-jack agents health
+# Check nodes health
+jack nodes health
 
 # Run a task
-jack run agent1 cmd:run "echo hello"
+jack run node1 cmd:run "echo hello"
 ```
 
 ### Write my first plugin
@@ -119,12 +119,12 @@ Then configure `/etc/jackadi/plugins.yaml` file:
   - tour
 ```
 
-#### Synchronize the plugin to the agent
+#### Synchronize the plugin to the node
 ```sh
-jack run agent1 plugins:sync
+jack run node1 plugins:sync
 ```
 
 #### Run the plugin
 ```sh
-jack run agent1 tour:hello
+jack run node1 tour:hello
 ```

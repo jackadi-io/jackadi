@@ -27,7 +27,7 @@ const (
 	GracefulShutdownTimeout = 30 * time.Second
 	SpecCollectionInterval  = 1 * time.Minute
 	DatabaseGCInterval      = 5 * time.Minute
-	AgentRetryDelay         = 10 * time.Second // The delay before retrying agent registration.
+	NodeRetryDelay          = 10 * time.Second // The delay before retrying node registration.
 	PluginUpdateTimeout     = 30 * time.Second
 
 	// gRPC keepalive settings.
@@ -37,7 +37,7 @@ const (
 	ClientKeepaliveTime    = 10 * time.Second
 	ClientKeepaliveTimeout = 30 * time.Second
 
-	// Task limits (can be overridden via agent configuration).
+	// Task limits (can be overridden via node configuration).
 	DefaultMaxConcurrentTasks = 2   // Default maximum number of tasks that can run concurrently.
 	DefaultMaxWaitingRequests = 100 // Default maximum number of requests that can wait in queue.
 
@@ -47,18 +47,18 @@ const (
 	MaxResultsLimit  = 500 // Maximum number of results that can be requested..
 
 	// File and directory paths.
-	DefaultConfigDir      = "/etc/jackadi"              // Default configuration directory.
-	DefaultPluginDir      = "/opt/jackadi/plugins"      // Default plugin directory for managers.
-	DefaultAgentPluginDir = "/var/lib/jackadi/plugins"  // Default plugin directory for agents.
-	DatabaseDir           = "/var/lib/jackadi/database" // Default database directory (containing past job results etc...).
-	RegistryFileName      = "registry.json"             // Name of the agent registry file.
+	DefaultConfigDir     = "/etc/jackadi"              // Default configuration directory.
+	DefaultPluginDir     = "/opt/jackadi/plugins"      // Default plugin directory for managers.
+	DefaultNodePluginDir = "/var/lib/jackadi/plugins"  // Default plugin directory for nodes.
+	DatabaseDir          = "/var/lib/jackadi/database" // Default database directory (containing past job results etc...).
+	RegistryFileName     = "registry.json"             // Name of the node registry file.
 
 	// Database and storage settings.
 	DBTaskRequestTTL = 24 * time.Hour // TTL of task requests in the database.
 	DBTaskResultTTL  = 24 * time.Hour // TTL of task results in the database.
 	DBGCThreshold    = 0.7            // Threshold for database garbage collection.
 
-	// Agent activity and health check settings.
-	AgentActiveThreshold   = 60 * time.Second // Time threshold to consider an agent active (more than this value means 'inactive').
+	// Node activity and health check settings.
+	NodeActiveThreshold    = 60 * time.Second // Time threshold to consider a node active (more than this value means 'inactive').
 	ResponseChannelTimeout = 30 * time.Second // Timeout for sending back responses to requester.
 )

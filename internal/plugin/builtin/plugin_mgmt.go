@@ -89,7 +89,7 @@ type diff struct {
 }
 
 func (s pluginMgmt) sync() (*diff, error) {
-	s.req <- struct{}{} // request update to KeepPluginsUpToDate goroutine (internal/agent/plugins.go)
+	s.req <- struct{}{} // request update to KeepPluginsUpToDate goroutine (internal/node/plugins.go)
 	changes := <-s.resp
 
 	out := diff{}
@@ -132,7 +132,7 @@ func MustLoadPluginMgmt(req chan struct{}) chan types.PluginUpdateResponse {
 		WithArg("name", "plugin", "cmd")
 	c.MustRegisterTask("sync", plugingMgmt.sync).
 		WithSummary("Sync plugin with the manager.").
-		WithDescription("The agent sync its plugins with the manager.\nIt adds, updates and removes the plugins following the manager configuration.").
+		WithDescription("The node sync its plugins with the manager.\nIt adds, updates and removes the plugins following the manager configuration.").
 		WithLockMode(sdk.ExclusiveLock)
 
 	if err := inventory.Registry.Register(c); err != nil {

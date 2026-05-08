@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func formatResultItem(id int64, date, agents, status string) string {
+func formatResultItem(id int64, date, nodes, status string) string {
 	idStr := fmt.Sprintf("%d", id)
 	statusSymbol := "✓"
 
@@ -36,7 +36,7 @@ func formatResultItem(id int64, date, agents, status string) string {
 		statusSymbolColored = style.RenderSuccess(statusSymbol)
 	}
 
-	return fmt.Sprintf("[%s] %s - %s\n    %s\n\n", statusSymbolColored, idColored, date, agents)
+	return fmt.Sprintf("[%s] %s - %s\n    %s\n\n", statusSymbolColored, idColored, date, nodes)
 }
 
 func listCommand() *cobra.Command {
@@ -95,7 +95,7 @@ func listCommand() *cobra.Command {
 	cmd.Flags().Int32VarP(&offset, "offset", "o", 0, "starting position for pagination")
 	cmd.Flags().StringVar(&fromStr, "from", "", "filter results from this date (format: 2006-01-01 or 2006-01-01 15:04:05)")
 	cmd.Flags().StringVar(&toStr, "to", "", "filter results up to this date (format: 2006-01-01 or 2006-01-01 15:04:05)")
-	cmd.Flags().StringSliceVarP(&targets, "targets", "t", []string{}, "filter results by agent IDs (comma separated)")
+	cmd.Flags().StringSliceVarP(&targets, "targets", "t", []string{}, "filter results by node IDs (comma separated)")
 
 	return cmd
 }
@@ -179,13 +179,13 @@ func list(limit, offset int32, fromDate, toDate int64, targets []string) (string
 		date := timestamp.Format("2006-01-02 15:04:05")
 
 		var targets string
-		if agent := result.GetAgent(); strings.HasPrefix(agent, "grouped:") {
-			// Grouped results contains only a list of sub IDs as target (not agents directly).
+		if nodeTarget := result.GetNode(); strings.HasPrefix(nodeTarget, "grouped:") {
+			// Grouped results contains only a list of sub IDs as target (not nodes directly).
 			// `jack results get <groupedID>` will fetch all the results for all sub IDs
-			targets, _ = strings.CutPrefix(agent, "grouped:")
+			targets, _ = strings.CutPrefix(nodeTarget, "grouped:")
 		} else {
-			// Only one agent targeted in a normal result
-			targets = result.GetAgent()
+			// Only one node targeted in a normal result
+			targets = result.GetNode()
 		}
 
 		status := result.GetStatus()

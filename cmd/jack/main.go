@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/jackadi-io/jackadi/cmd/jack/option"
-	"github.com/jackadi-io/jackadi/cmd/jack/subcommand/agent"
 	"github.com/jackadi-io/jackadi/cmd/jack/subcommand/job/result"
 	"github.com/jackadi-io/jackadi/cmd/jack/subcommand/job/task"
+	"github.com/jackadi-io/jackadi/cmd/jack/subcommand/node"
 	_ "github.com/jackadi-io/jackadi/internal/plugin/builtin"
 	"github.com/spf13/cobra"
 )
@@ -60,7 +60,7 @@ func main() {
 
 	rootCmd.AddCommand(completionCmd)
 	rootCmd.AddCommand(task.RunCommand())
-	rootCmd.AddCommand(agent.Root())
+	rootCmd.AddCommand(node.Root())
 	rootCmd.AddCommand(result.ResultsCmd())
 
 	option.JSONFormat = rootCmd.PersistentFlags().Bool("json", false, "display result in JSON")

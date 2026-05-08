@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/jackadi-io/jackadi/internal/agent"
+	"github.com/jackadi-io/jackadi/internal/node"
 	"github.com/jackadi-io/jackadi/internal/proto"
 )
 
@@ -11,7 +11,7 @@ const (
 )
 
 type Task struct {
-	Agent  agent.ID
+	Node   node.ID
 	Result *proto.TaskResponse
 }
 

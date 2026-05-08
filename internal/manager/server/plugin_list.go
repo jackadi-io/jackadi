@@ -71,9 +71,9 @@ func (s *Server) loadPluginsPolicies() (map[string][]pluginInfo, error) {
 	return pluginsPerPattern, nil
 }
 
-func (s *Server) ListAgentPlugins(ctx context.Context, req *emptypb.Empty) (*proto.ListAgentPluginsResponse, error) {
-	resp := &proto.ListAgentPluginsResponse{}
-	agentInfo, err := signatureFromContext(ctx, s.config.MTLSEnabled)
+func (s *Server) ListNodePlugins(ctx context.Context, req *emptypb.Empty) (*proto.ListNodePluginsResponse, error) {
+	resp := &proto.ListNodePluginsResponse{}
+	nd, err := signatureFromContext(ctx, s.config.MTLSEnabled)
 	if err != nil {
 		return resp, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -83,9 +83,9 @@ func (s *Server) ListAgentPlugins(ctx context.Context, req *emptypb.Empty) (*pro
 		return resp, status.Error(codes.NotFound, fmt.Sprintf("failed to load plugin list: %s", err))
 	}
 
-	agentPlugins := make(map[string]string)
+	nodePlugins := make(map[string]string)
 	for pattern, plugins := range pluginsPerPattern {
-		matched, err := filepath.Match(pattern, string(agentInfo.ID))
+		matched, err := filepath.Match(pattern, string(nd.ID))
 		if err != nil {
 			return nil, fmt.Errorf("invalid pattern '%s': %w ", pattern, err)
 		}
@@ -93,9 +93,9 @@ func (s *Server) ListAgentPlugins(ctx context.Context, req *emptypb.Empty) (*pro
 			continue
 		}
 		for _, p := range plugins {
-			agentPlugins[p.Filename] = p.Checksum
+			nodePlugins[p.Filename] = p.Checksum
 		}
 	}
-	resp.Plugin = agentPlugins
+	resp.Plugin = nodePlugins
 	return resp, nil
 }

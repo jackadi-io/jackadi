@@ -30,7 +30,7 @@ func MustLoadCmd() {
 	cmd := sdk.New("cmd")
 	cmd.MustRegisterTask("run", run).
 		WithSummary("Execute a command.").
-		WithDescription("The executed command is not canceled when the agent is closed.\nIt leverages exec.Command.").
+		WithDescription("The executed command is not canceled when the node is closed.\nIt leverages exec.Command.").
 		WithArg("cmd", "string", "ls -l")
 
 	if err := inventory.Registry.Register(cmd); err != nil {

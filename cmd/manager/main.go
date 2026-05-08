@@ -42,12 +42,12 @@ type managerConfig struct {
 	listenPort       string
 	pluginDir        string
 	pluginServerPort string
-	autoAcceptAgent  bool
+	autoAcceptNode   bool
 
 	mTLS          bool
 	mTLSCert      string
 	mTLSKey       string
-	mTLSAgentCA   string
+	mTLSNodeCA    string
 	apiEnabled    bool
 	apiAddress    string
 	apiPort       string
@@ -103,14 +103,14 @@ func run(cfg managerConfig) error {
 	defer cancel()
 	go dbGC(ctx, db)
 
-	agentsInventory := inventory.New()
-	if err := agentsInventory.LoadRegistry(); err != nil {
+	nodesInventory := inventory.New()
+	if err := nodesInventory.LoadRegistry(); err != nil {
 		slog.Info("unable to load registry", "error", err)
 	}
-	taskDispatcher := forwarder.NewDispatcher[*proto.TaskRequest, *proto.TaskResponse](&agentsInventory)
+	taskDispatcher := forwarder.NewDispatcher[*proto.TaskRequest, *proto.TaskResponse](&nodesInventory)
 
 	// start manager main instance
-	managerInstance, err := newManager(cfg, &agentsInventory, taskDispatcher, db)
+	managerInstance, err := newManager(cfg, &nodesInventory, taskDispatcher, db)
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func run(cfg managerConfig) error {
 
 	// start specs collector
 	go func() {
-		err := managerInstance.CollectAgentsSpecs(ctx)
+		err := managerInstance.CollectNodesSpecs(ctx)
 		slog.Error("spec collector stopped", "error", err)
 		closeCh <- struct{}{}
 	}()
@@ -241,8 +241,8 @@ func main() {
 		mTLS:             managerCfg.MTLS.Enabled,
 		mTLSKey:          managerCfg.MTLS.Key,
 		mTLSCert:         managerCfg.MTLS.Cert,
-		mTLSAgentCA:      managerCfg.MTLS.AgentCA,
-		autoAcceptAgent:  managerCfg.AutoAcceptAgent,
+		mTLSNodeCA:       managerCfg.MTLS.NodeCA,
+		autoAcceptNode:   managerCfg.AutoAcceptNode,
 		configDir:        managerCfg.ConfigDir,
 		apiEnabled:       managerCfg.API.Enabled,
 		apiAddress:       managerCfg.API.Address,

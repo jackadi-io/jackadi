@@ -6,15 +6,15 @@ type diff struct {
 	Got      any
 }
 
-func Compare(agent1, agent2 AgentIdentity) []diff {
+func Compare(node1, node2 NodeIdentity) []diff {
 	diffs := []diff{}
-	if agent1.ID != agent2.ID {
-		diffs = append(diffs, diff{"ID", agent1.ID, agent2.ID})
+	if node1.ID != node2.ID {
+		diffs = append(diffs, diff{"ID", node1.ID, node2.ID})
 	}
-	if agent1.Address != agent2.Address {
-		diffs = append(diffs, diff{"address", agent1.Address, agent2.Address})
+	if node1.Address != node2.Address {
+		diffs = append(diffs, diff{"address", node1.Address, node2.Address})
 	}
-	if agent1.Certificate != agent2.Certificate {
+	if node1.Certificate != node2.Certificate {
 		diffs = append(diffs, diff{"certificate", "hidden", "hidden"}) // it would make the output unreadable
 	}
 

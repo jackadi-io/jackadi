@@ -8,15 +8,15 @@ import (
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
-	agt "github.com/jackadi-io/jackadi/internal/agent"
 	"github.com/jackadi-io/jackadi/internal/config"
 	"github.com/jackadi-io/jackadi/internal/manager/database"
+	"github.com/jackadi-io/jackadi/internal/node"
 	"github.com/jackadi-io/jackadi/internal/proto"
 )
 
 // GRPCForwarder simply forwards tasks received from one component to another component.
 //
-// The main usage is for the Manager to forward CLI requests to the agents.
+// The main usage is for the Manager to forward CLI requests to the nodes.
 type GRPCForwarder struct {
 	proto.UnimplementedForwarderServer
 	taskDispatcher Dispatcher[*proto.TaskRequest, *proto.TaskResponse]
@@ -67,31 +67,31 @@ func (f *GRPCForwarder) storeRequest(req *proto.TaskRequest, targetsStatus map[s
 	}
 }
 
-// ExecTask gets the request from the requester (e.g. the CLI), and send it to the manager's stream.
+// ExecTask gets the request from the requester (e.g. the CLI), and sends it to the manager's stream.
 //
-// The manager's stream is linked to a single agent.
+// The manager's stream is linked to a single node.
 func (f *GRPCForwarder) ExecTask(ctx context.Context, req *proto.TaskRequest) (*proto.FwdResponse, error) {
-	targetsStatus, err := f.taskDispatcher.TargetedAgents(req.GetTarget(), req.GetTargetMode())
+	targetsStatus, err := f.taskDispatcher.TargetedNodes(req.GetTarget(), req.GetTargetMode())
 	if err != nil {
 		return nil, err
 	}
 
 	// in theory this lock is useless as we are not supposed to receive multiple responses
-	// from the same agent for a same request. Better safe than sorry.
+	// from the same node for a same request. Better safe than sorry.
 	lock := sync.Mutex{}
 	results := make(map[string]*proto.TaskResponse, len(targetsStatus))
 
-	// the group ID enables to get all responses when the request is targeting multiple agents
+	// the group ID enables to get all responses when the request is targeting multiple nodes
 	groupID := time.Now().UnixNano()
 	req.GroupID = &groupID
 
 	f.storeRequest(req, targetsStatus)
 	wg := sync.WaitGroup{}
-	for agent, connected := range targetsStatus {
+	for nd, connected := range targetsStatus {
 		if !connected {
-			slog.Debug("targeted agent disconnected", "agent", agent)
+			slog.Debug("targeted node disconnected", "node", nd)
 			lock.Lock()
-			results[agent] = &proto.TaskResponse{
+			results[nd] = &proto.TaskResponse{
 				GroupID:       req.GroupID,
 				InternalError: proto.InternalError_DISCONNECTED,
 			}
@@ -106,10 +106,10 @@ func (f *GRPCForwarder) ExecTask(ctx context.Context, req *proto.TaskRequest) (*
 				ResponseCh: resp,
 			}
 			timeout := time.Duration(req.GetTimeout()) * time.Second
-			if err := f.taskDispatcher.Send(agt.ID(agent), task, timeout); err != nil {
+			if err := f.taskDispatcher.Send(node.ID(nd), task, timeout); err != nil {
 				internalError := proto.InternalError_UNKNOWN_ERROR
 				switch {
-				case errors.Is(err, ErrAgentNotFound):
+				case errors.Is(err, ErrNodeNotFound):
 					internalError = proto.InternalError_DISCONNECTING
 				case errors.Is(err, ErrClosedTaskChannel):
 					internalError = proto.InternalError_DISCONNECTING
@@ -119,7 +119,7 @@ func (f *GRPCForwarder) ExecTask(ctx context.Context, req *proto.TaskRequest) (*
 
 				lock.Lock()
 				defer lock.Unlock()
-				results[agent] = &proto.TaskResponse{
+				results[nd] = &proto.TaskResponse{
 					GroupID:       req.GroupID,
 					InternalError: internalError,
 				}
@@ -130,11 +130,11 @@ func (f *GRPCForwarder) ExecTask(ctx context.Context, req *proto.TaskRequest) (*
 			case r := <-resp:
 				lock.Lock()
 				defer lock.Unlock()
-				results[agent] = r
+				results[nd] = r
 			case <-time.After(timeout):
 				lock.Lock()
 				defer lock.Unlock()
-				results[agent] = &proto.TaskResponse{
+				results[nd] = &proto.TaskResponse{
 					GroupID:       req.GroupID,
 					InternalError: proto.InternalError_TIMEOUT,
 				}

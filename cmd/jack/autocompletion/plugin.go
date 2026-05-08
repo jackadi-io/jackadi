@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jackadi-io/jackadi/internal/agent"
 	"github.com/jackadi-io/jackadi/internal/config"
+	"github.com/jackadi-io/jackadi/internal/node"
 	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
 	"github.com/spf13/cobra"
 )
@@ -42,7 +42,7 @@ func GetAvailablePlugins() map[string]*PluginInfo {
 func getBuiltinPlugins() map[string]*PluginInfo {
 	plugins := make(map[string]*PluginInfo)
 
-	agent.LoadBuiltins(nil)
+	node.LoadBuiltins(nil)
 	pluginNames := inventory.Registry.Names()
 
 	for _, name := range pluginNames {

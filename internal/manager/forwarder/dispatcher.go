@@ -13,13 +13,13 @@ import (
 	"time"
 
 	"github.com/claytonsingh/golib/dotaccess"
-	"github.com/jackadi-io/jackadi/internal/agent"
 	"github.com/jackadi-io/jackadi/internal/config"
 	"github.com/jackadi-io/jackadi/internal/manager/inventory"
+	"github.com/jackadi-io/jackadi/internal/node"
 	"github.com/jackadi-io/jackadi/internal/proto"
 )
 
-var ErrAgentNotFound = errors.New("agent not found")
+var ErrNodeNotFound = errors.New("node not found")
 var ErrClosedTaskChannel = errors.New("closed task channel")
 var ErrTimeout = errors.New("timeout")
 
@@ -28,88 +28,88 @@ type Task[R, A any] struct {
 	ResponseCh chan A
 }
 
-// Dispatcher keeps in memory the channels of each agent.
+// Dispatcher keeps in memory the channels of each node.
 //
 // Each channel is a structure containing a Response channel.
 type Dispatcher[R, A any] struct {
-	mutex              *sync.RWMutex
-	dispatch           map[agent.ID]chan Task[R, A]
-	dispatchableAgents map[agent.ID]bool
-	agentsInventory    *inventory.Agents
+	mutex             *sync.RWMutex
+	dispatch          map[node.ID]chan Task[R, A]
+	dispatchableNodes map[node.ID]bool
+	nodesInventory    *inventory.Nodes
 }
 
-func NewDispatcher[R, A any](agentsInventory *inventory.Agents) Dispatcher[R, A] {
+func NewDispatcher[R, A any](nodesInventory *inventory.Nodes) Dispatcher[R, A] {
 	return Dispatcher[R, A]{
-		mutex:              &sync.RWMutex{},
-		dispatch:           make(map[agent.ID]chan Task[R, A]),
-		dispatchableAgents: make(map[agent.ID]bool),
-		agentsInventory:    agentsInventory,
+		mutex:             &sync.RWMutex{},
+		dispatch:          make(map[node.ID]chan Task[R, A]),
+		dispatchableNodes: make(map[node.ID]bool),
+		nodesInventory:    nodesInventory,
 	}
 }
 
-// RegisterAgent create a dispatch channel to distribute task to the agent.
-func (d *Dispatcher[R, A]) RegisterAgent(agentID agent.ID) error {
+// RegisterNode creates a dispatch channel to distribute tasks to the node.
+func (d *Dispatcher[R, A]) RegisterNode(nodeID node.ID) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	if _, exists := d.dispatch[agentID]; exists {
-		return errors.New("cannot register: duplicate agent")
+	if _, exists := d.dispatch[nodeID]; exists {
+		return errors.New("cannot register: duplicate node")
 	}
-	d.dispatch[agentID] = make(chan Task[R, A])
-	d.dispatchableAgents[agentID] = true
+	d.dispatch[nodeID] = make(chan Task[R, A])
+	d.dispatchableNodes[nodeID] = true
 	return nil
 }
 
-// RegisterAgent delete the dispatch channel assigned to the agent.
-func (d *Dispatcher[R, A]) UnregisterAgent(agentID agent.ID) {
+// UnregisterNode deletes the dispatch channel assigned to the node.
+func (d *Dispatcher[R, A]) UnregisterNode(nodeID node.ID) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	delete(d.dispatch, agentID)
-	d.dispatchableAgents[agentID] = false
+	delete(d.dispatch, nodeID)
+	d.dispatchableNodes[nodeID] = false
 }
 
-// RegisterAgent close the dispatch channel assigned to the agent.
+// Close closes the dispatch channel assigned to the node.
 //
-// It does not delete the channel yet, which is done by UnregisterAgent.
-func (d *Dispatcher[R, A]) Close(agentID agent.ID) {
+// It does not delete the channel yet, which is done by UnregisterNode.
+func (d *Dispatcher[R, A]) Close(nodeID node.ID) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	close(d.dispatch[agentID])
-	d.dispatch[agentID] = nil
-	d.dispatchableAgents[agentID] = false
+	close(d.dispatch[nodeID])
+	d.dispatch[nodeID] = nil
+	d.dispatchableNodes[nodeID] = false
 }
 
-// Forget removes any reference to an unregistered agent.
+// Forget removes any reference to an unregistered node.
 //
-// Jackadi will stop report that an disconnected agent has been targeted.
-func (d *Dispatcher[R, A]) Forget(agentID agent.ID) error {
+// Jackadi will stop reporting that a disconnected node has been targeted.
+func (d *Dispatcher[R, A]) Forget(nodeID node.ID) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	if _, ok := d.dispatch[agentID]; ok {
-		return fmt.Errorf("agent %s must be unregistered before being forgotten", agentID)
+	if _, ok := d.dispatch[nodeID]; ok {
+		return fmt.Errorf("node %s must be unregistered before being forgotten", nodeID)
 	}
 
-	delete(d.dispatchableAgents, agentID)
+	delete(d.dispatchableNodes, nodeID)
 	return nil
 }
 
-func (d *Dispatcher[R, A]) isReady(agentID agent.ID) bool {
-	if state, ok := d.dispatchableAgents[agentID]; ok {
+func (d *Dispatcher[R, A]) isReady(nodeID node.ID) bool {
+	if state, ok := d.dispatchableNodes[nodeID]; ok {
 		return state
 	}
 	return false
 }
 
-func (d *Dispatcher[R, A]) Send(agentID agent.ID, task Task[R, A], timeout time.Duration) error {
+func (d *Dispatcher[R, A]) Send(nodeID node.ID, task Task[R, A], timeout time.Duration) error {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
-	ch, ok := d.dispatch[agentID]
+	ch, ok := d.dispatch[nodeID]
 	if !ok {
-		return ErrAgentNotFound
+		return ErrNodeNotFound
 	}
 	if ch == nil {
 		return ErrClosedTaskChannel
@@ -123,33 +123,33 @@ func (d *Dispatcher[R, A]) Send(agentID agent.ID, task Task[R, A], timeout time.
 	return nil
 }
 
-func (d *Dispatcher[R, A]) GetTasksChannel(agentID agent.ID) (chan Task[R, A], error) {
+func (d *Dispatcher[R, A]) GetTasksChannel(nodeID node.ID) (chan Task[R, A], error) {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
-	ret, ok := d.dispatch[agentID]
+	ret, ok := d.dispatch[nodeID]
 	if !ok {
-		return nil, errors.New("agent task channel closed")
+		return nil, errors.New("node task channel closed")
 	}
 	return ret, nil
 }
 
-// TargetedAgents returns Task channels for all targets.
+// TargetedNodes returns Task channels for all targets.
 //
-//   - The key in the returner map is the target ID.
+//   - The key in the returned map is the target ID.
 //   - The mode in argument enables to filter target using different methods: exact match, list (sep: ','), glob, regex.
 //   - For glob filter, please check filepath documentation: https://pkg.go.dev/path/filepath#Match
 //   - For regex filter, please check regex documentation: https://pkg.go.dev/regexp
 //   - For query filter, check Jackadi documentation
 //
 // Special note for regex filter: '^' and '$' are enforced to only do strict matching.
-func (d *Dispatcher[R, A]) TargetedAgents(target string, mode proto.TargetMode) (map[string]bool, error) {
+func (d *Dispatcher[R, A]) TargetedNodes(target string, mode proto.TargetMode) (map[string]bool, error) {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
 	switch mode {
 	case proto.TargetMode_EXACT:
-		return map[string]bool{target: d.isReady(agent.ID(target))}, nil
+		return map[string]bool{target: d.isReady(node.ID(target))}, nil
 
 	case proto.TargetMode_LIST:
 		return d.listMatching(target)
@@ -170,36 +170,36 @@ func (d *Dispatcher[R, A]) TargetedAgents(target string, mode proto.TargetMode) 
 }
 
 func (d *Dispatcher[R, A]) listMatching(list string) (map[string]bool, error) {
-	agents := make(map[string]bool)
+	nodes := make(map[string]bool)
 	for id := range strings.SplitSeq(list, config.ListSeparator) {
-		agents[id] = d.isReady(agent.ID(id))
+		nodes[id] = d.isReady(node.ID(id))
 	}
 
-	if len(agents) == 0 {
-		return nil, errors.New("no connected agent is matching with the list")
+	if len(nodes) == 0 {
+		return nil, errors.New("no connected node is matching with the list")
 	}
 
-	return agents, nil
+	return nodes, nil
 }
 
 func (d *Dispatcher[R, A]) globMatching(pattern string) (map[string]bool, error) {
-	agents := make(map[string]bool)
-	for id, ready := range d.dispatchableAgents {
+	nodes := make(map[string]bool)
+	for id, ready := range d.dispatchableNodes {
 		matched, err := filepath.Match(pattern, string(id))
 		if err != nil {
 			return nil, err
 		}
 
 		if matched {
-			agents[string(id)] = ready
+			nodes[string(id)] = ready
 		}
 	}
 
-	if len(agents) == 0 {
-		return nil, errors.New("no connected agent is matching with the pattern")
+	if len(nodes) == 0 {
+		return nil, errors.New("no connected node is matching with the pattern")
 	}
 
-	return agents, nil
+	return nodes, nil
 }
 
 func (d *Dispatcher[R, A]) regexMatching(pattern string) (map[string]bool, error) {
@@ -208,21 +208,21 @@ func (d *Dispatcher[R, A]) regexMatching(pattern string) (map[string]bool, error
 		return nil, err
 	}
 
-	agents := map[string]bool{}
-	for id, ready := range d.dispatchableAgents {
+	nodes := map[string]bool{}
+	for id, ready := range d.dispatchableNodes {
 		if matched := regex.MatchString(string(id)); matched {
-			agents[string(id)] = ready
+			nodes[string(id)] = ready
 		}
 	}
 
-	if len(agents) == 0 {
-		return nil, errors.New("no connected agent is matching with the pattern")
+	if len(nodes) == 0 {
+		return nil, errors.New("no connected node is matching with the pattern")
 	}
 
-	return agents, nil
+	return nodes, nil
 }
 
-// queryMatching evaluates a filter expression and returns matching agents.
+// queryMatching evaluates a filter expression and returns matching nodes.
 func (d *Dispatcher[R, A]) queryMatching(expr string) (map[string]bool, error) {
 	if strings.TrimSpace(expr) == "" {
 		return nil, errors.New("empty filter expression")
@@ -246,7 +246,7 @@ func (d *Dispatcher[R, A]) queryMatching(expr string) (map[string]bool, error) {
 	}
 
 	if len(result) == 0 {
-		return nil, errors.New("no connected agent matches the filter")
+		return nil, errors.New("no connected node matches the filter")
 	}
 
 	return result, nil
@@ -255,8 +255,8 @@ func (d *Dispatcher[R, A]) queryMatching(expr string) (map[string]bool, error) {
 // evaluateAndGroup processes AND conditions within a group.
 func (d *Dispatcher[R, A]) evaluateAndGroup(andGroup string) (map[string]bool, error) {
 	conditions := strings.Split(andGroup, " and ")
-	candidates := make(map[string]bool, len(d.dispatchableAgents))
-	for k, v := range d.dispatchableAgents {
+	candidates := make(map[string]bool, len(d.dispatchableNodes))
+	for k, v := range d.dispatchableNodes {
 		candidates[string(k)] = v
 	}
 
@@ -352,8 +352,8 @@ func (d *Dispatcher[R, A]) evaluateSpecsCondition(field, operator, value string)
 
 	// Extract specs path (remove "specs." prefix)
 	specPath := strings.TrimPrefix(field, "specs.")
-	for agt, agtSpecs := range d.agentsInventory.GetAllSpecs() {
-		a, err := dotaccess.NewAccessorDot[any, map[string]any](&agtSpecs, specPath)
+	for nd, ndSpecs := range d.nodesInventory.GetAllSpecs() {
+		a, err := dotaccess.NewAccessorDot[any, map[string]any](&ndSpecs, specPath)
 		if err != nil {
 			continue
 		}
@@ -375,7 +375,7 @@ func (d *Dispatcher[R, A]) evaluateSpecsCondition(field, operator, value string)
 		switch operator {
 		case "==":
 			if spec == value {
-				matched[string(agt)] = d.isReady(agt)
+				matched[string(nd)] = d.isReady(nd)
 			}
 
 		case "=~":
@@ -389,7 +389,7 @@ func (d *Dispatcher[R, A]) evaluateSpecsCondition(field, operator, value string)
 				}
 
 				if regex.MatchString(spec) {
-					matched[string(agt)] = d.isReady(agt)
+					matched[string(nd)] = d.isReady(nd)
 				}
 			} else {
 				// Glob pattern
@@ -398,7 +398,7 @@ func (d *Dispatcher[R, A]) evaluateSpecsCondition(field, operator, value string)
 					return nil, fmt.Errorf("invalid glob pattern %q: %w", value, err)
 				}
 				if globMatched {
-					matched[string(agt)] = d.isReady(agt)
+					matched[string(nd)] = d.isReady(nd)
 				}
 			}
 
