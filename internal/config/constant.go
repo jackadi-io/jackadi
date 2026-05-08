@@ -4,7 +4,7 @@ import "time"
 
 const (
 	// Grammar.
-	PluginSeparator   = ":"
+	PluginSeparator   = "."
 	ListSeparator     = ","
 	SpecManagerPrefix = "specs" // Prefix used for specs-related tasks.
 	InstantPingName   = "instant-ping"

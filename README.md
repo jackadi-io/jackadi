@@ -51,7 +51,7 @@ Full documentation can be found [here](https://jackadi.io/docs/).
 ![architecture](./assets/jackadi-overview.svg)
 
 In a nutshell:
-* Nodes' nodes are connected to a manager via persistent bidirectional gRPC.
+* Nodes are connected to a manager via persistent bidirectional gRPC.
 * Simple plugin system:
   * All tasks and specs collectors are pure Go functions.
   * The plugin system is based on [hashicorp/go-plugin](https://github.com/hashicorp/go-plugin/).
@@ -80,7 +80,7 @@ jack nodes list
 jack nodes health
 
 # Run a task
-jack run node1 cmd:run "echo hello"
+jack run node1 cmd.run "echo hello"
 ```
 
 ### Write my first plugin
@@ -121,10 +121,10 @@ Then configure `/etc/jackadi/plugins.yaml` file:
 
 #### Synchronize the plugin to the node
 ```sh
-jack run node1 plugins:sync
+jack run node1 plugins.sync
 ```
 
 #### Run the plugin
 ```sh
-jack run node1 tour:hello
+jack run node1 tour.hello
 ```

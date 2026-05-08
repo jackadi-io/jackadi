@@ -215,7 +215,7 @@ func TestListenTaskRequest_BasicTaskExecution(t *testing.T) {
 	// send task request
 	stream.SendRequest(&proto.TaskRequest{
 		Id:   int64(2),
-		Task: "testplugin:task1",
+		Task: "testplugin.task1",
 	})
 
 	// should get task response
@@ -261,7 +261,7 @@ func TestListenTaskRequest_TimeoutBeforeSlot(t *testing.T) {
 	for i := 0; i < nd.config.MaxConcurrentTasks; i++ {
 		stream.SendRequest(&proto.TaskRequest{
 			Id:      int64(100 + i),
-			Task:    "testplugin:task1",
+			Task:    "testplugin.task1",
 			Timeout: 10, // 10 seconds
 		})
 	}
@@ -269,7 +269,7 @@ func TestListenTaskRequest_TimeoutBeforeSlot(t *testing.T) {
 	// send request with very short timeout - should timeout before getting slot
 	stream.SendRequest(&proto.TaskRequest{
 		Id:      int64(999),
-		Task:    "testplugin:task1",
+		Task:    "testplugin.task1",
 		Timeout: 0, // Immediate timeout
 	})
 
@@ -345,7 +345,7 @@ func TestListenTaskRequest_QueueFull(t *testing.T) {
 	for i := range numRequests {
 		stream.SendRequest(&proto.TaskRequest{
 			Id:   int64(i),
-			Task: "testplugin:task1",
+			Task: "testplugin.task1",
 		})
 	}
 
@@ -404,7 +404,7 @@ func TestListenTaskRequest_ExclusiveLock(t *testing.T) {
 	for i := range numTasks {
 		stream.SendRequest(&proto.TaskRequest{
 			Id:   int64(i),
-			Task: "testplugin:exclusive",
+			Task: "testplugin.exclusive",
 		})
 	}
 
@@ -453,7 +453,7 @@ func TestListenTaskRequest_ContextCancellation(t *testing.T) {
 	// send task that will be waiting
 	stream.SendRequest(&proto.TaskRequest{
 		Id:   int64(1),
-		Task: "testplugin:task1",
+		Task: "testplugin.task1",
 	})
 
 	time.Sleep(10 * time.Millisecond)
@@ -484,7 +484,7 @@ func TestListenTaskRequest_UnknownTask(t *testing.T) {
 	// send request for non-existent plugin
 	stream.SendRequest(&proto.TaskRequest{
 		Id:   int64(1),
-		Task: "nonexistent:task",
+		Task: "nonexistent.task",
 	})
 
 	// should get UNKNOWN_TASK error
@@ -532,7 +532,7 @@ func TestListenTaskRequest_ConcurrentTasks(t *testing.T) {
 	for i := range numTasks {
 		stream.SendRequest(&proto.TaskRequest{
 			Id:   int64(i),
-			Task: "testplugin:task1",
+			Task: "testplugin.task1",
 		})
 	}
 
@@ -598,7 +598,7 @@ func TestListenTaskRequest_SlotRelease(t *testing.T) {
 	for i := range numTasks {
 		stream.SendRequest(&proto.TaskRequest{
 			Id:   int64(i),
-			Task: "testplugin:task1",
+			Task: "testplugin.task1",
 		})
 		time.Sleep(5 * time.Millisecond) // Small delay between sends
 	}

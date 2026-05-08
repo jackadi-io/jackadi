@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/jackadi-io/jackadi/internal/config"
 	"github.com/jackadi-io/jackadi/internal/plugin/core"
 	"github.com/jackadi-io/jackadi/internal/plugin/inventory"
 	"github.com/jackadi-io/jackadi/internal/plugin/types"
@@ -14,14 +15,14 @@ import (
 )
 
 func parseNames(name string) (string, string, error) {
-	splitName := strings.Split(name, ":")
+	splitName := strings.Split(name, config.PluginSeparator)
 	if len(splitName) == 0 {
-		return "", "", errors.New("missing plugin or plugin:task")
+		return "", "", errors.New("missing plugin or plugin.task")
 	}
 	pluginName := splitName[0]
 
 	if pluginName == "" {
-		return "", "", errors.New("missing plugin or plugin:task")
+		return "", "", errors.New("missing plugin or plugin.task")
 	}
 
 	taskName := ""

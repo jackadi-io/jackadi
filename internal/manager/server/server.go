@@ -316,7 +316,7 @@ func (s *Server) CollectNodesSpecs(ctx context.Context) {
 				defer wg.Done()
 
 				req := &proto.TaskRequest{
-					Task:    "specs:all",
+					Task:    config.SpecManagerPrefix + config.PluginSeparator + "all",
 					Input:   &proto.Input{Args: &structpb.ListValue{}},
 					Timeout: helper.DurationToUint32(timeout),
 				}

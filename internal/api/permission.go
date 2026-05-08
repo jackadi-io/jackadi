@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
+	"github.com/jackadi-io/jackadi/internal/config"
 	"github.com/jackadi-io/jackadi/internal/serializer"
 )
 
@@ -33,9 +34,9 @@ func (p *Permission) Match(resource, action string) bool {
 }
 
 func parsePermission(s string) (Permission, error) {
-	parts := strings.SplitN(s, ":", 2)
+	parts := strings.SplitN(s, ".", 2)
 	if len(parts) != 2 {
-		return Permission{}, fmt.Errorf("invalid permission format: %q (expected resource:action)", s)
+		return Permission{}, fmt.Errorf("invalid permission format: %q (expected resource.action)", s)
 	}
 	return Permission{
 		Resource: strings.TrimSpace(parts[0]),
@@ -230,9 +231,10 @@ func (a *Authorizer) handler(next http.Handler) http.Handler {
 				return
 			}
 
-			taskParts := strings.Split(execReq.Task, ":")
+			taskParts := strings.Split(execReq.Task, config.PluginSeparator)
 			if len(taskParts) < 2 {
-				_, _ = w.Write([]byte(`{"error":"Bad Request","message":"failed to parse plugin:task","status":400}`))
+				w.WriteHeader(http.StatusBadRequest)
+				_, _ = w.Write([]byte(`{"error":"Bad Request","message":"failed to parse plugin.task","status":400}`))
 				return
 			}
 

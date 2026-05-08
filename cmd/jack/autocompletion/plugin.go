@@ -177,8 +177,8 @@ func GetTaskCompletions(toComplete string) ([]string, cobra.ShellCompDirective) 
 	completions := []string{}
 
 	// complete task
-	if strings.Contains(toComplete, ":") {
-		parts := strings.SplitN(toComplete, ":", 2)
+	if strings.Contains(toComplete, config.PluginSeparator) {
+		parts := strings.SplitN(toComplete, config.PluginSeparator, 2)
 		if len(parts) != 2 {
 			return completions, cobra.ShellCompDirectiveDefault
 		}
@@ -207,7 +207,7 @@ func GetTaskCompletions(toComplete string) ([]string, cobra.ShellCompDirective) 
 	// complete plugin only
 	for p := range plugins {
 		if strings.HasPrefix(p, toComplete) {
-			completions = append(completions, p+":")
+			completions = append(completions, p+config.PluginSeparator)
 		}
 	}
 
