@@ -321,7 +321,7 @@ func (s *Server) CollectNodesSpecs(ctx context.Context) {
 					Timeout: helper.DurationToUint32(timeout),
 				}
 
-				resp := make(chan *proto.TaskResponse)
+				resp := make(chan *proto.TaskResponse, 1)
 				task := forwarder.Task[*proto.TaskRequest, *proto.TaskResponse]{
 					Request:    req,
 					ResponseCh: resp,
@@ -333,7 +333,13 @@ func (s *Server) CollectNodesSpecs(ctx context.Context) {
 					return
 				}
 
-				res := <-resp
+				var res *proto.TaskResponse
+				select {
+				case res = <-resp:
+				case <-time.After(timeout + 30*time.Second):
+					slog.Warn("timeout waiting for specs", "node", nd)
+					return
+				}
 				if res.GetError() != "" {
 					slog.Warn("failed to collect specs", "node", nd, "error", res.GetError())
 					return

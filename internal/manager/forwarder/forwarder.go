@@ -100,7 +100,7 @@ func (f *GRPCForwarder) ExecTask(ctx context.Context, req *proto.TaskRequest) (*
 		}
 
 		wg.Go(func() {
-			resp := make(chan *proto.TaskResponse)
+			resp := make(chan *proto.TaskResponse, 1)
 			task := Task[*proto.TaskRequest, *proto.TaskResponse]{
 				Request:    req,
 				ResponseCh: resp,
