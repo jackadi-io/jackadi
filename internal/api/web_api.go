@@ -97,6 +97,7 @@ func (h *Htpasswd) basicAuthMiddleware(next http.Handler) http.Handler {
 
 		expectedHash, err := h.Get(username)
 		if err != nil {
+			bcrypt.CompareHashAndPassword([]byte("$2y$10$wXuhWuwaECzjbYIrD9wH3OssSLDQCEojoeoWaCoIy9Dwa1L0XOwOS"), []byte(password))
 			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			w.WriteHeader(http.StatusUnauthorized)
 			_, _ = w.Write([]byte(`{"error":"Unauthorized","message":"Authentication required","status":401}`))

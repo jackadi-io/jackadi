@@ -97,7 +97,7 @@ func (l *Loader) load(path string) error {
 	cfg := goplugin.ClientConfig{
 		HandshakeConfig:  core.Handshake,
 		Plugins:          PluginMap,
-		Cmd:              exec.Command("sh", "-c", path),
+		Cmd:              exec.Command(path),
 		AllowedProtocols: []goplugin.Protocol{goplugin.ProtocolNetRPC, goplugin.ProtocolGRPC},
 		Logger:           l.logger,
 	}
