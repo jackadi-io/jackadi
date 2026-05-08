@@ -2,6 +2,7 @@ package forwarder
 
 import (
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/jackadi-io/jackadi/internal/manager/inventory"
@@ -276,6 +277,130 @@ func TestTargetedNodesQuery(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDispatcherLifecycle(t *testing.T) {
+	inv := &inventory.Nodes{}
+	nodeID := node.ID("node1")
+
+	t.Run("register and send", func(t *testing.T) {
+		d := NewDispatcher[string, string](inv)
+		if err := d.RegisterNode(nodeID); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		nodes, err := d.TargetedNodes(string(nodeID), proto.TargetMode_EXACT)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !nodes[string(nodeID)] {
+			t.Error("node should be dispatchable after registration")
+		}
+	})
+
+	t.Run("duplicate register", func(t *testing.T) {
+		d := NewDispatcher[string, string](inv)
+		_ = d.RegisterNode(nodeID)
+		if err := d.RegisterNode(nodeID); err == nil {
+			t.Error("expected error on duplicate registration")
+		}
+	})
+
+	t.Run("send to unknown node", func(t *testing.T) {
+		d := NewDispatcher[string, string](inv)
+		if err := d.Send(nodeID, Task[string, string]{}, time.Second); err != ErrNodeNotFound {
+			t.Errorf("expected ErrNodeNotFound, got %v", err)
+		}
+	})
+
+	t.Run("send times out when nobody reads", func(t *testing.T) {
+		d := NewDispatcher[string, string](inv)
+		_ = d.RegisterNode(nodeID)
+
+		if err := d.Send(nodeID, Task[string, string]{}, 50*time.Millisecond); err != ErrTimeout {
+			t.Errorf("expected ErrTimeout, got %v", err)
+		}
+	})
+
+	t.Run("send succeeds when channel is read", func(t *testing.T) {
+		d := NewDispatcher[string, string](inv)
+		_ = d.RegisterNode(nodeID)
+
+		ch, err := d.GetTasksChannel(nodeID)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		sendErr := make(chan error, 1)
+		go func() { sendErr <- d.Send(nodeID, Task[string, string]{Request: "hello"}, time.Second) }()
+
+		task := <-ch
+		if task.Request != "hello" {
+			t.Errorf("expected task request 'hello', got %q", task.Request)
+		}
+		if err := <-sendErr; err != nil {
+			t.Errorf("unexpected send error: %v", err)
+		}
+	})
+
+	t.Run("send to closed channel", func(t *testing.T) {
+		d := NewDispatcher[string, string](inv)
+		_ = d.RegisterNode(nodeID)
+		d.Close(nodeID)
+
+		if err := d.Send(nodeID, Task[string, string]{}, time.Second); err != ErrClosedTaskChannel {
+			t.Errorf("expected ErrClosedTaskChannel, got %v", err)
+		}
+	})
+
+	t.Run("unregister removes node from targets", func(t *testing.T) {
+		d := NewDispatcher[string, string](inv)
+		_ = d.RegisterNode(nodeID)
+		d.UnregisterNode(nodeID)
+
+		if err := d.Send(nodeID, Task[string, string]{}, time.Second); err != ErrNodeNotFound {
+			t.Errorf("expected ErrNodeNotFound, got %v", err)
+		}
+	})
+
+	t.Run("forget removes disconnected node from target results", func(t *testing.T) {
+		d := NewDispatcher[string, string](inv)
+		_ = d.RegisterNode(nodeID)
+		d.Close(nodeID)
+		d.UnregisterNode(nodeID)
+		if err := d.Forget(nodeID); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		nodes, err := d.TargetedNodes(string(nodeID), proto.TargetMode_EXACT)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if nodes[string(nodeID)] {
+			t.Error("forgotten node should not appear as dispatchable")
+		}
+	})
+
+	t.Run("forget fails if node is still registered", func(t *testing.T) {
+		d := NewDispatcher[string, string](inv)
+		_ = d.RegisterNode(nodeID)
+		if err := d.Forget(nodeID); err == nil {
+			t.Error("expected error forgetting a still-registered node")
+		}
+	})
+
+	t.Run("close marks node as not dispatchable", func(t *testing.T) {
+		d := NewDispatcher[string, string](inv)
+		_ = d.RegisterNode(nodeID)
+		d.Close(nodeID)
+
+		nodes, err := d.TargetedNodes(string(nodeID), proto.TargetMode_EXACT)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if nodes[string(nodeID)] {
+			t.Error("closed node should not be dispatchable")
+		}
+	})
 }
 
 func TestTargetedNodesUnknownMode(t *testing.T) {

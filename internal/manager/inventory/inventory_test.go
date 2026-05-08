@@ -163,6 +163,194 @@ func TestRemoveCandidates(t *testing.T) {
 	}
 }
 
+func TestRegister(t *testing.T) {
+	nd := NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1"}
+
+	t.Run("from candidate", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+		_ = nodes.AddCandidate(nd)
+
+		if err := nodes.Register(nd, false); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !nodes.IsRegistered(nd) {
+			t.Error("node should be registered")
+		}
+		_, candidates, _, _ := nodes.List()
+		if len(candidates) != 0 {
+			t.Errorf("candidate should be removed after registration, got %d", len(candidates))
+		}
+	})
+
+	t.Run("already registered", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+		_ = nodes.AddCandidate(nd)
+		_ = nodes.Register(nd, false)
+
+		if err := nodes.Register(nd, false); !errors.Is(err, ErrNodeAlreadyRegistered) {
+			t.Errorf("expected ErrNodeAlreadyRegistered, got %v", err)
+		}
+	})
+
+	t.Run("not a candidate", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+
+		if err := nodes.Register(nd, false); !errors.Is(err, ErrNodeNotFound) {
+			t.Errorf("expected ErrNodeNotFound, got %v", err)
+		}
+	})
+
+	t.Run("rejected node allowRejected=false", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+		_ = nodes.AddCandidate(nd)
+		_ = nodes.Reject(nd)
+
+		if err := nodes.Register(nd, false); err == nil {
+			t.Error("expected error registering a rejected node")
+		}
+		if nodes.IsRegistered(nd) {
+			t.Error("rejected node should not be registered")
+		}
+	})
+
+	t.Run("rejected node allowRejected=true", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+		_ = nodes.AddCandidate(nd)
+		_ = nodes.Reject(nd)
+
+		if err := nodes.Register(nd, true); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !nodes.IsRegistered(nd) {
+			t.Error("node should be registered after allowRejected=true")
+		}
+	})
+}
+
+func TestReject(t *testing.T) {
+	nd := NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1"}
+
+	t.Run("from candidate", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+		_ = nodes.AddCandidate(nd)
+
+		if err := nodes.Reject(nd); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if nodes.IsRegistered(nd) {
+			t.Error("rejected node should not be registered")
+		}
+		_, candidates, rejected, _ := nodes.List()
+		if len(candidates) != 0 {
+			t.Errorf("candidates should be empty, got %d", len(candidates))
+		}
+		if len(rejected) != 1 {
+			t.Errorf("expected 1 rejected node, got %d", len(rejected))
+		}
+	})
+
+	t.Run("from accepted", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+		_ = nodes.AddCandidate(nd)
+		_ = nodes.Register(nd, false)
+
+		if err := nodes.Reject(nd); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if nodes.IsRegistered(nd) {
+			t.Error("node should no longer be registered after rejection")
+		}
+		_, _, rejected, _ := nodes.List()
+		if len(rejected) != 1 {
+			t.Errorf("expected 1 rejected node, got %d", len(rejected))
+		}
+	})
+
+	t.Run("candidate cannot re-add after rejection", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+		_ = nodes.AddCandidate(nd)
+		_ = nodes.Reject(nd)
+
+		if err := nodes.AddCandidate(nd); !errors.Is(err, ErrNodeRejected) {
+			t.Errorf("expected ErrNodeRejected, got %v", err)
+		}
+	})
+}
+
+func TestIsRegistered(t *testing.T) {
+	nd := NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1"}
+
+	t.Run("false before registration", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+		if nodes.IsRegistered(nd) {
+			t.Error("should not be registered")
+		}
+	})
+
+	t.Run("true after registration", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+		_ = nodes.AddCandidate(nd)
+		_ = nodes.Register(nd, false)
+		if !nodes.IsRegistered(nd) {
+			t.Error("should be registered")
+		}
+	})
+
+	t.Run("false after rejection", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+		_ = nodes.AddCandidate(nd)
+		_ = nodes.Register(nd, false)
+		_ = nodes.Reject(nd)
+		if nodes.IsRegistered(nd) {
+			t.Error("should not be registered after rejection")
+		}
+	})
+
+	t.Run("different address is not registered", func(t *testing.T) {
+		nodes := New()
+		nodes.DisableRegistryFile()
+		_ = nodes.AddCandidate(nd)
+		_ = nodes.Register(nd, false)
+
+		other := NodeIdentity{ID: nd.ID, Address: "10.0.0.1"}
+		if nodes.IsRegistered(other) {
+			t.Error("node with different address should not be considered registered")
+		}
+	})
+}
+
+func TestMarkNodeStateChange(t *testing.T) {
+	nd := NodeIdentity{ID: node.ID("node1"), Address: "127.0.0.1"}
+
+	nodes := New()
+	nodes.DisableRegistryFile()
+	_ = nodes.AddCandidate(nd)
+	_ = nodes.Register(nd, false)
+
+	nodes.MarkNodeStateChange(nd.ID, true)
+	_, _, _, states := nodes.List()
+	if !states[nd.ID].Connected {
+		t.Error("node should be connected")
+	}
+
+	nodes.MarkNodeStateChange(nd.ID, false)
+	_, _, _, states = nodes.List()
+	if states[nd.ID].Connected {
+		t.Error("node should be disconnected")
+	}
+}
+
 func TestCompare(t *testing.T) {
 	tests := []struct {
 		name  string
