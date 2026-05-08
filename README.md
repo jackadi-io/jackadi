@@ -11,7 +11,7 @@
 [![Status](https://img.shields.io/badge/status-alpha-bue)](https://github.com/jackadi-io/jackadi)
 
 > [!WARNING]  
-> Jackadi is currently in an alpha state.
+> Jackadi is currently in an alpha.
 > You're welcome to try it out and give feedback.
 
 ## What is Jackadi?
