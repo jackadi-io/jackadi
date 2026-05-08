@@ -77,7 +77,7 @@ func (s *execStream) Recv() (*proto.TaskResponse, error) {
 
 func (s *execStream) Context() context.Context { return s.ctx }
 
-// grpc.ServerStream stubs (unused in these tests)
+// grpc.ServerStream stubs (unused in these tests).
 func (s *execStream) SetHeader(metadata.MD) error  { return nil }
 func (s *execStream) SendHeader(metadata.MD) error { return nil }
 func (s *execStream) SetTrailer(metadata.MD)       {}
@@ -173,7 +173,7 @@ func (h *harness) connectNode(t *testing.T, nodeID string) (*execStream, chan er
 }
 
 // execTask forwards a task to the given node and returns the forwarder's response.
-func (h *harness) execTask(ctx context.Context, nodeID, task string, timeoutSec uint32) (*proto.FwdResponse, error) {
+func (h *harness) execTask(ctx context.Context, nodeID, task string, timeoutSec uint32) (*proto.FwdResponse, error) { //nolint:unparam // expected
 	return h.fwd.ExecTask(ctx, &proto.TaskRequest{
 		Target:     nodeID,
 		TargetMode: proto.TargetMode_EXACT,

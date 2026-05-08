@@ -31,7 +31,7 @@ func newHandshakeServer(t *testing.T, autoAccept bool) (*server.Server, *invento
 }
 
 // handshakeCtx reuses the execStream context builder to get a properly formed incoming gRPC context.
-func handshakeCtx(nodeID string) context.Context {
+func handshakeCtx(nodeID string) context.Context { //nolint:unparam // expected
 	return newExecStream(context.Background(), nodeID).ctx
 }
 

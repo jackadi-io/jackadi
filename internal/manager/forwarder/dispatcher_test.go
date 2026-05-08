@@ -1,6 +1,7 @@
 package forwarder
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -307,7 +308,7 @@ func TestDispatcherLifecycle(t *testing.T) {
 
 	t.Run("send to unknown node", func(t *testing.T) {
 		d := NewDispatcher[string, string](inv)
-		if err := d.Send(nodeID, Task[string, string]{}, time.Second); err != ErrNodeNotFound {
+		if err := d.Send(nodeID, Task[string, string]{}, time.Second); !errors.Is(err, ErrNodeNotFound) {
 			t.Errorf("expected ErrNodeNotFound, got %v", err)
 		}
 	})
@@ -316,7 +317,7 @@ func TestDispatcherLifecycle(t *testing.T) {
 		d := NewDispatcher[string, string](inv)
 		_ = d.RegisterNode(nodeID)
 
-		if err := d.Send(nodeID, Task[string, string]{}, 50*time.Millisecond); err != ErrTimeout {
+		if err := d.Send(nodeID, Task[string, string]{}, 50*time.Millisecond); !errors.Is(err, ErrTimeout) {
 			t.Errorf("expected ErrTimeout, got %v", err)
 		}
 	})
@@ -347,7 +348,7 @@ func TestDispatcherLifecycle(t *testing.T) {
 		_ = d.RegisterNode(nodeID)
 		d.Close(nodeID)
 
-		if err := d.Send(nodeID, Task[string, string]{}, time.Second); err != ErrClosedTaskChannel {
+		if err := d.Send(nodeID, Task[string, string]{}, time.Second); !errors.Is(err, ErrClosedTaskChannel) {
 			t.Errorf("expected ErrClosedTaskChannel, got %v", err)
 		}
 	})
@@ -357,7 +358,7 @@ func TestDispatcherLifecycle(t *testing.T) {
 		_ = d.RegisterNode(nodeID)
 		d.UnregisterNode(nodeID)
 
-		if err := d.Send(nodeID, Task[string, string]{}, time.Second); err != ErrNodeNotFound {
+		if err := d.Send(nodeID, Task[string, string]{}, time.Second); !errors.Is(err, ErrNodeNotFound) {
 			t.Errorf("expected ErrNodeNotFound, got %v", err)
 		}
 	})

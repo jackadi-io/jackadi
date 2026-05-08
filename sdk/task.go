@@ -220,7 +220,7 @@ func (t *Plugin) MustRegisterTask(name string, function any) *Task {
 func (t Plugin) Do(ctx context.Context, task string, input *proto.Input) (core.Response, error) {
 	defer func() {
 		if r := recover(); r != nil {
-			slog.Error("recovered from panic", "plugin", t.name, "task", task, "error", r)
+			slog.Error("recovered from panic", "plugin", t.name, "error", r)
 		}
 	}()
 

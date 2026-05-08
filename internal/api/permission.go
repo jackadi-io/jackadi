@@ -169,7 +169,7 @@ func (a *Authorizer) canAccessEndpoint(username, resource, action string) bool {
 func (a *Authorizer) canAccessTask(username, plugin, task string) bool {
 	userRoles, ok := a.config.Users[User(username)]
 	if !ok {
-		slog.Debug("user not found in config", "username", username)
+		slog.Debug("user not found in config")
 		return false
 	}
 
@@ -188,7 +188,7 @@ func (a *Authorizer) canAccessTask(username, plugin, task string) bool {
 		}
 	}
 
-	slog.Debug("task permission denied", "username", username, "plugin", plugin, "task", task)
+	slog.Debug("task permission denied")
 	return false
 }
 

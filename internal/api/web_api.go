@@ -97,7 +97,7 @@ func (h *Htpasswd) basicAuthMiddleware(next http.Handler) http.Handler {
 
 		expectedHash, err := h.Get(username)
 		if err != nil {
-			bcrypt.CompareHashAndPassword([]byte("$2y$10$wXuhWuwaECzjbYIrD9wH3OssSLDQCEojoeoWaCoIy9Dwa1L0XOwOS"), []byte(password))
+			_ = bcrypt.CompareHashAndPassword([]byte("$2y$10$wXuhWuwaECzjbYIrD9wH3OssSLDQCEojoeoWaCoIy9Dwa1L0XOwOS"), []byte(password))
 			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			w.WriteHeader(http.StatusUnauthorized)
 			_, _ = w.Write([]byte(`{"error":"Unauthorized","message":"Authentication required","status":401}`))
@@ -190,7 +190,7 @@ func StartHTTPProxy(ctx context.Context, cfg Config) error {
 
 	go func() {
 		<-ctx.Done()
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
 		if err := httpServer.Shutdown(shutdownCtx); err != nil {
 			slog.Warn("web api failed to stop properly", "error", err)
